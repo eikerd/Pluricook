@@ -1,6 +1,7 @@
 import { serve } from "bun";
 import index from "./index.html";
 import { DATASETS, overview, queryDataset } from "./lib/admin-queries";
+import { compareDish, listDishes } from "./lib/compare-service";
 import { setTier, type Tier } from "./lib/curated-sources";
 
 const TIERS: Tier[] = ["required", "favorite", "normal", "blocked"];
@@ -22,6 +23,22 @@ const server = serve({
             id, label, searchable: Boolean(searchable?.length),
           })),
         ),
+    },
+
+    /** Dishes that have captured recipes, with the sections each one offers. */
+    "/api/admin/dishes": {
+      GET: async () => Response.json(await listDishes()),
+    },
+
+    /** Consensus, outliers and salinity for one dish, optionally one section of it. */
+    "/api/admin/compare/:dish": {
+      GET: async (req) => {
+        const section = new URL(req.url).searchParams.get("section");
+        const result = await compareDish(req.params.dish, section || null);
+        return result.ok
+          ? Response.json(result.comparison)
+          : Response.json({ error: result.error }, { status: result.status });
+      },
     },
 
     /**
