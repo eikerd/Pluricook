@@ -258,7 +258,10 @@ export interface ToGramsOptions {
 export function toGrams(opts: ToGramsOptions): GramResult {
   const unit = normalizeUnit(opts.unit);
   const aliases = opts.aliases ?? EMPTY_TABLE;
-  const alias = resolveAlias(aliases, opts.name);
+  // A stated amount outranks a reject phrase; see resolveAlias.
+  const quantified =
+    Number.isFinite(opts.quantity) && opts.quantity > 0 && unit !== "to taste";
+  const alias = resolveAlias(aliases, opts.name, quantified);
 
   /**
    * Our table first, heuristics second.

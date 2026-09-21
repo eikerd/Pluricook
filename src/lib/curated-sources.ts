@@ -189,14 +189,16 @@ export async function setTier(
     ...existing,
     displayName: opts.displayName ?? existing?.displayName,
     tier,
+    // A tier is an opinion about how much we want a site; an acquisition is a
+    // reviewed decision about what we may take from it. Changing the first must
+    // not disturb the second. Only two things set acquisition here: blocking
+    // forces "none", and a site with NO entry yet starts at pending-review.
+    //
+    // This used to reset "fetch" on every star, from when "fetch" was merely the
+    // unreviewed default. It is now an explicit clearance, and a star click was
+    // silently revoking it — disabling extraction from a site someone had cleared.
     acquisition:
-      tier === "blocked"
-        ? "none"
-        : existing?.acquisition && existing.acquisition !== "fetch"
-          ? existing.acquisition
-          : tier === "normal"
-            ? (existing?.acquisition ?? "pending-review")
-            : "pending-review",
+      tier === "blocked" ? "none" : (existing?.acquisition ?? "pending-review"),
   };
 
   file.sites[host] = updated;

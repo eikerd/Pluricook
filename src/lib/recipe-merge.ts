@@ -8,6 +8,7 @@
  * existing.
  */
 
+import { isHandEntered } from "./hand-entry";
 import { canonicalUrl } from "./site-registry";
 import type { ExtractedRecipe } from "../types/provenance";
 
@@ -30,10 +31,6 @@ export interface MergeResult {
 function keyOf(r: ExtractedRecipe): string {
   return r.provenance.sourceUrl ? canonicalUrl(r.provenance.sourceUrl) : `id:${r.id}`;
 }
-
-/** Entered by a person rather than fetched; a fetch must never overwrite these. */
-const isHandEntered = (r: ExtractedRecipe) =>
-  r.provenance.method === "manual-transcription" || r.provenance.method === "personal-collection";
 
 export function mergeRecipes(
   existing: ExtractedRecipe[],

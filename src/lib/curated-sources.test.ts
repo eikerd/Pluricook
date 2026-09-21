@@ -172,3 +172,29 @@ describe("manual-limited is not a fetching basis", () => {
     expect(mayStoreSourceText({ tier: "required", acquisition: "manual-limited" })).toBe(false);
   });
 });
+
+describe("setTier leaves a reviewed acquisition alone", () => {
+  test.each(["fetch", "licensed", "link-only", "manual-limited", "none"] as const)(
+    "starring a site at %s keeps it there",
+    async (acquisition) => {
+      // A star click used to reset "fetch" to pending-review, silently revoking
+      // a clearance someone had made and stopping extraction from that site.
+      await writeCurated({ sites: { "example.com": { tier: "normal", acquisition, note: "reviewed" } } }, TMP);
+      for (const tier of ["required", "favorite", "normal"] as const) {
+        const site = await setTier("example.com", tier, { path: TMP });
+        expect(site.acquisition).toBe(acquisition);
+        expect(site.note).toBe("reviewed");
+      }
+    },
+  );
+
+  test("a brand-new entry still starts at pending-review", async () => {
+    const site = await setTier("never-seen.com", "favorite", { path: TMP });
+    expect(site.acquisition).toBe("pending-review");
+  });
+
+  test("blocking still forces none, whatever was there", async () => {
+    await writeCurated({ sites: { "example.com": { tier: "normal", acquisition: "fetch" } } }, TMP);
+    expect((await setTier("example.com", "blocked", { path: TMP })).acquisition).toBe("none");
+  });
+});

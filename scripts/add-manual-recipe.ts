@@ -17,6 +17,7 @@
 
 import { Glob } from "bun";
 import { curationFor, mayCaptureManually, readCurated } from "../src/lib/curated-sources";
+import { countPublicHandEntered } from "../src/lib/hand-entry";
 import { canonicalHost } from "../src/lib/site-registry";
 import { assertProvenance, type ExtractedRecipe } from "../src/types/provenance";
 
@@ -66,9 +67,8 @@ if (smuggled.length > 0) {
 let used = 0;
 for await (const file of new Glob("data/recipes/*.json").scan(".")) {
   const { recipes } = (await Bun.file(file).json()) as { recipes: ExtractedRecipe[] };
-  used += (recipes ?? []).filter(
-    (r) => r.provenance.host === host && r.provenance.method === "manual-transcription",
-  ).length;
+  // Both hand-entry methods share one cap; see hand-entry.ts.
+  used += countPublicHandEntered(recipes ?? [], host);
 }
 
 const curated = await readCurated();

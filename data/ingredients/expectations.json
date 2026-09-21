@@ -141,6 +141,12 @@
       "expect": "celery",
       "reject": "broccoli",
       "found": "lentil soup — 'stalks' once resolved to 'Broccoli, stalks, raw'"
+    },
+    {
+      "line": "1/4 c. fresh flat-leaf parsley, chopped, plus more for serving",
+      "expect": "parsley",
+      "reject": "",
+      "found": "lentil soup — a reject phrase ('for serving') discarded the whole line although it states a quarter cup. A stated amount now outranks a reject phrase."
     }
   ],
   "rejections": [
