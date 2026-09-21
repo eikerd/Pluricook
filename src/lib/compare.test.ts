@@ -174,3 +174,20 @@ withDb("sections", () => {
     expect(c.common).toEqual([]);
   });
 });
+
+withDb("every ingredient lands in exactly one list", () => {
+  test("one listed by half the recipes is occasional, not lost between common and outliers", () => {
+    const base = ["500 g bread flour", "350 g water", "10 g salt"];
+    const withCheese = [...base, "300 g cheddar cheese"];
+    const c = compare([
+      recipe("a", withCheese), recipe("b", withCheese), recipe("c", withCheese),
+      recipe("d", base), recipe("e", base), recipe("f", base),
+    ]);
+
+    const everywhere = [...c.common, ...c.occasional, ...c.outliers];
+    expect(everywhere.filter((x) => /cheese/i.test(x.foodDescription))).toHaveLength(1);
+    expect(c.occasional.map((x) => x.foodDescription).join()).toMatch(/cheese/i);
+    expect(new Set(everywhere.map((x) => x.fdcId)).size).toBe(everywhere.length);
+  });
+});
+

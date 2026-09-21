@@ -112,6 +112,12 @@ export interface Comparison {
   withAnchor: number;
   commonThreshold: number;
   common: IngredientCluster[];
+  /**
+   * Too rare to be common, too frequent to be an outlier: 3 of 6 pizzas list
+   * cheese. Without this list those ingredients belonged to neither and
+   * vanished — from every grid and every chart.
+   */
+  occasional: IngredientCluster[];
   outliers: IngredientCluster[];
   recipes: RecipeSummary[];
   /** Corpus median salinity, for judging any one recipe against. */
@@ -358,6 +364,9 @@ export function compareRecipes(opts: CompareOptions): Comparison {
     withAnchor,
     commonThreshold,
     common: all.filter((c) => c.frequency >= commonThreshold).sort(byFrequency),
+    occasional: all
+      .filter((c) => c.frequency < commonThreshold && c.recipeCount > outlierMax)
+      .sort(byFrequency),
     outliers: all
       .filter((c) => c.recipeCount <= outlierMax)
       .sort((a, b) => a.recipeCount - b.recipeCount || (b.medianRelative ?? 0) - (a.medianRelative ?? 0)),
