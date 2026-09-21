@@ -34,6 +34,17 @@ export type Acquisition =
   | "licensed"
   /** Keep our own facts and link out; store no expression from the page. */
   | "link-only"
+  /**
+   * A person may enter recipes by hand, up to `manualCap`.
+   *
+   * For sites whose terms bar automated collection but where occasional,
+   * attributed, facts-only entry by a human is a different act: robots.txt
+   * addresses automated clients, and a browsewrap ToS accepted by nobody is
+   * weak contract formation. The cap is what keeps "occasional" honest — it is
+   * enforced by the system rather than remembered, because scale creep is the
+   * one risk here that drifts without anyone deciding to let it.
+   */
+  | "manual-limited"
   | "none"
   /** Starred but not yet reviewed. Treated as `none` until it is. */
   | "pending-review";
@@ -44,6 +55,8 @@ export interface CuratedSite {
   acquisition: Acquisition;
   note?: string | null;
   licence?: string | null;
+  /** Maximum hand-entered recipes. Only meaningful for `manual-limited`. */
+  manualCap?: number | null;
 }
 
 interface CuratedFile {
@@ -81,7 +94,48 @@ export function curationFor(
  */
 export function mayFetch(site: CuratedSite): boolean {
   if (site.tier === "blocked") return false;
+  // manual-limited is deliberately absent: it permits a person, not a fetcher.
   return site.acquisition === "fetch" || site.acquisition === "licensed";
+}
+
+/** Default cap when a site is set to manual-limited without naming one. */
+export const DEFAULT_MANUAL_CAP = 10;
+
+export interface ManualVerdict {
+  ok: boolean;
+  reason: string;
+  cap: number | null;
+  used: number;
+}
+
+/**
+ * May a person hand-enter one more recipe from this site?
+ *
+ * `used` is the number already held from that host, counted from the stored
+ * recipes rather than tracked separately, so deleting a recipe frees its slot
+ * and the count cannot drift from what is actually published.
+ */
+export function mayCaptureManually(site: CuratedSite, used: number): ManualVerdict {
+  const cap = site.manualCap ?? DEFAULT_MANUAL_CAP;
+
+  if (site.tier === "blocked") {
+    return { ok: false, reason: "site is blocked", cap: null, used };
+  }
+  if (site.acquisition === "licensed" || site.acquisition === "fetch") {
+    return { ok: true, reason: `acquisition is ${site.acquisition}; no cap applies`, cap: null, used };
+  }
+  if (site.acquisition !== "manual-limited") {
+    return {
+      ok: false,
+      reason: `acquisition is ${site.acquisition}, which does not permit hand entry`,
+      cap: null,
+      used,
+    };
+  }
+  if (used >= cap) {
+    return { ok: false, reason: `manual cap of ${cap} already reached`, cap, used };
+  }
+  return { ok: true, reason: `${used + 1} of ${cap}`, cap, used };
 }
 
 /** May we store text taken from the page, as opposed to our own derived facts? */

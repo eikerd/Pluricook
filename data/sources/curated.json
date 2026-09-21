@@ -19,6 +19,7 @@
     "  none           \u2014 take nothing",
     "  pending-review \u2014 starred but not yet legally reviewed; treated as `none` until it is",
     "",
+    "  manual-limited \u2014 a person may hand-enter recipes, up to `manualCap`",
     "Notes below record what was read on the sites themselves on 2026-09-20.",
     "They are a research summary, not legal advice."
   ],
@@ -40,9 +41,10 @@
     "seriouseats.com": {
       "displayName": "Serious Eats",
       "tier": "required",
-      "acquisition": "none",
-      "note": "Owner-starred 2026-09-20; reviewed same day. A People Inc brand since September 2020 (People Inc = Dotdash Meredith, renamed July 2025), governed by the People Inc Terms of Service. Scraping is prohibited by CONTRACT, not by robots.txt: `User-agent: *` disallows only /embed? and /cdn-cgi/, so recipe URLs are not robots-disallowed for a generic crawler. But ToS 3.3(e) bars spiders, scrapers and crawlers (public search engines excepted, 'but not caches or archives'); 3.3(f) bars using the data to train ML or AI; 3.3(g) bars accessing the Services 'to build a similar or competitive website, application, or service'; 3.3(h) bars republication; 3.3(m) says any unauthorised use immediately terminates the licence. New York law, SDNY forum. ClaudeBot, Claude-User, Claude-Web, anthropic-ai and FirecrawlAgent all get Disallow: / . IMPORTANT: these recipes are commercially LICENSABLE from the same company. People Inc Content Licensing advertises a recipe API with 'complete data, including method and images', 'Caching Permitted', and broad multi-channel usage rights. Pricing not published. Licensing is the intended route here, not scraping: contentlicensing@people.inc (permissions: CLPermissions@people.inc).",
-      "licence": null
+      "acquisition": "manual-limited",
+      "note": "Owner-starred 2026-09-20; reviewed same day. A People Inc brand since September 2020, governed by the People Inc Terms of Service. AUTOMATED collection is barred: ToS 3.3(e) bars spiders, scrapers and crawlers; 3.3(f) bars AI/ML training; 3.3(g) bars building a similar or competitive service; 3.3(h) bars republication. ClaudeBot, Claude-Web, anthropic-ai and FirecrawlAgent all get Disallow: / . Hence mayFetch() is false and will stay false. OCCASIONAL HAND ENTRY is treated as a different act, capped at 10: robots.txt addresses automated clients (RFC 9309) and does not reach a person reading a page; the ToS is browsewrap with no login and no clickwrap, so contract formation is weak; and the only fields we store from any site are facts - ingredient lines, yields, times, a step COUNT - never the headnote, step wording or photographs, which for this publisher are the valuable protected layer. The cap is what keeps 'occasional' honest, because scale is the one risk here that drifts. Licensing remains available and is the route at any real volume: People Inc Content Licensing advertises a recipe API with complete method and images and caching permitted, contentlicensing@people.inc. Not legal advice.",
+      "licence": null,
+      "manualCap": 10
     },
     "simplyrecipes.com": {
       "displayName": "Simply Recipes",

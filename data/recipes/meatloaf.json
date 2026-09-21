@@ -458,6 +458,49 @@
       "cookTimeMinutes": 50,
       "totalTimeRaw": "PT1H5M",
       "stepCount": 4
+    },
+    {
+      "id": "seriouseats.com:meatloaf:manual:2026-09-20",
+      "provenance": {
+        "host": "seriouseats.com",
+        "siteName": "Serious Eats",
+        "sourceUrl": "https://www.seriouseats.com/the-food-lab-all-american-meatloaf-excerpt-recipe",
+        "author": "J. Kenji López-Alt",
+        "sourceTitle": "Classic Meatloaf Recipe (The Food Lab)",
+        "capturedAt": "2026-09-20",
+        "method": "manual-transcription",
+        "acquisitionAtCapture": "manual-limited",
+        "licence": null
+      },
+      "dish": "meatloaf",
+      "ingredientLines": [
+        "1 pound ground beef chuck",
+        "1/2 pound ground pork",
+        "1/2 pound ground veal",
+        "2 tablespoons unsalted butter",
+        "1 medium onion, finely chopped",
+        "2 stalks celery, finely chopped",
+        "1 medium carrot, finely chopped",
+        "3 cloves garlic, minced",
+        "1 cup panko bread crumbs",
+        "1/2 cup whole milk",
+        "2 large eggs",
+        "1 tablespoon powdered gelatin",
+        "1/2 cup chicken stock",
+        "2 tablespoons soy sauce",
+        "1 tablespoon Worcestershire sauce",
+        "1/2 cup ketchup",
+        "2 tablespoons brown sugar",
+        "1 teaspoon kosher salt",
+        "1/2 teaspoon black pepper"
+      ],
+      "servings": 8,
+      "servingsRaw": "serves 8",
+      "totalTimeMinutes": 160,
+      "totalTimeRaw": "2 hr 40 min",
+      "prepTimeMinutes": null,
+      "cookTimeMinutes": null,
+      "stepCount": 6
     }
   ]
 }

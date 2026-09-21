@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { unlink } from "node:fs/promises";
 import {
+  DEFAULT_MANUAL_CAP,
   curationFor,
+  mayCaptureManually,
   mayFetch,
   mayStoreSourceText,
   readCurated,
@@ -110,5 +112,58 @@ describe("setTier", () => {
     await setTier("aaa.com", "favorite", { path: TMP });
     const text = await Bun.file(TMP).text();
     expect(text.indexOf("aaa.com")).toBeLessThan(text.indexOf("zzz.com"));
+  });
+});
+
+describe("manual capture cap", () => {
+  const base = { tier: "required" as const, manualCap: 3 };
+
+  test("a manual-limited site allows entry up to the cap", () => {
+    const site = { ...base, acquisition: "manual-limited" as const };
+    expect(mayCaptureManually(site, 0).ok).toBe(true);
+    expect(mayCaptureManually(site, 2).ok).toBe(true);
+    expect(mayCaptureManually(site, 2).reason).toBe("3 of 3");
+  });
+
+  test("refuses at the cap, and stays refused past it", () => {
+    const site = { ...base, acquisition: "manual-limited" as const };
+    expect(mayCaptureManually(site, 3).ok).toBe(false);
+    expect(mayCaptureManually(site, 9).ok).toBe(false);
+    expect(mayCaptureManually(site, 3).reason).toContain("cap of 3");
+  });
+
+  test("uses the default cap when a site names none", () => {
+    const site = { tier: "required" as const, acquisition: "manual-limited" as const };
+    expect(mayCaptureManually(site, 0).cap).toBe(DEFAULT_MANUAL_CAP);
+    expect(mayCaptureManually(site, DEFAULT_MANUAL_CAP).ok).toBe(false);
+  });
+
+  test("an acquisition that does not permit hand entry refuses regardless of count", () => {
+    for (const acquisition of ["none", "pending-review", "link-only"] as const) {
+      const v = mayCaptureManually({ tier: "required", acquisition }, 0);
+      expect(v.ok).toBe(false);
+      expect(v.reason).toContain(acquisition);
+    }
+  });
+
+  test("a blocked site refuses even when set to manual-limited", () => {
+    expect(
+      mayCaptureManually({ tier: "blocked", acquisition: "manual-limited", manualCap: 99 }, 0).ok,
+    ).toBe(false);
+  });
+
+  test("no cap applies where we already have a broader basis", () => {
+    expect(mayCaptureManually({ tier: "normal", acquisition: "fetch" }, 500).ok).toBe(true);
+    expect(mayCaptureManually({ tier: "required", acquisition: "licensed" }, 500).ok).toBe(true);
+  });
+});
+
+describe("manual-limited is not a fetching basis", () => {
+  test("mayFetch stays false — it permits a person, not a fetcher", () => {
+    expect(mayFetch({ tier: "required", acquisition: "manual-limited", manualCap: 10 })).toBe(false);
+  });
+
+  test("and it never permits storing the page's own text", () => {
+    expect(mayStoreSourceText({ tier: "required", acquisition: "manual-limited" })).toBe(false);
   });
 });
