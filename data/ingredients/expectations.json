@@ -1,0 +1,233 @@
+{
+  "_comment": [
+    "Golden cases for ingredient matching, taken from real lines in the corpus.",
+    "",
+    "Every entry here is a bug that was found by reading output, and would",
+    "otherwise be reintroduced by the next ranking change. Matching is heuristic",
+    "plus a curated table, and both are the kind of thing where fixing one food",
+    "silently breaks another — a first-segment rule once fixed milk and beef and",
+    "cost thirteen points of coverage on bread crumbs. This file is how that gets",
+    "caught instead of shipped.",
+    "",
+    "expect  — a substring the matched USDA description must contain (case-insensitive)",
+    "reject  — a substring it must NOT contain; this is the wrong answer we saw",
+    "found   — where the line came from, so a failure can be checked against the page",
+    "",
+    "Add a case whenever a miss is noticed. Never delete one to make a suite pass."
+  ],
+  "cases": [
+    {
+      "line": "1 medium onion, finely chopped",
+      "expect": "onion",
+      "reject": "pork",
+      "found": "Natasha's Kitchen — 'chopped' stems to 'chop' under the Porter tokenizer"
+    },
+    {
+      "line": "2 stalks celery, finely chopped",
+      "expect": "celery",
+      "reject": "pork",
+      "found": "Delish — same stemming collapse"
+    },
+    {
+      "line": "3 cloves garlic, minced",
+      "expect": "garlic",
+      "reject": "spices, cloves",
+      "found": "Serious Eats — the unit word 'cloves' is itself a food"
+    },
+    {
+      "line": "1 cup milk",
+      "expect": "milk",
+      "reject": "crackers",
+      "found": "several — a single short term gives bm25 nothing to rank on"
+    },
+    {
+      "line": "3/4 cup whole milk",
+      "expect": "milk",
+      "reject": "yogurt",
+      "found": "Serious Eats"
+    },
+    {
+      "line": "2 lb ground beef",
+      "expect": "beef",
+      "reject": "corned",
+      "found": "several — 'ground' was wrongly treated as preparation, leaving only 'beef'"
+    },
+    {
+      "line": "1 1/2 lbs lean ground beef",
+      "expect": "beef",
+      "reject": "corned",
+      "found": "The Wholesome Dish"
+    },
+    {
+      "line": "2 large eggs",
+      "expect": "egg",
+      "reject": "bread",
+      "found": "Natasha's Kitchen — matched 'Bread, egg'"
+    },
+    {
+      "line": "1 cup panko bread crumbs",
+      "expect": "crumb",
+      "reject": "coffee cake",
+      "found": "Serious Eats — a first-segment rule sent this to 'Coffee cake, crumb type'"
+    },
+    {
+      "line": "3/4 cup Italian bread crumbs",
+      "expect": "crumb",
+      "reject": "coffee cake",
+      "found": "Spend With Pennies"
+    },
+    {
+      "line": "1/2 cup ketchup",
+      "expect": "ketchup|catsup",
+      "reject": "",
+      "found": "several — USDA files the cup portion under the older spelling"
+    },
+    {
+      "line": "1 tablespoon Worcestershire sauce",
+      "expect": "worcestershire",
+      "reject": "",
+      "found": "several"
+    },
+    {
+      "line": "2 tablespoons brown sugar",
+      "expect": "sugars, brown",
+      "reject": "toaster",
+      "found": "several — 'Toaster pastries, brown-sugar-cinnamon' is a near miss"
+    },
+    {
+      "line": "1 teaspoon kosher salt",
+      "expect": "salt",
+      "reject": "",
+      "found": "Serious Eats"
+    },
+    {
+      "line": "1/2 teaspoon ground black pepper",
+      "expect": "pepper, black",
+      "reject": "bell",
+      "found": "Natasha's Kitchen — matched 'Peppers, bell, red, raw'"
+    },
+    {
+      "line": "1 medium carrot, finely chopped",
+      "expect": "carrot",
+      "reject": "pork",
+      "found": "Serious Eats"
+    },
+    {
+      "line": "1 teaspoon dried oregano",
+      "expect": "oregano",
+      "reject": "",
+      "found": "the density case: leaves 1.0 g/tsp vs ground 1.8 g/tsp"
+    },
+    {
+      "line": "1 tsp salt (or to taste)",
+      "expect": "salt",
+      "reject": "",
+      "found": "Natasha's Kitchen — a bracketed hedge beside a real quantity was being rejected outright, zeroing her table salt"
+    },
+    {
+      "line": "2 garlic cloves, minced",
+      "expect": "garlic",
+      "reject": "spices",
+      "found": "Natasha's Kitchen — the raw parser read unit='garlic' and name='cloves', which matched the clove spice"
+    },
+    {
+      "line": "1 yellow onion, chopped",
+      "expect": "onion",
+      "reject": "",
+      "found": "several — the raw parser read unit='yellow'"
+    },
+    {
+      "line": "2 stalks celery",
+      "expect": "celery",
+      "reject": "broccoli",
+      "found": "lentil soup — 'stalks' once resolved to 'Broccoli, stalks, raw'"
+    },
+    {
+      "line": "1/4 c. fresh flat-leaf parsley, chopped, plus more for serving",
+      "expect": "parsley",
+      "reject": "",
+      "found": "lentil soup — a reject phrase ('for serving') discarded the whole line although it states a quarter cup. A stated amount now outranks a reject phrase."
+    }
+  ],
+  "rejections": [
+    {
+      "line": "Kosher salt, to taste",
+      "found": "Serious Eats — must not be given a quantity"
+    },
+    {
+      "line": "salt and pepper, to taste",
+      "found": "several"
+    },
+    {
+      "line": "Water, as needed",
+      "found": "McCormick — matched 'Pomegranate juice, bottled' once"
+    }
+  ],
+  "coverageFloor": {
+    "dish": "meatloaf",
+    "minimumPercent": 84,
+    "note": "Coverage on the meatloaf corpus must not regress below this. History: 46% raw; 69% after the stemming and dataset-preference fixes; 75% with the alias table; 81% once counted ingredients were read against USDA's per-item portions; 86% after the raw parser's 'to taste' default stopped swallowing unitless counts. Raise it when genuinely beaten; never lower it to make a change pass."
+  },
+  "counts": [
+    {
+      "line": "2 large eggs",
+      "grams": 100,
+      "tolerance": 2,
+      "found": "USDA: 1 large egg = 50 g"
+    },
+    {
+      "line": "1 medium egg",
+      "grams": 44,
+      "tolerance": 1,
+      "found": "USDA: 1 medium egg = 44 g"
+    },
+    {
+      "line": "3 cloves garlic, minced",
+      "grams": 9,
+      "tolerance": 0.5,
+      "found": "USDA: 1 clove = 3 g"
+    },
+    {
+      "line": "1 large onion",
+      "grams": 150,
+      "tolerance": 2,
+      "found": "USDA: 1 large onion = 150 g"
+    },
+    {
+      "line": "1 onion",
+      "grams": 110,
+      "tolerance": 2,
+      "found": "no size stated, so medium: 110 g"
+    },
+    {
+      "line": "2 stalks celery",
+      "grams": 80,
+      "tolerance": 2,
+      "found": "no size stated, so medium stalk: 40 g each"
+    },
+    {
+      "line": "1 teaspoon ground oregano",
+      "grams": 1.8,
+      "tolerance": 0.05,
+      "found": "THE condition case. USDA: 1 tsp ground = 1.8 g. Review found the raw parser never sets preparation, so this was converting as leaves everywhere outside one hand-fed test."
+    },
+    {
+      "line": "1 teaspoon dried oregano leaves",
+      "grams": 1.0,
+      "tolerance": 0.05,
+      "found": "USDA: 1 tsp leaves = 1.0 g"
+    },
+    {
+      "line": "1 cup chopped onion",
+      "grams": 160,
+      "tolerance": 2,
+      "found": "USDA: 1 cup, chopped = 160 g"
+    },
+    {
+      "line": "1 cup sliced onion",
+      "grams": 115,
+      "tolerance": 2,
+      "found": "USDA: 1 cup, sliced = 115 g"
+    }
+  ]
+}

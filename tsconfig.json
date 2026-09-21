@@ -21,7 +21,7 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
 
-    "baseUrl": ".",
+    // No "baseUrl": removed in TypeScript 6. Paths resolve relative to this file.
     "paths": {
       "@/*": ["./src/*"]
     },

@@ -1,0 +1,71 @@
+{
+  "_comment": [
+    "The owner's own comparison sheet ('Detroit Pizza', Google Sheets), transcribed",
+    "from a screenshot on 2026-09-20. Cells are kept EXACTLY as written in the sheet —",
+    "'1 Tb', '300g', 'AP 315', 'taste' — and interpreted by src/lib/personal-collection.ts,",
+    "so a misreading can be fixed here without touching code.",
+    "",
+    "Every sourceUrl is null on purpose: the sheet records names, not links, and a",
+    "guessed URL would be a false attribution. Each recipe is therefore PRIVATE until",
+    "its link is filled in. Add the URL, re-run the import, and visibility is decided",
+    "again against data/sources/curated.json.",
+    "",
+    "For one of the owner's OWN recipes, set \"ownWork\": true instead of a URL — the",
+    "internal record is then its source and it is publishable as it stands."
+  ],
+
+  "dish": "detroit-pizza",
+  "convention": "bare-numbers-are-grams",
+  "compiledBy": "owner",
+  "compiledAt": "2026-09-20",
+
+  "sources": [
+    { "key": "pizzahog", "siteName": "PizzaHog", "author": null, "sourceUrl": null,
+      "note": "A blog, per the owner." },
+    { "key": "atk", "siteName": "America's Test Kitchen", "author": null, "sourceUrl": null,
+      "note": "Column header 'ATC' in the sheet. Curated list has this source at acquisition: none, so it stays private even with a URL." },
+    { "key": "serious", "siteName": "Serious Eats", "author": null, "sourceUrl": null,
+      "note": "Curated list has this source at manual-limited (cap 10); a URL would make it public and count toward the cap." },
+    { "key": "chefjohn", "siteName": "Food Wishes", "author": "Chef John", "sourceUrl": null },
+    { "key": "ethan", "siteName": "Ethan Chlebowski", "author": "Ethan Chlebowski", "sourceUrl": null,
+      "note": "YouTube creator." },
+    { "key": "charlie", "siteName": "Charlie Anderson", "author": "Charlie Anderson", "sourceUrl": null,
+      "note": "Sheet header reads 'Charlie A'; the owner described him as 'the other YouTube guy'. Surname to be confirmed." }
+  ],
+
+  "sections": [
+    {
+      "name": "dough and toppings",
+      "rows": [
+        { "ingredient": "Bread Flour",  "cells": { "pizzahog": 273, "atk": 337, "serious": 300, "chefjohn": 375, "ethan": "300g", "charlie": "AP 315" } },
+        { "ingredient": "Water",        "cells": { "pizzahog": 205, "atk": 236, "serious": 220, "chefjohn": 236, "ethan": "210g", "charlie": 205 } },
+        { "ingredient": "Yeast",        "cells": { "pizzahog": 1.5, "atk": 10,  "serious": 5,   "chefjohn": 9,   "ethan": 5,      "charlie": 1.6 } },
+        { "ingredient": "Salt",         "cells": { "pizzahog": 4.1, "atk": 6,   "serious": 9,   "chefjohn": 6,   "ethan": 6,      "charlie": 6.3 } },
+        { "ingredient": "Oil",          "cells": { "atk": "1 Tb", "serious": "1 Tb", "chefjohn": "3 Tb" } },
+        { "ingredient": "Sugar",        "cells": { "atk": 6, "chefjohn": 6 } },
+        { "ingredient": "Brick Cheese", "cells": { "atk": 284, "serious": 340, "charlie": 318 } },
+        { "ingredient": "Pepperoni",    "cells": { "serious": 340 } }
+      ]
+    },
+    {
+      "name": "sauce",
+      "rows": [
+        { "ingredient": "Tomato",        "cells": { "atk": "1 Cup", "serious": "28 oz", "ethan": "28 oz", "charlie": "28 oz" } },
+        { "ingredient": "Garlic Powder", "cells": { "serious": 6, "charlie": "1/4 tsp" } },
+        { "ingredient": "Garlic Cloves", "cells": { "atk": 1, "serious": "3 med", "ethan": 2 } },
+        { "ingredient": "Onion Powder",  "cells": { "serious": 6 } },
+        { "ingredient": "Fresh Basil",   "cells": { "atk": "1 Tb" } },
+        { "ingredient": "Dry Basil",     "cells": { "atk": 2 } },
+        { "ingredient": "Dry Oregano",   "cells": { "atk": 2, "serious": 5, "ethan": "taste", "charlie": "1.5 tsp" } },
+        { "ingredient": "Thyme",         "cells": { "charlie": "3/4 tsp" } },
+        { "ingredient": "Red Pepper",    "cells": { "atk": 4, "serious": 3, "ethan": "taste", "charlie": "1/4 tsp" } },
+        { "ingredient": "Olive Oil",     "cells": { "atk": "1 Tb", "serious": "30ml" } },
+        { "ingredient": "Sugar",         "cells": { "atk": 3, "serious": 15 } },
+        { "ingredient": "Salt",          "cells": { "atk": 2, "serious": 4, "ethan": "taste", "charlie": 5 } },
+        { "ingredient": "Butter",        "cells": { "ethan": 42 } },
+        { "ingredient": "Onion",         "cells": { "ethan": "1/4" } },
+        { "ingredient": "Pepper",        "cells": { "atk": 3 } }
+      ]
+    }
+  ]
+}
