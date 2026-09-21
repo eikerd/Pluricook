@@ -76,6 +76,11 @@ describe("buildMatrix — a recipe without the anchor class", () => {
     expect(m.lines[2]![1]).toBe("70 of water");
   });
 
+  test("keeps its food-class composition for the ternary", () => {
+    const grain = m.classes.indexOf("grain");
+    expect(m.classGrams[2]![grain]).toBeGreaterThan(0);
+  });
+
   test("still counts as listing the ingredients, and still has a distance", () => {
     expect(m.membershipDistance[0]![2]).toBe(0.25);
     expect(m.sharedDistance[0]![2]).toBe(0);

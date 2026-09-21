@@ -55,7 +55,11 @@ export interface VisualMatrix {
   grams: Array<Array<number | null>>;
   /** Sum of each food class per recipe, anchor-relative: the substitution-blind view. */
   classes: FoodClass[];
-  classValues: number[][];
+  /**
+   * Grams per food class per recipe, from grams so a recipe lacking the anchor
+   * keeps its composition. Only the ternary reads it, and renormalizes.
+   */
+  classGrams: number[][];
   /** 1 − Jaccard on RESOLVED ingredient sets. 0 = same ingredients. */
   membershipDistance: number[][];
   /**
@@ -156,7 +160,7 @@ export function buildMatrix(c: Comparison): VisualMatrix {
   for (const u of c.unmatched) unknown.set(u.recipeId, (unknown.get(u.recipeId) ?? 0) + 1);
 
   const classes = [...new Set(clusters.map((x) => x.klass))];
-  const classValues = values.map((row) =>
+  const classGrams = grams.map((row) =>
     classes.map((k) => round(row.reduce<number>((s, v, j) => s + (clusters[j]!.klass === k ? (v ?? 0) : 0), 0), 2)),
   );
 
@@ -191,7 +195,7 @@ export function buildMatrix(c: Comparison): VisualMatrix {
     lines,
     grams,
     classes,
-    classValues,
+    classGrams,
     // From grams: Aitchison is scale-invariant within a recipe, so grams give the
     // same distance as anchor ratios wherever both exist, and still work where a
     // recipe lacks the anchor class and has no ratios at all.

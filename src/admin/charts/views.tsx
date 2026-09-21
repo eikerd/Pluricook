@@ -22,6 +22,29 @@ export interface ViewProps {
 export const recipeLabel = (m: VisualMatrix, i: number) =>
   `${m.recipes[i]!.siteName}${m.recipes[i]!.unknownLines > 0 ? ` ⚠${m.recipes[i]!.unknownLines}` : ""}`;
 
+/**
+ * Labels for a categorical axis, where a repeat is fatal: Plotly draws every row
+ * sharing a label as ONE row. Two recipes from one site are numbered instead.
+ */
+export function rowLabels(m: VisualMatrix): string[] {
+  const base = m.recipes.map((_, i) => recipeLabel(m, i));
+  const seen = new Map<string, number>();
+  return base.map((l) => {
+    const n = (seen.get(l) ?? 0) + 1;
+    seen.set(l, n);
+    return base.filter((x) => x === l).length > 1 ? `${l} (${n})` : l;
+  });
+}
+
+/** Set one of several distinct picks; choosing a value another slot holds swaps the two. */
+export function pickDistinct<T extends number[]>(current: T, slot: number, value: number): T {
+  const next = [...current] as T;
+  const other = next.indexOf(value);
+  if (other !== -1 && other !== slot) next[other] = next[slot]!;
+  next[slot] = value;
+  return next;
+}
+
 /** Ingredients enough recipes list for a per-ingredient axis to mean something. */
 const shared = (m: VisualMatrix, min = 3) =>
   m.ingredients.map((_, j) => j).filter((j) => !m.ingredients[j]!.isAnchor && m.ingredients[j]!.recipeCount >= Math.min(min, m.recipes.length));
@@ -29,15 +52,17 @@ const shared = (m: VisualMatrix, min = 3) =>
 // ── 1. Heatmap against a baseline ───────────────────────────────────────────
 
 export function Heatmap({ m, focus, onPick }: ViewProps) {
-  const { data, layout, order } = useMemo(() => {
+  const { data, layout } = useMemo(() => {
     const base = m.ingredients.map((ing, j) => (focus === null ? ing.median : m.values[focus]![j]!));
     // Nearest to the baseline first, so small differences sit together.
     const order = m.recipes.map((_, i) => i).sort((a, b) =>
       focus === null ? 0 : (m.sharedDistance[focus]![a] ?? 99) - (m.sharedDistance[focus]![b] ?? 99));
 
-    const z: Array<Array<number | null>> = [], text: string[][] = [];
+    const labels = rowLabels(m);
+    const z: Array<Array<number | null>> = [], text: string[][] = [], cells: number[][][] = [];
     for (const i of order) {
       const zr: Array<number | null> = [], tr: string[] = [];
+      cells.push(m.ingredients.map((_, j) => [i, j]));
       m.ingredients.forEach((_, j) => {
         const v = m.values[i]![j]!, g = m.grams[i]![j]!;
         // Listed, but this recipe lacks the anchor class, so there is no ratio to
@@ -50,10 +75,9 @@ export function Heatmap({ m, focus, onPick }: ViewProps) {
       z.push(zr); text.push(tr);
     }
     return {
-      order,
       data: [{
         type: "heatmap", z, text, texttemplate: "%{text}", textfont: { size: 11 },
-        x: m.ingredients.map((g) => g.label), y: order.map((i) => recipeLabel(m, i)),
+        x: m.ingredients.map((g) => g.label), y: order.map((i) => labels[i]), customdata: cells,
         colorscale: DIVERGING, zmin: -2, zmax: 2, xgap: 2, ygap: 2, hoverongaps: false,
         colorbar: { title: { text: "× baseline" }, tickvals: [-2, -1, 0, 1, 2], ticktext: ["¼", "½", "1", "2", "4"] },
         hovertemplate: "%{y}<br>%{x}: %{text}<extra></extra>",
@@ -65,10 +89,10 @@ export function Heatmap({ m, focus, onPick }: ViewProps) {
     };
   }, [m, focus]);
 
+  // By identity, not by label: two recipes may read alike.
   const click = (p: PlotClick) => {
-    const j = m.ingredients.findIndex((g) => g.label === p.x);
-    const row = order.find((i) => recipeLabel(m, i) === p.y);
-    if (j >= 0 && row !== undefined) onPick({ recipe: row, ingredient: j });
+    const c = p.customdata as [number, number] | undefined;
+    if (c) onPick({ recipe: c[0], ingredient: c[1] });
   };
   return <Plot label="Heatmap of each recipe against the baseline" data={data} layout={layout}
     height={140 + 34 * m.recipes.length + 150} onPointClick={click} />;
@@ -209,7 +233,7 @@ export function Map3D({ m, focus, onPick }: ViewProps) {
         </select>
         {mode === "ratios" && cols.length >= 3 && ([0, 1, 2] as const).map((a) => (
           <select key={a} className="picker" aria-label={`Axis ${a + 1}`} value={chosen[a]}
-            onChange={(e) => { const next = [...chosen] as [number, number, number]; next[a] = Number(e.target.value); setAxes(next); }}>
+            onChange={(e) => setAxes(pickDistinct(chosen, a, Number(e.target.value)))}>
             {cols.map((j) => <option key={j} value={j}>{m.ingredients[j]!.label}</option>)}
           </select>
         ))}
@@ -225,7 +249,7 @@ export function Ternary({ m, focus }: ViewProps) {
   // Largest classes first, with water-salt-and-spice ("unanchorable") last: it is
   // mostly water, and as a default corner it drags every recipe into one point.
   const usable = useMemo(() => {
-    const total = (k: number) => m.classValues.reduce((sum, r) => sum + r[k]!, 0);
+    const total = (k: number) => m.classGrams.reduce((sum, r) => sum + r[k]!, 0);
     return m.classes.map((_, k) => k)
       .filter((k) => total(k) > 0)
       .sort((a, b) => Number(m.classes[a] === "unanchorable") - Number(m.classes[b] === "unanchorable") || total(b) - total(a));
@@ -238,10 +262,10 @@ export function Ternary({ m, focus }: ViewProps) {
   // Its own composition: the three chosen classes, renormalized to sum to 100.
   // Both numerator and denominator share the anchor, so it cancels — these are
   // shares of mass among the three, not anchor percentages.
-  const rows = m.recipes.map((_, i) => i).filter((i) => abc.some((k) => m.classValues[i]![k]! > 0));
+  const rows = m.recipes.map((_, i) => i).filter((i) => abc.some((k) => m.classGrams[i]![k]! > 0));
   const share = (i: number, k: number) => {
-    const total = abc.reduce((s, c) => s + m.classValues[i]![c]!, 0);
-    return Math.round((m.classValues[i]![k]! / total) * 1000) / 10;
+    const total = abc.reduce((s, c) => s + m.classGrams[i]![c]!, 0);
+    return Math.round((m.classGrams[i]![k]! / total) * 1000) / 10;
   };
   const axis = (k: number) => ({ title: { text: m.classes[k] }, gridcolor: LINE });
 
@@ -250,7 +274,7 @@ export function Ternary({ m, focus }: ViewProps) {
       <div className="pickers pickers--inline">
         {([0, 1, 2] as const).map((a) => (
           <select key={a} className="picker" aria-label={`Corner ${a + 1}`} value={abc[a]}
-            onChange={(e) => { const next = [...abc] as [number, number, number]; next[a] = Number(e.target.value); setPicked(next); }}>
+            onChange={(e) => setPicked(pickDistinct(abc, a, Number(e.target.value)))}>
             {usable.map((k) => <option key={k} value={k}>{m.classes[k]}</option>)}
           </select>
         ))}
