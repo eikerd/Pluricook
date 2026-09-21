@@ -1,0 +1,109 @@
+{
+  "query": "lentil-soup",
+  "searchQuery": "lentil soup recipe",
+  "seenAt": "2026-09-20",
+  "engine": "firecrawl-web-search",
+  "rawResultCount": 16,
+  "creditsUsed": 4,
+  "note": "Second dish, chosen as a vegetarian test of the anchor hierarchy. Search excluded video, social and the People Inc sites at query time, so ranks here are not comparable with the meatloaf observation's.",
+  "appearances": [
+    {
+      "rank": 1,
+      "url": "https://cookieandkate.com/best-lentil-soup-recipe/",
+      "kind": "recipe",
+      "displayName": "Cookie and Kate"
+    },
+    {
+      "rank": 2,
+      "url": "https://www.recipetineats.com/lentil-soup/",
+      "kind": "recipe",
+      "displayName": "RecipeTin Eats"
+    },
+    {
+      "rank": 3,
+      "url": "https://www.loveandlemons.com/lentil-soup/",
+      "kind": "recipe",
+      "displayName": "Love and Lemons"
+    },
+    {
+      "rank": 4,
+      "url": "https://www.sproutedkitchen.com/home/2016/11/22/everyday-lentil-soup",
+      "kind": "recipe",
+      "displayName": "Sprouted Kitchen"
+    },
+    {
+      "rank": 5,
+      "url": "https://www.reddit.com/r/mediterraneandiet/comments/suz3cs/",
+      "kind": "social",
+      "displayName": "Reddit"
+    },
+    {
+      "rank": 6,
+      "url": "https://www.thepioneerwoman.com/food-cooking/recipes/a63292347/lentil-soup-recipe/",
+      "kind": "recipe",
+      "displayName": "The Pioneer Woman"
+    },
+    {
+      "rank": 7,
+      "url": "https://ethnicspoon.com/middle-eastern-lentil-soup/",
+      "kind": "recipe",
+      "displayName": "Analida's Ethnic Spoon"
+    },
+    {
+      "rank": 8,
+      "url": "https://www.indianveggiedelight.com/lentil-soup-instant-pot/",
+      "kind": "recipe",
+      "displayName": "Indian Veggie Delight"
+    },
+    {
+      "rank": 9,
+      "url": "https://kathleenflinn.com/recipe-go-with-the-flow-lentil-soup/",
+      "kind": "recipe",
+      "displayName": "Kathleen Flinn"
+    },
+    {
+      "rank": 10,
+      "url": "https://www.makingthymeforhealth.com/the-best-lentil-soup/",
+      "kind": "recipe",
+      "displayName": "Making Thyme for Health"
+    },
+    {
+      "rank": 11,
+      "url": "https://cooking.nytimes.com/recipes/1016062-red-lentil-soup",
+      "kind": "recipe",
+      "displayName": "NYT Cooking"
+    },
+    {
+      "rank": 12,
+      "url": "https://www.acouplecooks.com/lentil-soup/",
+      "kind": "recipe",
+      "displayName": "A Couple Cooks"
+    },
+    {
+      "rank": 13,
+      "url": "https://www.reddit.com/r/mediterraneandiet/comments/y39gh8/",
+      "kind": "social",
+      "displayName": "Reddit"
+    },
+    {
+      "rank": 14,
+      "url": "https://thecozyapron.com/lentil-soup/",
+      "kind": "recipe",
+      "displayName": "The Cozy Apron"
+    },
+    {
+      "rank": 15,
+      "url": "https://frienji.kenjilopezalt.com/posts/this-easy-lentil-151567522",
+      "kind": "other",
+      "displayName": "J. Kenji López-Alt"
+    },
+    {
+      "rank": 16,
+      "url": "https://www.abeautifulplate.com/red-lentil-soup/",
+      "kind": "recipe",
+      "displayName": "A Beautiful Plate"
+    }
+  ],
+  "fetchAttempts": [],
+  "policies": []
+}

@@ -1,24 +1,43 @@
 /**
  * Consensus and variation across the recipes captured for one dish.
  *
- * Ingredients are clustered by USDA `fdc_id` rather than by fuzzy string
- * matching. The gram conversion already resolved each line to a food record, so
- * that identifier is a natural, free key — "2 lb ground beef", "1½ lbs lean
- * ground beef" and "500g beef mince" collapse without any string heuristics.
+ * Ingredients are clustered by USDA `fdc_id`: the gram conversion already
+ * resolved each line to a food record, so that identifier is a free, natural
+ * key. The cost is that clustering inherits the matcher's mistakes, which is
+ * why misses are surfaced in `unmatched` and pinned in the regression fixture.
  *
- * The cost is that clustering inherits the matcher's mistakes: where a line
- * resolves to the wrong food, it clusters with the wrong food. Those failures
- * are visible in `unmatched` and in the known-gap tests rather than hidden.
+ * Amounts are stated against the dish's ANCHOR (see anchor.ts) — meat for a
+ * meat dish, flour for a baked one, legumes for a dal, and so on down to a
+ * centered log-ratio when nothing is shared. Per-serving figures are kept as a
+ * secondary view, but a recipe no longer needs a servings count to take part:
+ * "a serving" is an author's opinion, and the corpus shows it varying 2.2x.
  *
- * Quantities are compared PER SERVING. A recipe serving four and one serving
- * eight are not comparable by absolute mass, and the corpus mixes 4, 6 and 8.
+ * Each recipe also gets a salinity reading — total sodium from the USDA
+ * nutrient table, as salt-equivalent against the anchor. It serves two jobs at
+ * once: a health figure, and a sanity check, because a recipe whose salinity is
+ * far off its peers usually has a parsing error rather than a bold cook.
  */
 
 import type { Database } from "bun:sqlite";
+import {
+  chooseAnchor,
+  classMass,
+  classifyCategory,
+  relativeAmount,
+  type AnchorDecision,
+  type AnchorOptions,
+  type Composition,
+  type FoodClass,
+} from "./anchor";
 import { parseIngredientLine } from "./ingredient-parser";
-import { toGrams, type Basis } from "./to-grams";
 import { EMPTY_TABLE, type AliasTable } from "./ingredient-aliases";
+import { toGrams, type Basis } from "./to-grams";
 import type { ExtractedRecipe } from "../types/provenance";
+
+/** NaCl / Na mass ratio: sodium × 2.54 = its table-salt equivalent. */
+const NA_TO_NACL = 2.54;
+/** FDA daily value for sodium, mg. */
+const SODIUM_DAILY_VALUE_MG = 2300;
 
 export interface SourceAmount {
   siteName: string;
@@ -26,69 +45,69 @@ export interface SourceAmount {
   /** The line exactly as published, so a surprising number can be checked. */
   rawLine: string;
   grams: number;
-  /** Grams divided by that recipe's stated servings. */
+  /** Amount against the dish anchor, in `Comparison.anchor.unitLabel`. */
+  relative: number | null;
   gramsPerServing: number | null;
-  /**
-   * Grams as a percentage of the recipe's reference mass (its total meat).
-   *
-   * The same convention as baker's percentage, where flour is 100%, and as
-   * charcuterie formulation, where salt and cure are specified as a percent of
-   * meat weight. Statistically it is Aitchison's additive log-ratio with meat
-   * as the reference part: a recipe is a composition, its absolute size carries
-   * no information, and only ratios between parts are meaningful.
-   */
-  pctOfReference: number | null;
   basis: Basis;
 }
 
 export interface IngredientCluster {
   fdcId: number;
   foodDescription: string;
-  /** How many recipes include it. */
+  klass: FoodClass;
+  /** True when this cluster belongs to the anchor class itself. */
+  isAnchor: boolean;
   recipeCount: number;
-  /** recipeCount / recipes analysed, 0-1. */
   frequency: number;
   medianGrams: number;
-  minGrams: number;
-  maxGrams: number;
+  medianRelative: number | null;
+  /** max / min of relative amounts — how far the corpus disagrees. */
+  spreadRelative: number | null;
   medianPerServing: number | null;
-  /** max / min for per-serving amounts — how much the corpus disagrees. */
-  spread: number | null;
-  /** Median as a percent of meat mass, across recipes that have a reference. */
-  medianPctOfReference: number | null;
-  /** max / min under reference normalization. */
-  spreadPctOfReference: number | null;
-  /** True when this cluster IS part of the reference (the meat itself). */
-  isReference: boolean;
   sources: SourceAmount[];
+}
+
+export type SalinityFlag =
+  | "ok"
+  /** More than twice the corpus median. */
+  | "high"
+  /** Under half the corpus median. */
+  | "low"
+  /** Too few lines resolved for the total to mean much. */
+  | "unreliable";
+
+export interface RecipeSummary {
+  siteName: string;
+  sourceUrl: string;
+  servings: number | null;
+  resolvedLines: number;
+  totalLines: number;
+  /** Mass of the anchor class in this recipe, grams. Null under clr. */
+  anchorGrams: number | null;
+  sodiumMg: number;
+  saltEquivalentGrams: number;
+  /** Salt-equivalent against the anchor, in the anchor's unit. */
+  salinityRelative: number | null;
+  sodiumMgPerServing: number | null;
+  /** Share of the FDA daily value in one serving, 0–1+. */
+  sodiumDailyValueShare: number | null;
+  salinityFlag: SalinityFlag;
 }
 
 export interface Comparison {
   dish: string;
-  /** Recipes with enough data to take part. */
   analysed: number;
-  /** Recipes excluded for having no servings count. */
-  skippedNoServings: number;
-  /** Recipes in which a reference (meat) mass could be established. */
-  withReference: number;
-  /** In at least this share of recipes. */
+  anchor: AnchorDecision;
+  /** Recipes in which the anchor class was actually present. */
+  withAnchor: number;
   commonThreshold: number;
   common: IngredientCluster[];
-  /** Present in only one or two recipes. */
   outliers: IngredientCluster[];
-  /** Lines that never reached a food record, by reason. */
+  recipes: RecipeSummary[];
+  /** Corpus median salinity, for judging any one recipe against. */
+  medianSalinity: number | null;
   unmatched: Array<{ siteName: string; rawLine: string; basis: Basis }>;
 }
-
-/**
- * USDA food categories that count as the reference "protein" mass.
- * 5 Poultry · 7 Sausages & Luncheon Meats · 10 Pork · 13 Beef ·
- * 15 Finfish & Shellfish · 17 Lamb, Veal & Game.
- *
- * Category ids come from USDA's own food_category table, so what counts as
- * meat is their classification, not ours.
- */
-const REFERENCE_CATEGORIES = new Set([5, 7, 10, 13, 15, 17]);
 
 function median(values: number[]): number {
   const s = [...values].sort((a, b) => a - b);
@@ -101,47 +120,42 @@ const round = (n: number, dp = 1) => Math.round(n * 10 ** dp) / 10 ** dp;
 export interface CompareOptions {
   recipes: ExtractedRecipe[];
   db: Database;
-  /** Share of recipes an ingredient must appear in to count as consensus. */
   commonThreshold?: number;
-  /** At most this many recipes for an ingredient to count as an outlier. */
   outlierMax?: number;
-  /** Our ingredient mapping; without it clustering inherits every heuristic miss. */
   aliases?: AliasTable;
+  anchor?: AnchorOptions;
+  /** Below this share of resolved lines, a salinity total is not trusted. */
+  minResolvedShare?: number;
+}
+
+interface ResolvedPart {
+  rawLine: string;
+  fdcId: number;
+  grams: number;
+  basis: Basis;
+  description: string;
+  klass: FoodClass;
 }
 
 export function compareRecipes(opts: CompareOptions): Comparison {
   const commonThreshold = opts.commonThreshold ?? 0.6;
   const outlierMax = opts.outlierMax ?? 2;
-
-  const clusters = new Map<
-    number,
-    { description: string; isReference: boolean; sources: SourceAmount[] }
-  >();
-  const unmatched: Comparison["unmatched"] = [];
-  let skippedNoServings = 0;
-  let analysed = 0;
-  let withReference = 0;
+  const minResolvedShare = opts.minResolvedShare ?? 0.6;
 
   const categoryOf = opts.db.query<{ category_id: number | null }, [number]>(
     `SELECT category_id FROM foods WHERE fdc_id = ?1`,
   );
+  const sodiumOf = opts.db.query<{ amount: number | null }, [number]>(
+    `SELECT fn.amount FROM food_nutrients fn JOIN nutrients n ON n.id = fn.nutrient_id
+     WHERE fn.fdc_id = ?1 AND n.name = 'Sodium, Na' LIMIT 1`,
+  );
 
-  for (const recipe of opts.recipes) {
-    // Without a servings count there is no per-serving figure, and an absolute
-    // mass from an unknown yield would quietly distort every median it joins.
-    if (!recipe.servings || recipe.servings <= 0) {
-      skippedNoServings++;
-      continue;
-    }
-    analysed++;
+  const unmatched: Comparison["unmatched"] = [];
 
-    // Pass 1: resolve every line, and total the reference (meat) mass. Every
-    // meat line counts toward the reference, including a food listed twice.
-    const resolved: Array<{
-      rawLine: string; fdcId: number; grams: number; basis: Basis;
-      description: string; isReference: boolean;
-    }> = [];
-    let referenceGrams = 0;
+  // ── Pass 1: resolve every line of every recipe ──────────────────────────
+  const resolved = opts.recipes.map((recipe) => {
+    const parts: ResolvedPart[] = [];
+    let sodiumMg = 0;
 
     for (const rawLine of recipe.ingredientLines) {
       const parsed = parseIngredientLine(rawLine);
@@ -159,87 +173,145 @@ export function compareRecipes(opts: CompareOptions): Comparison {
         continue;
       }
 
-      const category = categoryOf.get(result.fdcId)?.category_id ?? null;
-      const isReference = category !== null && REFERENCE_CATEGORIES.has(category);
-      if (isReference) referenceGrams += result.grams;
+      // USDA nutrient amounts are per 100 g of the food.
+      sodiumMg += ((sodiumOf.get(result.fdcId)?.amount ?? 0) * result.grams) / 100;
 
-      resolved.push({
-        rawLine, fdcId: result.fdcId, grams: result.grams, basis: result.basis,
-        description: result.foodDescription ?? `fdc ${result.fdcId}`, isReference,
+      parts.push({
+        rawLine,
+        fdcId: result.fdcId,
+        grams: result.grams,
+        basis: result.basis,
+        description: result.foodDescription ?? `fdc ${result.fdcId}`,
+        klass: classifyCategory(categoryOf.get(result.fdcId)?.category_id ?? null),
       });
     }
 
-    if (referenceGrams > 0) withReference++;
+    const composition: Composition = {
+      recipeId: recipe.id,
+      parts: parts.map((p) => ({ klass: p.klass, grams: p.grams })),
+    };
+    return { recipe, parts, composition, sodiumMg };
+  });
 
-    // Pass 2: cluster. One line per food per recipe: a recipe listing beef twice
-    // (patty and filling) should not count as two recipes using beef.
+  // ── Pass 2: one anchor for the whole dish ───────────────────────────────
+  const anchor = chooseAnchor(resolved.map((r) => r.composition), opts.anchor);
+  const anchorKlass = anchor.kind === "class" ? anchor.klass : null;
+
+  // ── Pass 3: cluster, stating every amount against the anchor ────────────
+  const clusters = new Map<
+    number,
+    { description: string; klass: FoodClass; sources: SourceAmount[] }
+  >();
+  let withAnchor = 0;
+
+  for (const { recipe, parts, composition } of resolved) {
+    if (anchorKlass === null || classMass(composition, anchorKlass) > 0) withAnchor++;
+
+    // One line per food per recipe: beef listed twice is still one recipe using beef.
     const seen = new Set<number>();
-    for (const r of resolved) {
-      if (seen.has(r.fdcId)) continue;
-      seen.add(r.fdcId);
+    for (const p of parts) {
+      if (seen.has(p.fdcId)) continue;
+      seen.add(p.fdcId);
 
-      const entry = clusters.get(r.fdcId) ?? {
-        description: r.description, isReference: r.isReference, sources: [],
+      const entry = clusters.get(p.fdcId) ?? {
+        description: p.description, klass: p.klass, sources: [],
       };
       entry.sources.push({
         siteName: recipe.provenance.siteName,
         sourceUrl: recipe.provenance.sourceUrl,
-        rawLine: r.rawLine,
-        grams: r.grams,
-        gramsPerServing: round(r.grams / recipe.servings),
-        pctOfReference: referenceGrams > 0 ? round((r.grams / referenceGrams) * 100, 2) : null,
-        basis: r.basis,
+        rawLine: p.rawLine,
+        grams: p.grams,
+        relative: relativeAmount(anchor, composition, p.grams),
+        gramsPerServing:
+          recipe.servings && recipe.servings > 0 ? round(p.grams / recipe.servings) : null,
+        basis: p.basis,
       });
-      clusters.set(r.fdcId, entry);
+      clusters.set(p.fdcId, entry);
     }
   }
 
+  const analysed = resolved.length;
+
   const all: IngredientCluster[] = [...clusters.entries()].map(([fdcId, entry]) => {
-    const grams = entry.sources.map((s) => s.grams);
-    const perServing = entry.sources
-      .map((s) => s.gramsPerServing)
-      .filter((n): n is number => n !== null);
-
-    const medianPerServing = perServing.length > 0 ? round(median(perServing)) : null;
-    const lo = perServing.length > 0 ? Math.min(...perServing) : null;
-    const hi = perServing.length > 0 ? Math.max(...perServing) : null;
-
-    const pct = entry.sources
-      .map((s) => s.pctOfReference)
-      .filter((n): n is number => n !== null);
-    const pLo = pct.length > 0 ? Math.min(...pct) : null;
-    const pHi = pct.length > 0 ? Math.max(...pct) : null;
+    const rel = entry.sources.map((s) => s.relative).filter((n): n is number => n !== null);
+    const per = entry.sources.map((s) => s.gramsPerServing).filter((n): n is number => n !== null);
+    const lo = rel.length > 0 ? Math.min(...rel) : null;
+    const hi = rel.length > 0 ? Math.max(...rel) : null;
 
     return {
       fdcId,
       foodDescription: entry.description,
+      klass: entry.klass,
+      isAnchor: anchorKlass !== null && entry.klass === anchorKlass,
       recipeCount: entry.sources.length,
       frequency: analysed > 0 ? round(entry.sources.length / analysed, 2) : 0,
-      medianGrams: round(median(grams)),
-      minGrams: round(Math.min(...grams)),
-      maxGrams: round(Math.max(...grams)),
-      medianPerServing,
+      medianGrams: round(median(entry.sources.map((s) => s.grams))),
+      medianRelative: rel.length > 0 ? round(median(rel), 2) : null,
       // Guarded against a zero low end, which would make the ratio infinite.
-      spread: lo !== null && hi !== null && lo > 0 ? round(hi / lo, 1) : null,
-      medianPctOfReference: pct.length > 0 ? round(median(pct), 2) : null,
-      spreadPctOfReference: pLo !== null && pHi !== null && pLo > 0 ? round(pHi / pLo, 1) : null,
-      isReference: entry.isReference,
-      sources: entry.sources.sort((a, b) => b.gramsPerServing! - a.gramsPerServing!),
+      spreadRelative: lo !== null && hi !== null && lo > 0 ? round(hi / lo, 1) : null,
+      medianPerServing: per.length > 0 ? round(median(per)) : null,
+      sources: entry.sources.sort((a, b) => (b.relative ?? -1) - (a.relative ?? -1)),
     };
   });
+
+  // ── Per-recipe salinity ─────────────────────────────────────────────────
+  const drafts = resolved.map(({ recipe, parts, composition, sodiumMg }) => {
+    const saltEq = (sodiumMg / 1000) * NA_TO_NACL;
+    const servings = recipe.servings && recipe.servings > 0 ? recipe.servings : null;
+    return {
+      siteName: recipe.provenance.siteName,
+      sourceUrl: recipe.provenance.sourceUrl,
+      servings,
+      resolvedLines: parts.length,
+      totalLines: recipe.ingredientLines.length,
+      anchorGrams: anchorKlass ? round(classMass(composition, anchorKlass)) : null,
+      sodiumMg: Math.round(sodiumMg),
+      saltEquivalentGrams: round(saltEq),
+      salinityRelative: relativeAmount(anchor, composition, saltEq),
+      sodiumMgPerServing: servings ? Math.round(sodiumMg / servings) : null,
+      sodiumDailyValueShare: servings
+        ? round(sodiumMg / servings / SODIUM_DAILY_VALUE_MG, 2)
+        : null,
+    };
+  });
+
+  // The median is taken over trustworthy recipes only, so that one badly
+  // resolved recipe cannot drag the yardstick it will then be judged against.
+  const trusted = drafts.filter(
+    (d) => d.salinityRelative !== null && d.resolvedLines / d.totalLines >= minResolvedShare,
+  );
+  const medianSalinity =
+    trusted.length > 0 ? round(median(trusted.map((d) => d.salinityRelative!)), 2) : null;
+
+  const recipes: RecipeSummary[] = drafts
+    .map((d): RecipeSummary => {
+      let salinityFlag: SalinityFlag = "ok";
+      if (d.salinityRelative === null || d.resolvedLines / d.totalLines < minResolvedShare) {
+        salinityFlag = "unreliable";
+      } else if (medianSalinity && d.salinityRelative > medianSalinity * 2) {
+        salinityFlag = "high";
+      } else if (medianSalinity && d.salinityRelative < medianSalinity * 0.5) {
+        salinityFlag = "low";
+      }
+      return { ...d, salinityFlag };
+    })
+    .sort((a, b) => (b.salinityRelative ?? -1) - (a.salinityRelative ?? -1));
+
+  const byFrequency = (a: IngredientCluster, b: IngredientCluster) =>
+    b.frequency - a.frequency || (b.medianRelative ?? 0) - (a.medianRelative ?? 0);
 
   return {
     dish: opts.recipes[0]?.dish ?? "",
     analysed,
-    skippedNoServings,
-    withReference,
+    anchor,
+    withAnchor,
     commonThreshold,
-    common: all
-      .filter((c) => c.frequency >= commonThreshold)
-      .sort((a, b) => b.frequency - a.frequency || b.medianPerServing! - a.medianPerServing!),
+    common: all.filter((c) => c.frequency >= commonThreshold).sort(byFrequency),
     outliers: all
       .filter((c) => c.recipeCount <= outlierMax)
-      .sort((a, b) => a.recipeCount - b.recipeCount || b.medianPerServing! - a.medianPerServing!),
+      .sort((a, b) => a.recipeCount - b.recipeCount || (b.medianRelative ?? 0) - (a.medianRelative ?? 0)),
+    recipes,
+    medianSalinity,
     unmatched,
   };
 }

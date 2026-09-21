@@ -3,7 +3,7 @@
  * What the corpus agrees and disagrees about, for one dish.
  *
  *   bun scripts/compare-dish.ts meatloaf
- *   bun scripts/compare-dish.ts meatloaf --sources   # who sits where on each
+ *   bun scripts/compare-dish.ts "lentil soup" --sources
  */
 
 import { Database } from "bun:sqlite";
@@ -14,15 +14,17 @@ import type { ExtractedRecipe } from "../src/types/provenance";
 const dish = process.argv[2] ?? "meatloaf";
 const showSources = process.argv.includes("--sources");
 
-const file = Bun.file(`data/recipes/${dish}.json`);
+const slug = dish.toLowerCase().replace(/\s+/g, "-");
+const file = Bun.file(`data/recipes/${slug}.json`);
 if (!(await file.exists())) {
-  console.error(`No recipes at data/recipes/${dish}.json`);
+  console.error(`No recipes at data/recipes/${slug}.json`);
   process.exit(1);
 }
 
 const { recipes } = (await file.json()) as { recipes: ExtractedRecipe[] };
 const db = new Database("usda.db", { readonly: true });
 const cmp = compareRecipes({ recipes, db, aliases: await readAliases() });
+const unit = cmp.anchor.unitLabel;
 
 function table<T>(rows: T[], cols: Array<[string, (r: T) => string, boolean]>) {
   const header = cols.map(([h]) => h);
@@ -35,44 +37,65 @@ function table<T>(rows: T[], cols: Array<[string, (r: T) => string, boolean]>) {
   for (const b of body) console.log(line(b));
 }
 
-console.log(
-  `${dish} · ${cmp.analysed} recipes analysed` +
-    (cmp.skippedNoServings ? ` · ${cmp.skippedNoServings} skipped (no servings)` : ""),
+console.log(`${dish} · ${cmp.analysed} recipes\n`);
+console.log(`ANCHOR  ${unit}`);
+console.log(`        ${cmp.anchor.reason}`);
+console.log(`        present in ${cmp.withAnchor} of ${cmp.analysed} recipes\n`);
+
+table(
+  cmp.anchor.candidates.filter((c) => c.presence > 0),
+  [
+    ["Class", (c) => c.klass, false],
+    ["Present in", (c) => `${Math.round(c.presence * 100)}%`, true],
+    ["Median share", (c) => `${Math.round(c.medianShare * 100)}%`, true],
+    ["Qualifies", (c) => (c.qualifies ? "yes" : "—"), false],
+  ],
 );
 
 console.log(`\n\nCONSENSUS — in ${Math.round(cmp.commonThreshold * 100)}%+ of recipes\n`);
 table(cmp.common, [
-  ["Ingredient (USDA record)", (c) => c.foodDescription.slice(0, 40), false],
+  ["Ingredient (USDA record)", (c) => c.foodDescription.slice(0, 42), false],
   ["In", (c) => `${c.recipeCount}/${cmp.analysed}`, true],
+  [unit, (c) => (c.isAnchor ? "(anchor)" : String(c.medianRelative ?? "—")), true],
+  ["Spread", (c) => (c.isAnchor ? "—" : c.spreadRelative ? `${c.spreadRelative}x` : "—"), true],
   ["g/serving", (c) => String(c.medianPerServing ?? "—"), true],
-  ["Spread", (c) => (c.spread ? `${c.spread}x` : "—"), true],
-  ["% of meat", (c) => (c.isReference ? "(ref)" : String(c.medianPctOfReference ?? "—")), true],
-  ["Spread", (c) => (c.isReference ? "—" : c.spreadPctOfReference ? `${c.spreadPctOfReference}x` : "—"), true],
 ]);
-console.log(`\nReference mass (meat) established in ${cmp.withReference} of ${cmp.analysed} recipes.`);
 
-console.log(`\n\nOUTLIERS — in ${1}–2 recipes only\n`);
-table(cmp.outliers.slice(0, 18), [
-  ["Ingredient (USDA record)", (c) => c.foodDescription.slice(0, 44), false],
+console.log(`\n\nSALINITY — total sodium as salt-equivalent, ${unit}\n`);
+table(cmp.recipes, [
+  ["Source", (r) => r.siteName, false],
+  ["Salt-eq g", (r) => String(r.saltEquivalentGrams), true],
+  [unit, (r) => String(r.salinityRelative ?? "—"), true],
+  ["mg Na/serving", (r) => (r.sodiumMgPerServing ?? "—").toLocaleString(), true],
+  ["% daily", (r) => (r.sodiumDailyValueShare === null ? "—" : `${Math.round(r.sodiumDailyValueShare * 100)}%`), true],
+  ["Resolved", (r) => `${r.resolvedLines}/${r.totalLines}`, true],
+  ["Check", (r) => (r.salinityFlag === "ok" ? "" : r.salinityFlag.toUpperCase()), false],
+]);
+console.log(
+  `\nCorpus median: ${cmp.medianSalinity ?? "—"} ${unit}. ` +
+    `HIGH is over 2x the median, LOW under half, UNRELIABLE means too few lines resolved.` +
+    `\nTotals are lower bounds: an unresolved line contributes no sodium.`,
+);
+
+console.log(`\n\nOUTLIERS — in 1–2 recipes only\n`);
+table(cmp.outliers.slice(0, 14), [
+  ["Ingredient (USDA record)", (c) => c.foodDescription.slice(0, 42), false],
   ["In", (c) => String(c.recipeCount), true],
-  ["g/serving", (c) => String(c.medianPerServing ?? "—"), true],
-  ["Who", (c) => c.sources.map((s) => s.siteName).join(", ").slice(0, 46), false],
+  [unit, (c) => String(c.medianRelative ?? "—"), true],
+  ["Who", (c) => c.sources.map((s) => s.siteName).join(", ").slice(0, 44), false],
 ]);
 
 if (showSources) {
-  console.log("\n\nWHO SITS WHERE, on the most-agreed ingredients\n");
-  for (const c of cmp.common.slice(0, 6)) {
-    console.log(`${c.foodDescription}  — median ${c.medianPerServing} g/serving`);
+  console.log("\n\nWHO SITS WHERE\n");
+  for (const c of cmp.common.filter((x) => !x.isAnchor).slice(0, 6)) {
+    console.log(`${c.foodDescription} — median ${c.medianRelative} ${unit}`);
     for (const s of c.sources) {
-      console.log(
-        `  ${String(s.gramsPerServing).padStart(7)} g  ${s.siteName.padEnd(24)} ${s.rawLine.slice(0, 46)}`,
-      );
+      console.log(`  ${String(s.relative ?? "—").padStart(8)}  ${s.siteName.padEnd(24)} ${s.rawLine.slice(0, 44)}`);
     }
     console.log();
   }
 }
 
 console.log(
-  `\n${cmp.common.length} consensus ingredients · ${cmp.outliers.length} outliers · ` +
-    `${cmp.unmatched.length} lines unmatched`,
+  `\n${cmp.common.length} consensus · ${cmp.outliers.length} outliers · ${cmp.unmatched.length} lines unmatched`,
 );
