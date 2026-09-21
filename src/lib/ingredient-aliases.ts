@@ -77,7 +77,11 @@ export async function readAliases(path = ALIASES_PATH): Promise<AliasTable> {
  * mode this whole module exists to avoid.
  */
 export function resolveAlias(table: AliasTable, name: string): AliasResolution {
-  const n = norm(name);
+  // Parenthetical asides are dropped BEFORE the reject check. "1 tsp salt (or to
+  // taste)" states a real quantity and must resolve; only a bare "salt, to
+  // taste" is quantity-free. Rejecting on any occurrence of the phrase zeroed
+  // the table salt of every recipe that hedged in brackets.
+  const n = norm(name.replace(/\([^)]*\)/g, " "));
 
   for (const r of table.reject) {
     if (n === r || n.includes(r)) return { kind: "reject", matched: r };

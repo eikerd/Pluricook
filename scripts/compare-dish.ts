@@ -42,13 +42,14 @@ console.log(
 
 console.log(`\n\nCONSENSUS — in ${Math.round(cmp.commonThreshold * 100)}%+ of recipes\n`);
 table(cmp.common, [
-  ["Ingredient (USDA record)", (c) => c.foodDescription.slice(0, 44), false],
+  ["Ingredient (USDA record)", (c) => c.foodDescription.slice(0, 40), false],
   ["In", (c) => `${c.recipeCount}/${cmp.analysed}`, true],
   ["g/serving", (c) => String(c.medianPerServing ?? "—"), true],
-  ["Low", (c) => String(Math.min(...c.sources.map((s) => s.gramsPerServing!))), true],
-  ["High", (c) => String(Math.max(...c.sources.map((s) => s.gramsPerServing!))), true],
   ["Spread", (c) => (c.spread ? `${c.spread}x` : "—"), true],
+  ["% of meat", (c) => (c.isReference ? "(ref)" : String(c.medianPctOfReference ?? "—")), true],
+  ["Spread", (c) => (c.isReference ? "—" : c.spreadPctOfReference ? `${c.spreadPctOfReference}x` : "—"), true],
 ]);
+console.log(`\nReference mass (meat) established in ${cmp.withReference} of ${cmp.analysed} recipes.`);
 
 console.log(`\n\nOUTLIERS — in ${1}–2 recipes only\n`);
 table(cmp.outliers.slice(0, 18), [

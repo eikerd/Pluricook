@@ -15,50 +15,130 @@
     "",
     "Add a case whenever a miss is noticed. Never delete one to make a suite pass."
   ],
-
   "cases": [
-    { "line": "1 medium onion, finely chopped", "expect": "onion", "reject": "pork",
-      "found": "Natasha's Kitchen — 'chopped' stems to 'chop' under the Porter tokenizer" },
-    { "line": "2 stalks celery, finely chopped", "expect": "celery", "reject": "pork",
-      "found": "Delish — same stemming collapse" },
-    { "line": "3 cloves garlic, minced", "expect": "garlic", "reject": "spices, cloves",
-      "found": "Serious Eats — the unit word 'cloves' is itself a food" },
-    { "line": "1 cup milk", "expect": "milk", "reject": "crackers",
-      "found": "several — a single short term gives bm25 nothing to rank on" },
-    { "line": "3/4 cup whole milk", "expect": "milk", "reject": "yogurt",
-      "found": "Serious Eats" },
-    { "line": "2 lb ground beef", "expect": "beef", "reject": "corned",
-      "found": "several — 'ground' was wrongly treated as preparation, leaving only 'beef'" },
-    { "line": "1 1/2 lbs lean ground beef", "expect": "beef", "reject": "corned",
-      "found": "The Wholesome Dish" },
-    { "line": "2 large eggs", "expect": "egg", "reject": "bread",
-      "found": "Natasha's Kitchen — matched 'Bread, egg'" },
-    { "line": "1 cup panko bread crumbs", "expect": "crumb", "reject": "coffee cake",
-      "found": "Serious Eats — a first-segment rule sent this to 'Coffee cake, crumb type'" },
-    { "line": "3/4 cup Italian bread crumbs", "expect": "crumb", "reject": "coffee cake",
-      "found": "Spend With Pennies" },
-    { "line": "1/2 cup ketchup", "expect": "ketchup|catsup", "reject": "",
-      "found": "several — USDA files the cup portion under the older spelling" },
-    { "line": "1 tablespoon Worcestershire sauce", "expect": "worcestershire", "reject": "",
-      "found": "several" },
-    { "line": "2 tablespoons brown sugar", "expect": "sugars, brown", "reject": "toaster",
-      "found": "several — 'Toaster pastries, brown-sugar-cinnamon' is a near miss" },
-    { "line": "1 teaspoon kosher salt", "expect": "salt", "reject": "",
-      "found": "Serious Eats" },
-    { "line": "1/2 teaspoon ground black pepper", "expect": "pepper, black", "reject": "bell",
-      "found": "Natasha's Kitchen — matched 'Peppers, bell, red, raw'" },
-    { "line": "1 medium carrot, finely chopped", "expect": "carrot", "reject": "pork",
-      "found": "Serious Eats" },
-    { "line": "1 teaspoon dried oregano", "expect": "oregano", "reject": "",
-      "found": "the density case: leaves 1.0 g/tsp vs ground 1.8 g/tsp" }
+    {
+      "line": "1 medium onion, finely chopped",
+      "expect": "onion",
+      "reject": "pork",
+      "found": "Natasha's Kitchen — 'chopped' stems to 'chop' under the Porter tokenizer"
+    },
+    {
+      "line": "2 stalks celery, finely chopped",
+      "expect": "celery",
+      "reject": "pork",
+      "found": "Delish — same stemming collapse"
+    },
+    {
+      "line": "3 cloves garlic, minced",
+      "expect": "garlic",
+      "reject": "spices, cloves",
+      "found": "Serious Eats — the unit word 'cloves' is itself a food"
+    },
+    {
+      "line": "1 cup milk",
+      "expect": "milk",
+      "reject": "crackers",
+      "found": "several — a single short term gives bm25 nothing to rank on"
+    },
+    {
+      "line": "3/4 cup whole milk",
+      "expect": "milk",
+      "reject": "yogurt",
+      "found": "Serious Eats"
+    },
+    {
+      "line": "2 lb ground beef",
+      "expect": "beef",
+      "reject": "corned",
+      "found": "several — 'ground' was wrongly treated as preparation, leaving only 'beef'"
+    },
+    {
+      "line": "1 1/2 lbs lean ground beef",
+      "expect": "beef",
+      "reject": "corned",
+      "found": "The Wholesome Dish"
+    },
+    {
+      "line": "2 large eggs",
+      "expect": "egg",
+      "reject": "bread",
+      "found": "Natasha's Kitchen — matched 'Bread, egg'"
+    },
+    {
+      "line": "1 cup panko bread crumbs",
+      "expect": "crumb",
+      "reject": "coffee cake",
+      "found": "Serious Eats — a first-segment rule sent this to 'Coffee cake, crumb type'"
+    },
+    {
+      "line": "3/4 cup Italian bread crumbs",
+      "expect": "crumb",
+      "reject": "coffee cake",
+      "found": "Spend With Pennies"
+    },
+    {
+      "line": "1/2 cup ketchup",
+      "expect": "ketchup|catsup",
+      "reject": "",
+      "found": "several — USDA files the cup portion under the older spelling"
+    },
+    {
+      "line": "1 tablespoon Worcestershire sauce",
+      "expect": "worcestershire",
+      "reject": "",
+      "found": "several"
+    },
+    {
+      "line": "2 tablespoons brown sugar",
+      "expect": "sugars, brown",
+      "reject": "toaster",
+      "found": "several — 'Toaster pastries, brown-sugar-cinnamon' is a near miss"
+    },
+    {
+      "line": "1 teaspoon kosher salt",
+      "expect": "salt",
+      "reject": "",
+      "found": "Serious Eats"
+    },
+    {
+      "line": "1/2 teaspoon ground black pepper",
+      "expect": "pepper, black",
+      "reject": "bell",
+      "found": "Natasha's Kitchen — matched 'Peppers, bell, red, raw'"
+    },
+    {
+      "line": "1 medium carrot, finely chopped",
+      "expect": "carrot",
+      "reject": "pork",
+      "found": "Serious Eats"
+    },
+    {
+      "line": "1 teaspoon dried oregano",
+      "expect": "oregano",
+      "reject": "",
+      "found": "the density case: leaves 1.0 g/tsp vs ground 1.8 g/tsp"
+    },
+    {
+      "line": "1 tsp salt (or to taste)",
+      "expect": "salt",
+      "reject": "",
+      "found": "Natasha's Kitchen — a bracketed hedge beside a real quantity was being rejected outright, zeroing her table salt"
+    }
   ],
-
   "rejections": [
-    { "line": "Kosher salt, to taste", "found": "Serious Eats — must not be given a quantity" },
-    { "line": "salt and pepper, to taste", "found": "several" },
-    { "line": "Water, as needed", "found": "McCormick — matched 'Pomegranate juice, bottled' once" }
+    {
+      "line": "Kosher salt, to taste",
+      "found": "Serious Eats — must not be given a quantity"
+    },
+    {
+      "line": "salt and pepper, to taste",
+      "found": "several"
+    },
+    {
+      "line": "Water, as needed",
+      "found": "McCormick — matched 'Pomegranate juice, bottled' once"
+    }
   ],
-
   "coverageFloor": {
     "dish": "meatloaf",
     "minimumPercent": 70,
