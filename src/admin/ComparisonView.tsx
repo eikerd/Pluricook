@@ -1,0 +1,235 @@
+/**
+ * The comparison for one dish: what the recipes agree on, where they part, and
+ * how salty each one is — every amount stated against the dish's anchor.
+ */
+
+import { useEffect, useMemo, useState } from "react";
+import { SortableGrid, type GridColumn } from "./SortableGrid";
+import type { Comparison, IngredientCluster, RecipeSummary, SalinityFlag } from "../lib/compare";
+import type { DishSummary } from "../lib/compare-service";
+
+const WHOLE_RECIPE = "";
+
+const FLAG_BADGE: Record<SalinityFlag, string> = {
+  ok: "badge--go",
+  high: "badge--stop",
+  low: "badge--warn",
+  unreliable: "badge--mute",
+};
+
+/** "detroit-pizza" → "Detroit pizza". */
+const dishName = (slug: string) => {
+  const words = slug.replace(/-/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+
+const number = (n: number | null, dp = 1) =>
+  n === null ? "—" : n.toLocaleString(undefined, { maximumFractionDigits: dp });
+
+function clusterColumns(c: Comparison): GridColumn<IngredientCluster>[] {
+  return [
+    { key: "food", label: "Ingredient", value: (r) => r.foodDescription },
+    { key: "klass", label: "Class", value: (r) => r.klass },
+    {
+      key: "recipes", label: "Recipes", numeric: true,
+      value: (r) => r.recipeCount,
+      render: (r) => `${r.recipeCount} / ${c.analysed}`,
+    },
+    {
+      key: "relative", label: `Median ${c.anchor.unitLabel}`, numeric: true,
+      value: (r) => r.medianRelative,
+      render: (r) => <strong>{number(r.medianRelative, 2)}</strong>,
+    },
+    {
+      key: "spread", label: "Spread", numeric: true,
+      value: (r) => r.spreadRelative,
+      render: (r) => (r.spreadRelative === null ? "—" : `${number(r.spreadRelative)}×`),
+    },
+    {
+      key: "grams", label: "Median g", numeric: true,
+      value: (r) => r.medianGrams,
+      render: (r) => number(r.medianGrams),
+    },
+  ];
+}
+
+function salinityColumns(c: Comparison): GridColumn<RecipeSummary>[] {
+  return [
+    {
+      key: "source", label: "Source",
+      value: (r) => r.siteName,
+      render: (r) =>
+        r.sourceUrl ? (
+          <span className="url"><a href={r.sourceUrl} target="_blank" rel="noreferrer">{r.siteName}</a></span>
+        ) : r.siteName,
+    },
+    {
+      key: "salinity", label: `Salt ${c.anchor.unitLabel}`, numeric: true,
+      value: (r) => r.salinityRelative,
+      render: (r) => <strong>{number(r.salinityRelative, 2)}</strong>,
+    },
+    {
+      key: "flag", label: "Flag",
+      value: (r) => r.salinityFlag,
+      render: (r) => <span className={`badge ${FLAG_BADGE[r.salinityFlag]}`}>{r.salinityFlag}</span>,
+    },
+    {
+      key: "saltGrams", label: "Salt-equivalent g", numeric: true,
+      value: (r) => r.saltEquivalentGrams,
+      render: (r) => number(r.saltEquivalentGrams),
+    },
+    {
+      key: "sodium", label: "Sodium mg", numeric: true,
+      value: (r) => r.sodiumMg,
+      render: (r) => number(r.sodiumMg, 0),
+    },
+    {
+      key: "anchorGrams", label: "Anchor g", numeric: true,
+      value: (r) => r.anchorGrams,
+      render: (r) => number(r.anchorGrams, 0),
+    },
+    {
+      key: "lines", label: "Lines resolved", numeric: true,
+      value: (r) => (r.totalLines === 0 ? null : r.resolvedLines / r.totalLines),
+      render: (r) => `${r.resolvedLines} / ${r.totalLines}`,
+    },
+    {
+      key: "perServing", label: "Sodium mg / serving", numeric: true,
+      value: (r) => r.sodiumMgPerServing,
+      render: (r) => number(r.sodiumMgPerServing, 0),
+    },
+    {
+      key: "dailyValue", label: "Daily value %", numeric: true,
+      value: (r) => r.sodiumDailyValueShare,
+      render: (r) => (r.sodiumDailyValueShare === null ? "—" : number(r.sodiumDailyValueShare * 100, 0)),
+    },
+  ];
+}
+
+export function ComparisonView() {
+  const [dishes, setDishes] = useState<DishSummary[] | null>(null);
+  const [dish, setDish] = useState<string | null>(null);
+  const [section, setSection] = useState(WHOLE_RECIPE);
+  const [comparison, setComparison] = useState<Comparison | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/dishes")
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const list = (await r.json()) as DishSummary[];
+        setDishes(list);
+        setDish((current) => current ?? list[0]?.dish ?? null);
+      })
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not list dishes"));
+  }, []);
+
+  useEffect(() => {
+    if (!dish) return;
+    let stale = false;
+    const query = section === WHOLE_RECIPE ? "" : `?section=${encodeURIComponent(section)}`;
+
+    fetch(`/api/admin/compare/${dish}${query}`)
+      .then(async (r) => {
+        const body = (await r.json()) as Comparison | { error: string };
+        if (!r.ok) throw new Error("error" in body ? body.error : `HTTP ${r.status}`);
+        if (!stale) { setComparison(body as Comparison); setError(null); }
+      })
+      .catch((e: unknown) => {
+        if (!stale) setError(e instanceof Error ? e.message : "Comparison failed");
+      });
+
+    // A slow answer for the previous dish must not overwrite the current one.
+    return () => { stale = true; };
+  }, [dish, section]);
+
+  const sections = useMemo(
+    () => dishes?.find((d) => d.dish === dish)?.sections ?? [],
+    [dishes, dish],
+  );
+
+  const pickDish = (next: string) => {
+    setDish(next);
+    setSection(WHOLE_RECIPE);   // sections belong to a dish; "sauce" means nothing for meatloaf
+    setComparison(null);
+  };
+
+  if (error) {
+    return (
+      <div className="pane">
+        <header className="pane__head"><div><h2>Something broke</h2></div></header>
+        <p className="failure">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pane">
+      <header className="pane__head">
+        <div>
+          <h2>Comparison</h2>
+        </div>
+        <div className="pickers">
+          <select
+            className="picker"
+            aria-label="Dish"
+            value={dish ?? ""}
+            onChange={(e) => pickDish(e.target.value)}
+          >
+            {(dishes ?? []).map((d) => (
+              <option key={d.dish} value={d.dish}>{dishName(d.dish)}</option>
+            ))}
+          </select>
+
+          {sections.length > 0 && (
+            <select
+              className="picker"
+              aria-label="Section"
+              value={section}
+              onChange={(e) => setSection(e.target.value)}
+            >
+              <option value={WHOLE_RECIPE}>Whole recipe</option>
+              {sections.map((s) => (
+                <option key={s} value={s}>{dishName(s)}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      </header>
+
+      {!comparison ? (
+        <p className="muted">Loading…</p>
+      ) : comparison.analysed === 0 ? (
+        <p className="empty">No recipes to compare.</p>
+      ) : (
+        // Keyed by dish and section so each grid starts from its default sort
+        // when the question changes, rather than carrying over the last one.
+        <div key={`${comparison.dish}:${comparison.section ?? ""}`}>
+          <h3 className="pane__sub">Consensus</h3>
+          <SortableGrid
+            columns={clusterColumns(comparison)}
+            rows={comparison.common}
+            rowKey={(r) => String(r.fdcId)}
+            initialSort={{ key: "recipes", dir: "desc" }}
+          />
+
+          <h3 className="pane__sub">Salinity</h3>
+          <SortableGrid
+            columns={salinityColumns(comparison)}
+            rows={comparison.recipes}
+            rowKey={(r) => `${r.siteName}:${r.sourceUrl ?? ""}`}
+            initialSort={{ key: "salinity", dir: "desc" }}
+          />
+
+          <h3 className="pane__sub">Outliers</h3>
+          <SortableGrid
+            columns={clusterColumns(comparison)}
+            rows={comparison.outliers}
+            rowKey={(r) => String(r.fdcId)}
+            initialSort={{ key: "recipes", dir: "desc" }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}

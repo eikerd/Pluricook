@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { ComparisonView } from "./ComparisonView";
 import { DataTable } from "./DataTable";
 import "../admin.css";
 
@@ -125,6 +126,12 @@ export function AdminApp() {
                 {d.label}
               </button>
             ))}
+          <button
+            className={`rail__item ${active === "comparison" ? "is-active" : ""}`}
+            onClick={() => setActive("comparison")}
+          >
+            Comparison
+          </button>
         </nav>
 
         <p className="rail__foot">
@@ -136,6 +143,8 @@ export function AdminApp() {
       <main className="main">
         {active === "overview" ? (
           <Overview />
+        ) : active === "comparison" ? (
+          <ComparisonView />
         ) : (
           <DataTable datasetId={active} searchable={current?.searchable ?? false} />
         )}

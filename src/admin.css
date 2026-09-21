@@ -167,6 +167,39 @@ h1, h2, h3, .brand__name {
   outline-offset: -1px;
 }
 
+/* ── Comparison ──────────────────────────────────────────── */
+
+.pickers { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+.picker {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--cream-line);
+  border-radius: 3px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.picker:focus {
+  outline: 2px solid var(--saffron);
+  outline-offset: -1px;
+}
+
+.pane__sub {
+  margin: 1.75rem 0 0;
+  font-size: 1.1rem;
+  color: var(--espresso-soft);
+}
+
+/* Several grids share this page, so each takes its own height instead of
+   stretching to fill the pane as a lone DataTable does. */
+.grid-wrap--fit { flex: none; margin-top: 0.6rem; }
+
+.grid thead th:focus-visible {
+  outline: 2px solid var(--saffron);
+  outline-offset: -2px;
+}
+
 /* ── Overview tiles ──────────────────────────────────────── */
 
 .tiles {
