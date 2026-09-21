@@ -5,7 +5,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { SortableGrid, type GridColumn } from "./SortableGrid";
-import type { Comparison, IngredientCluster, RecipeSummary, SalinityFlag } from "../lib/compare";
+import type {
+  Comparison, IngredientCluster, RecipeSummary, SalinityFlag, SourceAmount,
+} from "../lib/compare";
 import type { DishSummary } from "../lib/compare-service";
 
 const WHOLE_RECIPE = "";
@@ -53,15 +55,61 @@ function clusterColumns(c: Comparison): GridColumn<IngredientCluster>[] {
   ];
 }
 
+type Unmatched = Comparison["unmatched"][number];
+
+/**
+ * Only a web address becomes a link. assertProvenance already refuses anything
+ * else at capture, but personal collections are JSON edited by hand, and an
+ * href is the one place a "javascript:" string would run.
+ */
+function webUrl(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    return ["http:", "https:"].includes(new URL(url).protocol) ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+function sourceLink(siteName: string, sourceUrl: string | null) {
+  const href = webUrl(sourceUrl);
+  if (!href) return siteName;
+  return (
+    <span className="url"><a href={href} target="_blank" rel="noopener noreferrer">{siteName}</a></span>
+  );
+}
+
+/** One ingredient, opened: each site's line as published, and what it came to. */
+function sourceColumns(c: Comparison): GridColumn<SourceAmount>[] {
+  return [
+    { key: "source", label: "Source", value: (r) => r.siteName, render: (r) => sourceLink(r.siteName, r.sourceUrl) },
+    { key: "line", label: "As published", value: (r) => r.rawLine },
+    {
+      key: "grams", label: "Grams", numeric: true,
+      value: (r) => r.grams,
+      render: (r) => <strong>{number(r.grams)}</strong>,
+    },
+    {
+      key: "relative", label: c.anchor.unitLabel, numeric: true,
+      value: (r) => r.relative,
+      render: (r) => number(r.relative, 2),
+    },
+    { key: "basis", label: "Converted by", value: (r) => r.basis },
+  ];
+}
+
+const UNMATCHED_COLUMNS: GridColumn<Unmatched>[] = [
+  { key: "source", label: "Source", value: (r) => r.siteName },
+  { key: "line", label: "As published", value: (r) => r.rawLine },
+  { key: "basis", label: "Reason", value: (r) => r.basis },
+];
+
 function salinityColumns(c: Comparison): GridColumn<RecipeSummary>[] {
   return [
     {
       key: "source", label: "Source",
       value: (r) => r.siteName,
-      render: (r) =>
-        r.sourceUrl ? (
-          <span className="url"><a href={r.sourceUrl} target="_blank" rel="noreferrer">{r.siteName}</a></span>
-        ) : r.siteName,
+      render: (r) => sourceLink(r.siteName, r.sourceUrl),
     },
     {
       key: "salinity", label: `Salt ${c.anchor.unitLabel}`, numeric: true,
@@ -168,6 +216,9 @@ export function ComparisonView() {
       <header className="pane__head">
         <div>
           <h2>Comparison</h2>
+          {comparison && comparison.analysed > 0 && (
+            <p className="muted pane__note">{comparison.anchor.reason}</p>
+          )}
         </div>
         <div className="pickers">
           <select
@@ -211,6 +262,14 @@ export function ComparisonView() {
             rows={comparison.common}
             rowKey={(r) => String(r.fdcId)}
             initialSort={{ key: "recipes", dir: "desc" }}
+            detail={(cluster) => (
+              <SortableGrid
+                columns={sourceColumns(comparison)}
+                rows={cluster.sources}
+                rowKey={(r) => `${r.siteName}:${r.rawLine}`}
+                initialSort={{ key: "relative", dir: "desc" }}
+              />
+            )}
           />
 
           <h3 className="pane__sub">Salinity</h3>
@@ -227,7 +286,27 @@ export function ComparisonView() {
             rows={comparison.outliers}
             rowKey={(r) => String(r.fdcId)}
             initialSort={{ key: "recipes", dir: "desc" }}
+            detail={(cluster) => (
+              <SortableGrid
+                columns={sourceColumns(comparison)}
+                rows={cluster.sources}
+                rowKey={(r) => `${r.siteName}:${r.rawLine}`}
+                initialSort={{ key: "relative", dir: "desc" }}
+              />
+            )}
           />
+
+          {comparison.unmatched.length > 0 && (
+            <>
+              <h3 className="pane__sub">Unmatched lines</h3>
+              <SortableGrid
+                columns={UNMATCHED_COLUMNS}
+                rows={comparison.unmatched}
+                rowKey={(r) => `${r.siteName}:${r.rawLine}`}
+                initialSort={{ key: "source", dir: "asc" }}
+              />
+            </>
+          )}
         </div>
       )}
     </div>

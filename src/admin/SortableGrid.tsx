@@ -7,7 +7,7 @@
  * component.
  */
 
-import { useMemo, useState, type ReactNode } from "react";
+import { Fragment, useMemo, useState, type ReactNode } from "react";
 
 export type SortValue = string | number | null;
 export type SortDir = "asc" | "desc";
@@ -27,6 +27,11 @@ interface SortableGridProps<T> {
   rows: T[];
   rowKey: (row: T) => string;
   initialSort: { key: string; dir: SortDir };
+  /**
+   * What a row opens to show. When given, the first cell carries a toggle.
+   * Open rows are remembered by key, so they stay open through a re-sort.
+   */
+  detail?: (row: T) => ReactNode;
 }
 
 /** Nulls sink to the bottom in both directions: "no value" is never the top answer. */
@@ -41,8 +46,16 @@ function compare(a: SortValue, b: SortValue, dir: SortDir): number {
   return dir === "asc" ? order : -order;
 }
 
-export function SortableGrid<T>({ columns, rows, rowKey, initialSort }: SortableGridProps<T>) {
+export function SortableGrid<T>({ columns, rows, rowKey, initialSort, detail }: SortableGridProps<T>) {
   const [sort, setSort] = useState(initialSort);
+  const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
+
+  const toggleOpen = (key: string) =>
+    setOpen((current) => {
+      const next = new Set(current);
+      if (!next.delete(key)) next.add(key);
+      return next;
+    });
 
   const sorted = useMemo(() => {
     const column = columns.find((c) => c.key === sort.key);
@@ -82,15 +95,38 @@ export function SortableGrid<T>({ columns, rows, rowKey, initialSort }: Sortable
           </tr>
         </thead>
         <tbody>
-          {sorted.map((row) => (
-            <tr key={rowKey(row)}>
-              {columns.map((c) => (
-                <td key={c.key} className={c.numeric ? "num" : ""}>
-                  {c.render ? c.render(row) : (c.value(row) ?? "—")}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {sorted.map((row) => {
+            const key = rowKey(row);
+            const isOpen = open.has(key);
+            return (
+              <Fragment key={key}>
+                <tr className={isOpen ? "is-open" : undefined}>
+                  {columns.map((c, i) => {
+                    const content = c.render ? c.render(row) : (c.value(row) ?? "—");
+                    return (
+                      <td key={c.key} className={c.numeric ? "num" : ""}>
+                        {detail && i === 0 ? (
+                          <button
+                            className="grid__toggle"
+                            aria-expanded={isOpen}
+                            onClick={() => toggleOpen(key)}
+                          >
+                            <span className="grid__chevron" aria-hidden="true">{isOpen ? "▾" : "▸"}</span>
+                            {content}
+                          </button>
+                        ) : content}
+                      </td>
+                    );
+                  })}
+                </tr>
+                {detail && isOpen && (
+                  <tr className="grid__detail">
+                    <td colSpan={columns.length}>{detail(row)}</td>
+                  </tr>
+                )}
+              </Fragment>
+            );
+          })}
         </tbody>
       </table>
     </div>

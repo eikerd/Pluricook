@@ -195,6 +195,38 @@ h1, h2, h3, .brand__name {
    stretching to fill the pane as a lone DataTable does. */
 .grid-wrap--fit { flex: none; margin-top: 0.6rem; }
 
+.pane__note { margin: 0.3rem 0 0; font-size: 0.9rem; }
+
+/* A row that opens. The toggle is a button so it is reachable by keyboard. */
+.grid__toggle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.grid__toggle:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+
+.grid__chevron { width: 0.7em; color: var(--paprika); }
+
+.grid tbody tr.is-open { background: var(--parchment-warm); }
+
+.grid tbody tr.grid__detail,
+.grid tbody tr.grid__detail:hover { background: var(--parchment); }
+
+.grid tbody tr.grid__detail > td { padding: 0.6rem 0.9rem 0.9rem 1.9rem; }
+
+.grid__detail .grid-wrap--fit { margin-top: 0; }
+
+/* Headers inside an opened row scroll with it rather than pinning to the pane. */
+.grid__detail .grid thead th { position: static; }
+
 .grid thead th:focus-visible {
   outline: 2px solid var(--saffron);
   outline-offset: -2px;
@@ -314,9 +346,11 @@ h1, h2, h3, .brand__name {
 
 .grid td.num { text-align: right; }
 
-.grid td.url a { color: var(--plum); text-decoration: none; }
+.grid td.url a,
+.grid .url a { color: var(--plum); text-decoration: none; }
 
-.grid td.url a:hover { text-decoration: underline; }
+.grid td.url a:hover,
+.grid .url a:hover { text-decoration: underline; }
 
 /* ── Badges ──────────────────────────────────────────────── */
 
