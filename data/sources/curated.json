@@ -17,35 +17,38 @@
     "  licensed       \u2014 we hold a licence or API agreement; terms recorded in `licence`",
     "  link-only      \u2014 store our own facts and link out; store no expression from the page",
     "  none           \u2014 take nothing",
-    "  pending-review \u2014 starred but not yet legally reviewed; treated as `none` until it is"
+    "  pending-review \u2014 starred but not yet legally reviewed; treated as `none` until it is",
+    "",
+    "Notes below record what was read on the sites themselves on 2026-09-20.",
+    "They are a research summary, not legal advice."
   ],
   "sites": {
     "allrecipes.com": {
       "displayName": "Allrecipes",
       "tier": "blocked",
       "acquisition": "none",
-      "note": "People Inc. robots.txt prohibits scraping except to direct traffic, and names TDM, LLM/RAG use and dataset creation as prohibited. Licensing contact: contentlicensing@people.inc",
+      "note": "People Inc. robots.txt prohibits scraping except to direct traffic, and names TDM, LLM/RAG use and dataset creation as prohibited. Licensing contact: contentlicensing@people.inc Licensable via People Inc Content Licensing.",
       "licence": null
     },
     "americastestkitchen.com": {
       "displayName": "America's Test Kitchen",
       "tier": "required",
-      "acquisition": "pending-review",
-      "note": "Owner-starred 2026-09-20. Subscription-gated: content behind a paid account means clickwrap terms and a contract layer that is independent of copyright. Review before any account is created for collection purposes.",
+      "acquisition": "none",
+      "note": "Owner-starred 2026-09-20; reviewed same day, set to none pending a decision. Metered paywall, not a hard one: ingredients and numbered instructions are served to an anonymous fetcher within the meter, so the barrier is contractual and rate-based, not cryptographic. robots.txt carries NO legal comment block and does not disallow /recipes for generic crawlers, but does Disallow: / for anthropic-ai, ClaudeBot, Claude-Web, GPTBot, CCBot, PerplexityBot and others. Terms of Use (19 Aug 2026) contain NO scraping, AI-training, competing-product or republication clause - only the section 9 catch-all, 'Use of any of the materials for any purpose not expressly permitted in these Terms of Use is prohibited', over a licence limited to 'content and materials for which you have subscribed and paid for'. Quieter terms are not consent: a narrow grant plus paid access turns this from a copyright question into a contract one. No content-licensing or developer programme exists; majority owner is Marquee Brands (Feb 2023), a brand licensor. Only published contact: cooks@americastestkitchen.com. No recipe-copying litigation found, but that is weak evidence - Lumen's takedown corpus is CAPTCHA-gated and was not queried.",
       "licence": null
     },
     "seriouseats.com": {
       "displayName": "Serious Eats",
       "tier": "required",
-      "acquisition": "pending-review",
-      "note": "Owner-starred 2026-09-20. Believed to be People Inc, the publisher family whose robots.txt prohibits dataset creation and RAG \u2014 needs its own robots.txt and terms checked directly before anything is fetched.",
+      "acquisition": "none",
+      "note": "Owner-starred 2026-09-20; reviewed same day. A People Inc brand since September 2020 (People Inc = Dotdash Meredith, renamed July 2025), governed by the People Inc Terms of Service. Scraping is prohibited by CONTRACT, not by robots.txt: `User-agent: *` disallows only /embed? and /cdn-cgi/, so recipe URLs are not robots-disallowed for a generic crawler. But ToS 3.3(e) bars spiders, scrapers and crawlers (public search engines excepted, 'but not caches or archives'); 3.3(f) bars using the data to train ML or AI; 3.3(g) bars accessing the Services 'to build a similar or competitive website, application, or service'; 3.3(h) bars republication; 3.3(m) says any unauthorised use immediately terminates the licence. New York law, SDNY forum. ClaudeBot, Claude-User, Claude-Web, anthropic-ai and FirecrawlAgent all get Disallow: / . IMPORTANT: these recipes are commercially LICENSABLE from the same company. People Inc Content Licensing advertises a recipe API with 'complete data, including method and images', 'Caching Permitted', and broad multi-channel usage rights. Pricing not published. Licensing is the intended route here, not scraping: contentlicensing@people.inc (permissions: CLPermissions@people.inc).",
       "licence": null
     },
     "simplyrecipes.com": {
       "displayName": "Simply Recipes",
       "tier": "blocked",
       "acquisition": "none",
-      "note": "Identical People Inc. language to allrecipes.com.",
+      "note": "Identical People Inc. language to allrecipes.com. Licensable via People Inc Content Licensing.",
       "licence": null
     }
   }
