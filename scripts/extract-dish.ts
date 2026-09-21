@@ -14,7 +14,8 @@
 import { Glob } from "bun";
 import { curationFor, mayFetch, readCurated } from "../src/lib/curated-sources";
 import { extractRecipe, type ExtractFailure } from "../src/lib/recipe-extract";
-import { canonicalHost } from "../src/lib/site-registry";
+import { mergeRecipes } from "../src/lib/recipe-merge";
+import { canonicalHost, canonicalUrl } from "../src/lib/site-registry";
 import type { ExtractedRecipe } from "../src/types/provenance";
 
 const UA =
@@ -37,14 +38,22 @@ interface Appearance {
 }
 
 // Gather this dish's recipe results from every observation file that has them.
-const targets: Appearance[] = [];
+// Keyed by canonical URL: once a dish has been searched twice the same page
+// appears in both files, and fetching it twice would count that source twice in
+// every consensus frequency and in the choice of anchor.
+const byUrl = new Map<string, Appearance>();
 for await (const path of new Glob("data/observations/*.json").scan(".")) {
   const obs = await Bun.file(path).json();
   if (obs.query !== dish) continue;
   for (const a of obs.appearances as Appearance[]) {
-    if (a.kind === "recipe") targets.push(a);
+    if (a.kind !== "recipe") continue;
+    const key = canonicalUrl(a.url);
+    const held = byUrl.get(key);
+    // Keep the best rank the page has reached.
+    if (!held || a.rank < held.rank) byUrl.set(key, a);
   }
 }
+const targets = [...byUrl.values()];
 
 if (targets.length === 0) {
   console.error(`No recipe results recorded for "${dish}" in data/observations/.`);
@@ -160,10 +169,30 @@ console.log(
     `${count("failed")} no usable data · ${count("error")} unreachable`,
 );
 
+// A refresh merges into what is held; it never replaces it. Writing only this
+// run's output would delete every hand-entered recipe, and would drop any recipe
+// whose site happened to be unreachable today.
+const out = `data/recipes/${dish}.json`;
+const existing: ExtractedRecipe[] = (await Bun.file(out).exists())
+  ? ((await Bun.file(out).json()) as { recipes: ExtractedRecipe[] }).recipes ?? []
+  : [];
+const merged = mergeRecipes(existing, recipes);
+
+console.log(
+  `\nCorpus: ${merged.recipes.length} recipes — ${merged.added} new, ` +
+    `${merged.refreshed} refreshed, ${merged.kept} kept untouched` +
+    (merged.keptManual ? ` (${merged.keptManual} hand-entered)` : ""),
+);
+
 if (dryRun) {
-  console.log("\n--dry-run: nothing written.");
-} else if (recipes.length > 0) {
-  const out = `data/recipes/${dish}.json`;
-  await Bun.write(out, JSON.stringify({ dish, extractedAt: new Date().toISOString().slice(0, 10), recipes }, null, 2) + "\n");
-  console.log(`\nWrote ${recipes.length} recipes → ${out}`);
+  console.log("--dry-run: nothing written.");
+} else if (merged.recipes.length > 0) {
+  await Bun.write(
+    out,
+    JSON.stringify(
+      { dish, extractedAt: new Date().toISOString().slice(0, 10), recipes: merged.recipes },
+      null, 2,
+    ) + "\n",
+  );
+  console.log(`→ ${out}`);
 }

@@ -36,6 +36,23 @@ export function canonicalHost(url: string): string {
   return raw.toLowerCase().replace(/^www\./, "");
 }
 
+/**
+ * Canonical form of a page URL, for telling whether two results are one page.
+ *
+ * The same recipe turns up across observation files with and without "www.",
+ * a trailing slash, or tracking parameters. Left alone, each spelling would be
+ * fetched and counted as its own recipe.
+ */
+export function canonicalUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    const path = u.pathname.replace(/\/+$/, "");
+    return `${canonicalHost(url)}${path}`.toLowerCase();
+  } catch {
+    return url.trim().toLowerCase();
+  }
+}
+
 /** Readable site name from a host, used until a better one is supplied. */
 function defaultDisplayName(host: string): string {
   return host.replace(/\.(com|net|org|co|recipes|kitchen)(\.[a-z]{2})?$/, "");
@@ -93,6 +110,16 @@ const SCHEMA = /* sql */ `
     note             TEXT,
     attempted_at     TEXT NOT NULL
   );
+
+  -- Importing an observation twice must not double its fetch log. The table
+  -- predates this constraint, so duplicates already present are collapsed
+  -- first; otherwise creating the unique index would fail on an existing file.
+  DELETE FROM fetch_attempts WHERE id NOT IN (
+    SELECT MIN(id) FROM fetch_attempts
+    GROUP BY url, fetcher, status, outcome, attempted_at
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_attempts_unique
+    ON fetch_attempts(url, fetcher, status, outcome, attempted_at);
 
   CREATE INDEX IF NOT EXISTS idx_appearances_host ON search_appearances(host);
   CREATE INDEX IF NOT EXISTS idx_appearances_query ON search_appearances(query);
@@ -153,8 +180,11 @@ export function recordFetchAttempt(
 ): void {
   const host = f.host ?? canonicalHost(f.url);
   touchSite(db, host, f.attemptedAt);
+  // OR IGNORE against idx_attempts_unique: the same attempt recorded twice is one
+  // attempt. Observation files carry day-granular dates, so two identical
+  // outcomes for one URL on one day collapse — which is what a re-import is.
   db.query(
-    `INSERT INTO fetch_attempts (
+    `INSERT OR IGNORE INTO fetch_attempts (
        host, url, fetcher, status, outcome, cdn, body_bytes, elapsed_ms,
        json_ld, ingredient_count, step_count, yield_raw, total_time_raw,
        note, attempted_at
@@ -262,13 +292,17 @@ export function siteStats(db: Database): SiteStats[] {
      FROM fetch_attempts GROUP BY host, outcome, fetcher`,
   ).all();
 
-  // A "rescue" is a host that a raw fetcher failed on and a managed one cleared.
+  // A "rescue" is a host a raw fetcher was BLOCKED on and a managed one cleared.
+  // A refusal is deliberately excluded: it is a policy decision that must not be
+  // retried, so a later success there is not a rescue, it is a violation of the
+  // FetchOutcome contract — and counting it would overstate what managed
+  // fetching is worth.
   const rescues = db.query<{ host: string; n: number }, []>(
     `SELECT host, COUNT(*) AS n FROM fetch_attempts a
      WHERE a.fetcher = 'managed' AND a.outcome = 'ok'
        AND EXISTS (SELECT 1 FROM fetch_attempts b
                    WHERE b.host = a.host AND b.fetcher = 'raw'
-                     AND b.outcome IN ('blocked', 'refused'))
+                     AND b.outcome = 'blocked')
      GROUP BY host`,
   ).all();
 

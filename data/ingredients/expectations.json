@@ -198,6 +198,30 @@
       "grams": 80,
       "tolerance": 2,
       "found": "no size stated, so medium stalk: 40 g each"
+    },
+    {
+      "line": "1 teaspoon ground oregano",
+      "grams": 1.8,
+      "tolerance": 0.05,
+      "found": "THE condition case. USDA: 1 tsp ground = 1.8 g. Review found the raw parser never sets preparation, so this was converting as leaves everywhere outside one hand-fed test."
+    },
+    {
+      "line": "1 teaspoon dried oregano leaves",
+      "grams": 1.0,
+      "tolerance": 0.05,
+      "found": "USDA: 1 tsp leaves = 1.0 g"
+    },
+    {
+      "line": "1 cup chopped onion",
+      "grams": 160,
+      "tolerance": 2,
+      "found": "USDA: 1 cup, chopped = 160 g"
+    },
+    {
+      "line": "1 cup sliced onion",
+      "grams": 115,
+      "tolerance": 2,
+      "found": "USDA: 1 cup, sliced = 115 g"
     }
   ]
 }

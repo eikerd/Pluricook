@@ -207,23 +207,34 @@ export function compareRecipes(opts: CompareOptions): Comparison {
   for (const { recipe, parts, composition } of resolved) {
     if (anchorKlass === null || classMass(composition, anchorKlass) > 0) withAnchor++;
 
-    // One line per food per recipe: beef listed twice is still one recipe using beef.
-    const seen = new Set<number>();
+    // One SOURCE per food per recipe, so frequency counts recipes, not lines —
+    // but its amount is the SUM of every line. Natasha's Kitchen lists ketchup
+    // twice (2 Tbsp in the loaf, 3/4 cup in the glaze); keeping only the first
+    // understated her ketchup sixfold while the anchor mass still counted both.
+    const combined = new Map<number, ResolvedPart & { lines: string[] }>();
     for (const p of parts) {
-      if (seen.has(p.fdcId)) continue;
-      seen.add(p.fdcId);
+      const prior = combined.get(p.fdcId);
+      if (prior) {
+        prior.grams += p.grams;
+        prior.lines.push(p.rawLine);
+      } else {
+        combined.set(p.fdcId, { ...p, lines: [p.rawLine] });
+      }
+    }
 
+    for (const p of combined.values()) {
       const entry = clusters.get(p.fdcId) ?? {
         description: p.description, klass: p.klass, sources: [],
       };
+      const grams = round(p.grams);
       entry.sources.push({
         siteName: recipe.provenance.siteName,
         sourceUrl: recipe.provenance.sourceUrl,
-        rawLine: p.rawLine,
-        grams: p.grams,
-        relative: relativeAmount(anchor, composition, p.grams),
+        rawLine: p.lines.join("  +  "),
+        grams,
+        relative: relativeAmount(anchor, composition, grams),
         gramsPerServing:
-          recipe.servings && recipe.servings > 0 ? round(p.grams / recipe.servings) : null,
+          recipe.servings && recipe.servings > 0 ? round(grams / recipe.servings) : null,
         basis: p.basis,
       });
       clusters.set(p.fdcId, entry);

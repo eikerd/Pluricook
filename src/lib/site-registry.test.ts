@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  canonicalUrl,
   canonicalHost,
   deriveStance,
   openRegistry,
@@ -120,10 +121,11 @@ describe("fetch statistics", () => {
       bodyBytes: null, elapsedMs: null, ingredientCount: null, stepCount: null,
       yieldRaw: null, totalTimeRaw: null, note: null, attemptedAt: AT,
     };
-    // Two ok (one with JSON-LD), one blocked.
-    recordFetchAttempt(db, { ...base, status: 200, outcome: "ok", jsonLd: true });
-    recordFetchAttempt(db, { ...base, status: 200, outcome: "ok", jsonLd: false });
-    recordFetchAttempt(db, { ...base, status: 403, outcome: "blocked", jsonLd: false });
+    // Two ok (one with JSON-LD), one blocked — three different pages, since two
+    // attempts identical in every keyed field are now, correctly, one attempt.
+    recordFetchAttempt(db, { ...base, url: "https://example.com/a/", status: 200, outcome: "ok", jsonLd: true });
+    recordFetchAttempt(db, { ...base, url: "https://example.com/b/", status: 200, outcome: "ok", jsonLd: false });
+    recordFetchAttempt(db, { ...base, url: "https://example.com/c/", status: 403, outcome: "blocked", jsonLd: false });
 
     const [row] = siteStats(db);
     expect(row!.fetches).toBe(3);
@@ -229,5 +231,71 @@ describe("trusted sites", () => {
     });
 
     expect(siteStats(db)[0]!.trusted).toBe(true);
+  });
+});
+
+describe("canonicalUrl", () => {
+  test("collapses the spellings one page turns up under", () => {
+    const forms = [
+      "https://www.delish.com/cooking/meatloaf/",
+      "https://delish.com/cooking/meatloaf",
+      "https://DELISH.com/cooking/meatloaf?utm_source=pinterest",
+      "https://www.delish.com/cooking/meatloaf/#recipe",
+    ];
+    expect(new Set(forms.map(canonicalUrl)).size).toBe(1);
+  });
+
+  test("keeps genuinely different pages apart", () => {
+    expect(canonicalUrl("https://delish.com/a")).not.toBe(canonicalUrl("https://delish.com/b"));
+  });
+});
+
+describe("import idempotence", () => {
+  test("recording the same fetch attempt twice counts it once", () => {
+    // The importer is documented as safe to re-run. It was not: a second import
+    // took the log from 18 rows to 36 and inflated every rate built on it.
+    const db = freshDb();
+    const attempt = {
+      url: "https://www.budgetbytes.com/meatloaf/", fetcher: "raw" as const, status: 403,
+      outcome: "blocked" as const, cdn: "Cloudflare", bodyBytes: 6144, elapsedMs: 57,
+      jsonLd: false, ingredientCount: null, stepCount: null, yieldRaw: null,
+      totalTimeRaw: null, note: null, attemptedAt: AT,
+    };
+    recordFetchAttempt(db, attempt);
+    recordFetchAttempt(db, attempt);
+
+    const [row] = siteStats(db);
+    expect(row!.fetches).toBe(1);
+    expect(row!.blocked).toBe(1);
+  });
+
+  test("a different outcome for the same page is still a separate attempt", () => {
+    const db = freshDb();
+    const base = {
+      url: "https://preppykitchen.com/meatloaf/", cdn: null, bodyBytes: null, elapsedMs: null,
+      ingredientCount: null, stepCount: null, yieldRaw: null, totalTimeRaw: null,
+      note: null, attemptedAt: AT,
+    };
+    recordFetchAttempt(db, { ...base, fetcher: "raw", status: 403, outcome: "blocked", jsonLd: false });
+    recordFetchAttempt(db, { ...base, fetcher: "managed", status: 200, outcome: "ok", jsonLd: true });
+    expect(siteStats(db)[0]!.fetches).toBe(2);
+  });
+});
+
+describe("managed rescues exclude policy refusals", () => {
+  test("a managed success after a raw REFUSAL is not a rescue", () => {
+    // A refusal is a policy decision that must not be retried. If the data ever
+    // holds a later success there, that is a contract violation to notice, not
+    // a win for managed fetching to be credited with.
+    const db = freshDb();
+    const base = {
+      url: "https://www.allrecipes.com/recipe/1/", cdn: null, bodyBytes: null, elapsedMs: null,
+      ingredientCount: null, stepCount: null, yieldRaw: null, totalTimeRaw: null,
+      note: null, attemptedAt: AT,
+    };
+    recordFetchAttempt(db, { ...base, fetcher: "raw", status: 403, outcome: "refused", jsonLd: false });
+    recordFetchAttempt(db, { ...base, fetcher: "managed", status: 200, outcome: "ok", jsonLd: true });
+
+    expect(siteStats(db)[0]!.managedRescues).toBe(0);
   });
 });

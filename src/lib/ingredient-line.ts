@@ -52,6 +52,33 @@ export function singular(word: string): string {
   return w;
 }
 
+/**
+ * Words that change how much of a food fits in a measure.
+ *
+ * These select between USDA portions of the same unit: a cup of chopped onion
+ * is 160 g and a cup of sliced is 115 g; a teaspoon of oregano is 1.0 g as
+ * leaves and 1.8 g ground.
+ */
+const CONDITION_WORDS = [
+  "chopped", "sliced", "diced", "minced", "grated", "shredded", "ground", "crushed",
+  "mashed", "packed", "sifted", "crumbled", "melted", "whole", "leaves", "halves",
+  "pieces", "cubed", "pureed", "cooked", "raw",
+];
+
+/**
+ * Pull the preparation out of an ingredient phrase.
+ *
+ * The raw parser declares a `preparation` field and never sets it, so every
+ * production caller was passing no condition at all and the oregano distinction
+ * this project is built around was silently bypassed everywhere except in the
+ * test that set the condition by hand.
+ */
+export function extractPreparation(phrase: string): string | null {
+  const words = phrase.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/);
+  const found = CONDITION_WORDS.filter((w) => words.includes(w));
+  return found.length > 0 ? found.join(" ") : null;
+}
+
 export interface ParsedLine {
   quantity: number;
   /** A mass or volume unit, a size, a count noun, or "each". */
@@ -105,7 +132,9 @@ export function parseLine(rawLine: string): ParsedLine {
     quantity: p.quantity,
     unit,
     name,
-    preparation: p.preparation ?? null,
+    // From the whole line, since the word may sit before the food ("ground
+    // oregano"), after a comma ("onion, chopped") or in brackets.
+    preparation: p.preparation ?? extractPreparation(rawLine),
     rawLine,
   };
 }

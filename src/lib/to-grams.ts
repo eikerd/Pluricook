@@ -108,6 +108,9 @@ const PREPARATION_WORDS = new Set([
   "fresh", "freshly", "dried", "frozen", "canned", "cooked", "raw", "plus", "more",
   "taste", "needed", "room", "temperature", "large", "medium", "small", "thinly",
   "roughly", "lightly", "well", "drained", "rinsed", "warm", "cold", "hot",
+  // Form words. "dried oregano leaves" is oregano; searched as written, the
+  // head-noun retry fell back to "leaves" alone and returned taro leaves.
+  "leaves", "leaf", "whole", "halves", "pieces", "sprigs", "sprig",
 ]);
 
 /**
@@ -335,7 +338,9 @@ export function toGrams(opts: ToGramsOptions): GramResult {
     // is what an unqualified "1 onion" or "2 stalks celery" means in practice.
     const cond = opts.condition?.toLowerCase().trim();
     const bySize = SIZE_WORDS.includes(unit) ? candidates.find((p) => has(p, unit)) : undefined;
-    const byCondition = cond ? candidates.find((p) => has(p, cond)) : undefined;
+    // Several words may arrive ("ground dried"); any one can select a portion.
+    const condWords = cond ? cond.split(/\s+/).filter(Boolean) : [];
+    const byCondition = candidates.find((p) => condWords.some((w) => has(p, w)));
     const byMedium = candidates.length > 1 ? candidates.find((p) => has(p, "medium")) : undefined;
     const chosen = bySize ?? byCondition ?? byMedium ?? candidates[0]!;
 

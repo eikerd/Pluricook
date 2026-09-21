@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { parseLine, singular } from "./ingredient-line";
+import { extractPreparation, parseLine, singular } from "./ingredient-line";
 
 describe("singular", () => {
   test("folds the plurals a recipe uses", () => {
@@ -62,5 +62,24 @@ describe("parseLine — the raw parser's 'to taste' default", () => {
 
   test("a line with no number really is unquantified", () => {
     expect(parseLine("Kosher salt, to taste").unit.toLowerCase()).toBe("to taste");
+  });
+});
+
+describe("extractPreparation — the raw parser never sets it", () => {
+  test("finds the word wherever the recipe put it", () => {
+    expect(extractPreparation("1 teaspoon ground oregano")).toBe("ground");
+    expect(extractPreparation("1 medium onion, finely chopped")).toBe("chopped");
+    expect(extractPreparation("2 stalks celery (diced)")).toBe("diced");
+    expect(extractPreparation("1 tsp dried oregano leaves")).toBe("leaves");
+  });
+
+  test("returns null when the line states none", () => {
+    expect(extractPreparation("2 large eggs")).toBeNull();
+    expect(extractPreparation("1 cup milk")).toBeNull();
+  });
+
+  test("parseLine now carries it through to conversion", () => {
+    expect(parseLine("1 teaspoon ground oregano").preparation).toBe("ground");
+    expect(parseLine("1 cup sliced onion").preparation).toBe("sliced");
   });
 });
