@@ -307,7 +307,7 @@ export async function queryDataset(
     // Small table: read it whole, merge the curated decisions, then sort and page
     // in memory, because tier and acquisition live in JSON rather than in SQL.
     const curated = await readCurated();
-    const all = db
+    const all: Record<string, unknown>[] = db
       .query<Record<string, unknown>, any[]>(`SELECT ${def.select} ${def.from}${where}`)
       .all(...params)
       .map(withStance)
