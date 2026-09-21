@@ -7,11 +7,11 @@ branch: comparison-in-admin
 pr: https://github.com/eikerd/Pluricook/pull/2
 state: pr-open
 deployed: no
-loose-ends: PR #2 open, external review rounds not yet complete; no ESLint or react-hooks lint in the repo (task chip raised); no Figma file exists for this project, so the new Comparison page is not in Figma; six Detroit pizza recipes still private pending source URLs; "Charlie A" read as Charlie Anderson, unconfirmed; RecipeTin Eats broth and bouillon lines do not parse (reads "low" salinity in two dishes); 16 pre-existing type errors in ingredient-parser/unit-normalizer/build.ts; dead scaffold files App.tsx and APITester.tsx; TODO.md stale; 3 todo matcher tests; extraction is JSON-LD only
+loose-ends: PR #2 open, Codex round 3 pending; untracked AGENTS.md in the main checkout is a full copy of CLAUDE.md written by another tool at 04:54, left untouched; no ESLint or react-hooks lint in the repo (task chip raised); no Figma file exists for this project, so the new Comparison page is not in Figma; six Detroit pizza recipes still private pending source URLs; "Charlie A" read as Charlie Anderson, unconfirmed; RecipeTin Eats broth and bouillon lines do not parse (reads "low" salinity in two dishes); 16 pre-existing type errors in ingredient-parser/unit-normalizer/build.ts; dead scaffold files App.tsx and APITester.tsx; TODO.md stale; 3 todo matcher tests; extraction is JSON-LD only
 supersedes: docs/handoffs/2026-09-20-1930-claude-code-source-registry-usda-admin.md
 ---
 
-# The comparison, in the admin, by section
+# The comparison and seven visualizations, in the admin
 
 Repo [eikerd/Pluricook](https://github.com/eikerd/Pluricook) (private), branch
 `comparison-in-admin`, [PR #2](https://github.com/eikerd/Pluricook/pull/2) — **open**.
@@ -81,6 +81,44 @@ Not fixed, deliberately: section names match case-sensitively (the UI only ever
 sends names from `sectionsAvailable`); no `AbortController` on the fetch (matches
 `DataTable`, and the `stale` flag already guards the race).
 
+### Visualize: seven views, decided in Slack
+
+The owner asked to take every suggestion in Slack `#recipe-bom-visualization`,
+review them against the code in a conversation there, then build all of them.
+The thread holds a ChatGPT proposal, my review, a Codex reply and my answer.
+
+| View | What it answers |
+|---|---|
+| Heatmap | Each recipe against a baseline (the median or any one recipe), log scale; added and removed marked |
+| Distribution | Each ingredient's spread against its median, every point shown |
+| Parallel | One line per recipe; "not listed" gets its own floor, never zero |
+| UpSet | Exact combinations of recipes sharing ingredients. **Hand-drawn SVG**: `@upsetjs` is AGPL-3 or paid |
+| 3D map | Three chosen ingredient ratios, or an exploratory MDS projection |
+| 3D network | Recipes and ingredients as a graph; ubiquitous ingredients hidden by default; 2D toggle |
+| Ternary | Three food classes renormalized to 100% |
+
+Decisions that came out of the Slack review, all in code:
+- **One payload**, `/api/admin/matrix/:dish` (`src/lib/visual-matrix.ts`), derived only from the Comparison.
+- **Two distances, named honestly.** A shared-ingredient ratio distance has a different ingredient basis for every pair, so it is not one space; it is kept per pair, with its coverage. The projection uses only the *fixed-basis* distance: Aitchison over the ingredients **every** recipe lists, with nothing imputed. Fewer than 3 such ingredients means no projection is drawn.
+- Unknown is never zero; normalization metadata travels with the numbers; a missing baseline is "added", never infinite.
+- Codex's five acceptance cases are tests in `visual-matrix.test.ts`.
+
+Plotly (4.6 MB) and three.js (1.4 MB) are separate production chunks. The entry chunk is 400 KB and has neither.
+
+### Two bugs the charts exposed
+
+**Ingredients vanished between "common" and "outliers".** Common was ≥60% of
+recipes, outliers ≤2 recipes, and anything between was in neither list and
+dropped from every grid. For meatloaf that was 12 ingredients, among them
+onions, Worcestershire, garlic and parsley; for pizza, the brick cheese. Found
+because the ternary showed no dairy. `Comparison.occasional` now holds them,
+the Comparison page has an Occasional grid (owner-approved), and a test pins
+that every ingredient lands in exactly one list.
+
+**Two flours merged into one column.** Bread and all-purpose flour both
+shortened to "Wheat flour, white", and Plotly keys categories by label.
+`uniqueLabels` grows each label until it is distinct, on the server, for every chart.
+
 ### What the numbers say now
 
 | Dish or section | Anchor | Median salt-equivalent | Note |
@@ -97,7 +135,7 @@ sends names from `sectionsAvailable`); no `AbortController` on the fetch (matche
 - Branch `comparison-in-admin`, pushed; PR #2 marked ready for review once this note landed.
 - Working directly in the main checkout (`/Users/ernestoikerd/repos/food/compare-recipe`); no worktree was created.
 - Dev server: `bun --hot src/index.ts` on port 3000, via `.claude/launch.json` (`pluricook-admin`).
-- `bun test`: 297 pass, 3 todo, 0 fail. `tsc --noEmit`: no new errors.
+- `bun test`: 323 pass, 3 todo, 0 fail. `tsc --noEmit`: no new errors.
 
 ## What is deployed
 
@@ -106,6 +144,8 @@ Nothing. There is no deploy target yet.
 ## Loose ends
 
 - **PR #2 is open.** Three review rounds, the scorecard and the merge are still to do.
+- **`AGENTS.md`, untracked, in the main checkout.** Another tool wrote it at 04:54 as a 111-line copy of `CLAUDE.md`. The rule is that an `AGENTS.md` is a *pointer* to `CLAUDE.md`, never a copy. It is an instruction file, so it was not touched, added or deleted here; it is for the owner to decide.
+- **Codex rounds:** 1 and 2 done (four findings, all valid, all fixed). Round 3 was requested on `404e28a`; the Visualize commits landed after it, so round 3 may need re-requesting on the final head.
 - **No linter.** The repo has no ESLint at all, so `react-hooks/exhaustive-deps` has never run on the admin. Out of scope here; raised as a task chip ("Add ESLint with react-hooks rules to Pluricook").
 - **CodeRabbit's green check on a draft is a skip, not a review.** It declines draft PRs and still reports SUCCESS. Do not count it as a round.
 - **Figma:** the project has no Figma file, so the new Comparison page is recorded nowhere but the code. Not skipped silently — there is nothing to update yet.
@@ -128,6 +168,8 @@ Nothing. There is no deploy target yet.
 - Asked which optional additions to include, chose all three: "Per-source drill-down, Unmatched lines grid, Anchor reasoning line".
 - On the pizza's combined section: "Split into dough / toppings (Recommended)".
 - On the second render: "Approve, commit it".
+- Visualizations: "take all of the suggestions and just have different ways of viewing our information till we find one that's the most useful… have a conversation on Slack… then build out all of the visualizations in the way you guys decide."
+- Visualize render: "Approve, commit it". Occasional grid on the Comparison page: "Add an Occasional grid (Recommended)". Captions: "UpSet explainer, Network legend". Second render: "Approve, commit it".
 
 ## Proposed rule changes
 
