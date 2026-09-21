@@ -1,16 +1,20 @@
+---
+tool: claude-code
+model: Fable 5.1, then Opus 5
+repo: eikerd/Pluricook
+branch: workflow-source-registry
+pr: https://github.com/eikerd/Pluricook/pull/1
+state: pr-open
+deployed: no
+loose-ends: 20 pre-existing type errors in ingredient-parser and unit-normalizer; dead scaffold files (App.tsx, APITester.tsx); TODO.md stale; no trusted-site list; extraction not built
+supersedes: none
+---
+
 # Source registry, USDA reference tables, and the Pluricook admin
 
-| | |
-|---|---|
-| **tool** | Claude Code (desktop app) |
-| **model** | Fable 5.1, then Opus 5 |
-| **repo** | [eikerd/Pluricook](https://github.com/eikerd/Pluricook) (private) |
-| **branch** | `workflow-source-registry` |
-| **PR** | [#1](https://github.com/eikerd/Pluricook/pull/1), draft |
-| **state** | pr-open |
-| **deployed** | no |
-| **loose ends** | see below; `agent-sweep.sh` reports only this PR |
-| **supersedes** | none — first handoff in this repo |
+Repo [eikerd/Pluricook](https://github.com/eikerd/Pluricook) (private), branch
+`workflow-source-registry`, draft [PR #1](https://github.com/eikerd/Pluricook/pull/1).
+Nothing is deployed. `agent-sweep.sh` reports only this PR.
 
 > The repo did not exist at session start. It was created this session from an
 > existing local checkout that had one commit (`chore: initialize repository`)
