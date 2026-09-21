@@ -79,6 +79,9 @@ export function Network({ m, focus, onPick }: ViewProps) {
           />
         </Suspense>
       </div>
+      <p className="muted">
+        Dark nodes are recipes, saffron nodes ingredients. Nearness means shared ingredients, not similar amounts.
+      </p>
     </>
   );
 }

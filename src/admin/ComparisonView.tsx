@@ -323,6 +323,20 @@ export function ComparisonView() {
             initialSort={{ key: "salinity", dir: "desc" }}
           />
 
+          {comparison.occasional.length > 0 && (
+            <>
+              <h3 className="pane__sub">Occasional</h3>
+              <SortableGrid
+                label="Occasional"
+                columns={columns.cluster}
+                rows={comparison.occasional}
+                rowKey={byFood}
+                initialSort={{ key: "recipes", dir: "desc" }}
+                detail={sourcesOf}
+              />
+            </>
+          )}
+
           <h3 className="pane__sub">Outliers</h3>
           <SortableGrid
             label="Outliers"

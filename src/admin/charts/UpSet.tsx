@@ -74,6 +74,10 @@ export function UpSet({ m, focus, onPick }: ViewProps) {
           );
         })}
       </svg>
+      <p className="muted">
+        Each column is one exact combination; its bar counts the ingredients listed by exactly those recipes.
+        Hover a column for them.
+      </p>
     </div>
   );
 }
