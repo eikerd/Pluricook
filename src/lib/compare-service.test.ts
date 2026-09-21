@@ -18,6 +18,18 @@ describe("listDishes", () => {
     expect(dishes.map((d) => d.dish)).not.toContain("zz-test-broken");
   });
 
+  test.each([
+    ["a null entry", { recipes: [null] }],
+    ["an entry with no ingredient lines", { recipes: [{ id: "x" }] }],
+    ["sections that are not a list", { recipes: [{ id: "x", ingredientLines: [], sections: "dough" }] }],
+    ["a section with no lines", { recipes: [{ id: "x", ingredientLines: [], sections: [{ name: "dough" }] }] }],
+  ])("valid JSON with %s costs one dish, not the whole list", async (_what, body) => {
+    await Bun.write(BROKEN, JSON.stringify(body));
+    const names = (await listDishes()).map((d) => d.dish);
+    expect(names).toContain("meatloaf");
+    expect(names).not.toContain("zz-test-broken");
+  });
+
   test("a dish is named by its file, whatever the file says inside", async () => {
     await Bun.write(MISLABELLED, JSON.stringify({ dish: "meatloaf", recipes: [] }));
     const names = (await listDishes()).map((d) => d.dish);
@@ -55,6 +67,12 @@ describe("compareDish", () => {
       expect(outcome).toMatchObject({ ok: false, status: 404 });
     },
   );
+
+  test("a malformed entry answers in the API's shape, naming the recipe", async () => {
+    await Bun.write(BROKEN, JSON.stringify({ recipes: [null] }));
+    const outcome = await compareDish("zz-test-broken", null);
+    expect(outcome).toMatchObject({ ok: false, status: 500 });
+  });
 
   test("an unreadable recipe file answers in the API's shape, not a thrown error", async () => {
     await Bun.write(BROKEN, "{ not json");

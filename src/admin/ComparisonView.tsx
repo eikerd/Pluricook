@@ -161,20 +161,27 @@ function salinityColumns(c: Comparison): GridColumn<RecipeSummary>[] {
   ];
 }
 
+type Outcome =
+  | { kind: "answer"; question: string; comparison: Comparison }
+  | { kind: "failure"; question: string; message: string };
+
 export function ComparisonView() {
   const [dishes, setDishes] = useState<DishSummary[] | null>(null);
   const [dish, setDish] = useState<string | null>(null);
   const [section, setSection] = useState(WHOLE_RECIPE);
-  // The answer is kept with the question it answers, so the page can tell when
-  // what is on screen no longer matches what the pickers say.
-  const [loaded, setLoaded] = useState<{ question: string; comparison: Comparison } | null>(null);
-  // A failure is kept with the question that failed, like an answer is. Moving a
-  // picker then makes it stop applying by itself — and the pickers stay on
-  // screen, so one unreadable dish is never a dead end.
-  const [failed, setFailed] = useState<{ question: string; message: string } | null>(null);
+  // The latest outcome — an answer OR a failure, never both — kept with the
+  // question it belongs to. As two separate states, one question could hold a
+  // failure and a later success at once, and the old failure hid the new answer.
+  // One slot makes that unrepresentable: each outcome replaces the last.
+  const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [listError, setListError] = useState<string | null>(null);
 
   const question = `${dish ?? ""}\n${section}`;
+  const current = outcome?.question === question ? outcome : null;
+
+  // The answer on screen. After a failure the last good answer is dropped, not
+  // dimmed: it would sit under an error about a different question.
+  const loaded = outcome?.kind === "answer" ? outcome : null;
   const comparison = loaded?.comparison ?? null;
   const isStale = loaded !== null && loaded.question !== question;
 
@@ -198,10 +205,12 @@ export function ComparisonView() {
       .then(async (r) => {
         const body = (await r.json()) as Comparison | { error: string };
         if (!r.ok) throw new Error("error" in body ? body.error : `HTTP ${r.status}`);
-        if (!stale) setLoaded({ question, comparison: body as Comparison });
+        if (!stale) setOutcome({ kind: "answer", question, comparison: body as Comparison });
       })
       .catch((e: unknown) => {
-        if (!stale) setFailed({ question, message: e instanceof Error ? e.message : "Comparison failed" });
+        if (!stale) {
+          setOutcome({ kind: "failure", question, message: e instanceof Error ? e.message : "Comparison failed" });
+        }
       });
 
     // A slow answer for the previous dish must not overwrite the current one.
@@ -228,7 +237,7 @@ export function ComparisonView() {
   const pickDish = (next: string) => {
     setDish(next);
     setSection(WHOLE_RECIPE);   // sections belong to a dish; "sauce" means nothing for meatloaf
-    setLoaded(null);
+    setOutcome(null);
   };
 
   const sourcesOf = (cluster: IngredientCluster) =>
@@ -242,7 +251,7 @@ export function ComparisonView() {
       />
     );
 
-  const error = listError ?? (failed?.question === question ? failed.message : null);
+  const error = listError ?? (current?.kind === "failure" ? current.message : null);
 
   return (
     <div className="pane">

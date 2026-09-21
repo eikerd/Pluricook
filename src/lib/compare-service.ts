@@ -30,10 +30,45 @@ const SLUG = /^[a-z0-9][a-z0-9-]*$/;
  */
 const slugOf = (path: string) => path.slice(path.lastIndexOf("/") + 1).replace(/\.json$/, "");
 
+const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null;
+const isStringArray = (v: unknown): v is string[] => Array.isArray(v) && v.every((x) => typeof x === "string");
+
+/**
+ * What a recipe entry must have before anything here reads it. Checking only
+ * the outer array let valid JSON with a malformed entry — `recipes: [null]`, a
+ * `sections` that is a string — through, to throw later outside every guard.
+ * Returns why an entry is unusable, or null when it is fine.
+ */
+function entryProblem(entry: unknown): string | null {
+  if (!isObject(entry)) return "is not an object";
+  if (!isStringArray(entry.ingredientLines)) return "has no ingredientLines list of strings";
+  if (entry.sections === undefined) return null;
+  if (!Array.isArray(entry.sections)) return "has sections that are not a list";
+  const bad = entry.sections.findIndex(
+    (s) => !isObject(s) || typeof s.name !== "string" || !isStringArray(s.ingredientLines),
+  );
+  return bad === -1 ? null : `has a malformed section at index ${bad}`;
+}
+
 async function readRecipes(path: string): Promise<ExtractedRecipe[]> {
-  const parsed = (await Bun.file(path).json()) as { recipes?: unknown };
-  if (!Array.isArray(parsed.recipes)) throw new Error(`${path} has no "recipes" array`);
+  const parsed: unknown = await Bun.file(path).json();
+  if (!isObject(parsed) || !Array.isArray(parsed.recipes)) {
+    throw new Error(`${path} has no "recipes" array`);
+  }
+  parsed.recipes.forEach((entry, i) => {
+    const problem = entryProblem(entry);
+    if (problem) throw new Error(`${path}: recipe ${i} ${problem}`);
+  });
   return parsed.recipes as ExtractedRecipe[];
+}
+
+function summarize(dish: string, recipes: ExtractedRecipe[]): DishSummary {
+  return {
+    dish,
+    recipes: recipes.length,
+    privateRecipes: recipes.filter((r) => r.visibility === "private").length,
+    sections: [...new Set(recipes.flatMap((r) => (r.sections ?? []).map((s) => s.name)))],
+  };
 }
 
 async function readDish(dish: string): Promise<ExtractedRecipe[] | null> {
@@ -50,22 +85,14 @@ export async function listDishes(): Promise<DishSummary[]> {
     const dish = slugOf(path);
     if (!SLUG.test(dish)) continue;   // the compare route could never open it
 
-    // These files are edited by hand. One stray comma should cost one dish,
-    // not the whole picker — and the log should say which file.
-    let recipes: ExtractedRecipe[];
+    // These files are edited by hand. One stray comma — or one malformed entry
+    // in valid JSON — should cost one dish, not the whole picker, and the log
+    // should say which file. Everything that reads the file sits inside this guard.
     try {
-      recipes = await readRecipes(path);
+      out.push(summarize(dish, await readRecipes(path)));
     } catch (error) {
       console.error(`[compare-service] skipped ${path}:`, error);
-      continue;
     }
-
-    out.push({
-      dish,
-      recipes: recipes.length,
-      privateRecipes: recipes.filter((r) => r.visibility === "private").length,
-      sections: [...new Set(recipes.flatMap((r) => (r.sections ?? []).map((s) => s.name)))],
-    });
   }
   return out.sort((a, b) => a.dish.localeCompare(b.dish));
 }
