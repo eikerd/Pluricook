@@ -12,14 +12,14 @@
         "sourceTitle": "detroit-pizza (from owner's notes)",
         "capturedAt": "2026-09-20",
         "method": "personal-collection",
-        "acquisitionAtCapture": "fetch",
+        "acquisitionAtCapture": "pending-review",
         "licence": null
       },
       "visibility": "private",
       "dish": "detroit-pizza",
       "sections": [
         {
-          "name": "dough and toppings",
+          "name": "dough",
           "ingredientLines": [
             "273 g bread flour",
             "205 g water",
@@ -53,21 +53,26 @@
         "sourceTitle": "detroit-pizza (from owner's notes)",
         "capturedAt": "2026-09-20",
         "method": "personal-collection",
-        "acquisitionAtCapture": "fetch",
+        "acquisitionAtCapture": "pending-review",
         "licence": null
       },
       "visibility": "private",
       "dish": "detroit-pizza",
       "sections": [
         {
-          "name": "dough and toppings",
+          "name": "dough",
           "ingredientLines": [
             "337 g bread flour",
             "236 g water",
             "10 g yeast",
             "6 g salt",
             "1 tb oil",
-            "6 g sugar",
+            "6 g sugar"
+          ]
+        },
+        {
+          "name": "toppings",
+          "ingredientLines": [
             "284 g brick cheese"
           ]
         },
@@ -125,20 +130,25 @@
         "sourceTitle": "detroit-pizza (from owner's notes)",
         "capturedAt": "2026-09-20",
         "method": "personal-collection",
-        "acquisitionAtCapture": "fetch",
+        "acquisitionAtCapture": "pending-review",
         "licence": null
       },
       "visibility": "private",
       "dish": "detroit-pizza",
       "sections": [
         {
-          "name": "dough and toppings",
+          "name": "dough",
           "ingredientLines": [
             "300 g bread flour",
             "220 g water",
             "5 g yeast",
             "9 g salt",
-            "1 tb oil",
+            "1 tb oil"
+          ]
+        },
+        {
+          "name": "toppings",
+          "ingredientLines": [
             "340 g brick cheese",
             "340 g pepperoni"
           ]
@@ -195,14 +205,14 @@
         "sourceTitle": "detroit-pizza (from owner's notes)",
         "capturedAt": "2026-09-20",
         "method": "personal-collection",
-        "acquisitionAtCapture": "fetch",
+        "acquisitionAtCapture": "pending-review",
         "licence": null
       },
       "visibility": "private",
       "dish": "detroit-pizza",
       "sections": [
         {
-          "name": "dough and toppings",
+          "name": "dough",
           "ingredientLines": [
             "375 g bread flour",
             "236 g water",
@@ -240,14 +250,14 @@
         "sourceTitle": "detroit-pizza (from owner's notes)",
         "capturedAt": "2026-09-20",
         "method": "personal-collection",
-        "acquisitionAtCapture": "fetch",
+        "acquisitionAtCapture": "pending-review",
         "licence": null
       },
       "visibility": "private",
       "dish": "detroit-pizza",
       "sections": [
         {
-          "name": "dough and toppings",
+          "name": "dough",
           "ingredientLines": [
             "300 g bread flour",
             "210 g water",
@@ -300,19 +310,24 @@
         "sourceTitle": "detroit-pizza (from owner's notes)",
         "capturedAt": "2026-09-20",
         "method": "personal-collection",
-        "acquisitionAtCapture": "fetch",
+        "acquisitionAtCapture": "pending-review",
         "licence": null
       },
       "visibility": "private",
       "dish": "detroit-pizza",
       "sections": [
         {
-          "name": "dough and toppings",
+          "name": "dough",
           "ingredientLines": [
             "315 g all-purpose flour",
             "205 g water",
             "1.6 g yeast",
-            "6.3 g salt",
+            "6.3 g salt"
+          ]
+        },
+        {
+          "name": "toppings",
+          "ingredientLines": [
             "318 g brick cheese"
           ]
         },

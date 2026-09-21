@@ -6,7 +6,9 @@
  */
 
 import { useEffect, useState } from "react";
+import { ComparisonView } from "./ComparisonView";
 import { DataTable } from "./DataTable";
+import { VisualizeView } from "./VisualizeView";
 import "../admin.css";
 
 interface DatasetMeta {
@@ -81,6 +83,7 @@ export function AdminApp() {
         <nav>
           <p className="rail__group">Summary</p>
           <button
+            type="button"
             className={`rail__item ${active === "overview" ? "is-active" : ""}`}
             onClick={() => setActive("overview")}
           >
@@ -92,6 +95,7 @@ export function AdminApp() {
             .filter((d) => ["sources", "searches", "fetches"].includes(d.id))
             .map((d) => (
               <button
+                type="button"
                 key={d.id}
                 className={`rail__item ${active === d.id ? "is-active" : ""}`}
                 onClick={() => setActive(d.id)}
@@ -105,6 +109,7 @@ export function AdminApp() {
             .filter((d) => d.id.startsWith("usda"))
             .map((d) => (
               <button
+                type="button"
                 key={d.id}
                 className={`rail__item ${active === d.id ? "is-active" : ""}`}
                 onClick={() => setActive(d.id)}
@@ -118,6 +123,7 @@ export function AdminApp() {
             .filter((d) => d.id === "recipes")
             .map((d) => (
               <button
+                type="button"
                 key={d.id}
                 className={`rail__item ${active === d.id ? "is-active" : ""}`}
                 onClick={() => setActive(d.id)}
@@ -125,6 +131,20 @@ export function AdminApp() {
                 {d.label}
               </button>
             ))}
+          <button
+            type="button"
+            className={`rail__item ${active === "comparison" ? "is-active" : ""}`}
+            onClick={() => setActive("comparison")}
+          >
+            Comparison
+          </button>
+          <button
+            type="button"
+            className={`rail__item ${active === "visualize" ? "is-active" : ""}`}
+            onClick={() => setActive("visualize")}
+          >
+            Visualize
+          </button>
         </nav>
 
         <p className="rail__foot">
@@ -136,6 +156,10 @@ export function AdminApp() {
       <main className="main">
         {active === "overview" ? (
           <Overview />
+        ) : active === "comparison" ? (
+          <ComparisonView />
+        ) : active === "visualize" ? (
+          <VisualizeView />
         ) : (
           <DataTable datasetId={active} searchable={current?.searchable ?? false} />
         )}

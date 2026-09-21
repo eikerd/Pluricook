@@ -35,14 +35,19 @@
 
   "sections": [
     {
-      "name": "dough and toppings",
+      "name": "dough",
       "rows": [
         { "ingredient": "Bread Flour",  "cells": { "pizzahog": 273, "atk": 337, "serious": 300, "chefjohn": 375, "ethan": "300g", "charlie": "AP 315" } },
         { "ingredient": "Water",        "cells": { "pizzahog": 205, "atk": 236, "serious": 220, "chefjohn": 236, "ethan": "210g", "charlie": 205 } },
         { "ingredient": "Yeast",        "cells": { "pizzahog": 1.5, "atk": 10,  "serious": 5,   "chefjohn": 9,   "ethan": 5,      "charlie": 1.6 } },
         { "ingredient": "Salt",         "cells": { "pizzahog": 4.1, "atk": 6,   "serious": 9,   "chefjohn": 6,   "ethan": 6,      "charlie": 6.3 } },
         { "ingredient": "Oil",          "cells": { "atk": "1 Tb", "serious": "1 Tb", "chefjohn": "3 Tb" } },
-        { "ingredient": "Sugar",        "cells": { "atk": 6, "chefjohn": 6 } },
+        { "ingredient": "Sugar",        "cells": { "atk": 6, "chefjohn": 6 } }
+      ]
+    },
+    {
+      "name": "toppings",
+      "rows": [
         { "ingredient": "Brick Cheese", "cells": { "atk": 284, "serious": 340, "charlie": 318 } },
         { "ingredient": "Pepperoni",    "cells": { "serious": 340 } }
       ]

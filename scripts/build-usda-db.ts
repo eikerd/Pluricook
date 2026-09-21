@@ -216,6 +216,14 @@ for (const ds of DATASETS) {
 db.run(`INSERT INTO foods_fts (rowid, description) SELECT fdc_id, description FROM foods`);
 db.run(`PRAGMA optimize`);
 
+// WAL made the million-row load fast; it must not survive into the finished
+// file. A WAL database cannot be opened read-only once its -shm/-wal sidecars
+// are gone, and any tool that opens it read-write and exits cleanly deletes
+// them — one `sqlite3 usda.db .schema` took down every reader. A reference
+// table that is only ever read wants one file and no sidecars, which is also
+// what a read-only cloud filesystem will demand.
+db.run(`PRAGMA journal_mode = DELETE`);
+
 const count = (sql: string) => db.query<{ n: number }, []>(sql).get()!.n;
 console.log(
   `\nBuilt ${dbPath}: ` +

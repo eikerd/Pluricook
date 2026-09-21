@@ -136,6 +136,38 @@
     "salt": {
       "fdcId": 173468,
       "note": "Salt, table."
+    },
+    "soy sauce": {
+      "fdcId": 174277,
+      "note": "Soy sauce made from soy and wheat (shoyu), 5493 mg Na/100 g. Heuristics reached 'Sauce, peanut, made from ... soy sauce' at 1338 — a 4x understatement of the saltiest line in the recipe. 'Reduced-sodium soy sauce' is NOT aliased: heuristics find the right record."
+    },
+    "bacon": {
+      "fdcId": 168277,
+      "note": "Pork, cured, bacon, unprepared. A recipe's bacon goes in raw; the cooked record reads 3x saltier because the water has left. Heuristics reached 'Bacon, meatless'."
+    },
+    "chicken broth": {
+      "fdcId": 174536,
+      "note": "Soup, chicken broth, ready-to-serve. Cartons are what most recipes mean by broth AND stock; home-made stock carries under half the sodium, so a recipe that says so reads high. Heuristics reached 'Chicken, canned, no broth'."
+    },
+    "chicken stock": {
+      "fdcId": 174536,
+      "note": "See chicken broth."
+    },
+    "beef broth": {
+      "fdcId": 171538,
+      "note": "Soup, beef broth or bouillon canned, ready-to-serve. Cartons are what most recipes mean by broth AND stock; home-made stock carries under half the sodium, so a recipe that says so reads high. Heuristics reached 'Soup, stock, beef, home-prepared'."
+    },
+    "beef stock": {
+      "fdcId": 171538,
+      "note": "See beef broth."
+    },
+    "vegetable broth": {
+      "fdcId": 171583,
+      "note": "Soup, vegetable broth, ready to serve. The generic record; heuristics reached the SWANSON branded one."
+    },
+    "vegetable stock": {
+      "fdcId": 171583,
+      "note": "See vegetable broth."
     }
   },
   "patterns": {
@@ -178,6 +210,10 @@
     "unsalted butter": {
       "fdcId": 173430,
       "note": "Butter, without salt."
+    },
+    "grated parmesan": {
+      "fdcId": 171247,
+      "note": "Cheese, parmesan, grated — the record with a cup portion (100 g). Heuristics reached 'parmesan, hard', which has none, so a cup of cheese weighed nothing."
     }
   },
   "reject": [

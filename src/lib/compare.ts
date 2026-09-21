@@ -40,6 +40,11 @@ const NA_TO_NACL = 2.54;
 const SODIUM_DAILY_VALUE_MG = 2300;
 
 export interface SourceAmount {
+  /**
+   * The recipe's own id. A site name cannot identify a row: two recipes from
+   * one site, or two hand-entered ones with no URL, share everything else.
+   */
+  recipeId: string;
   siteName: string;
   sourceUrl: string | null;
   /** The line exactly as published, so a surprising number can be checked. */
@@ -77,6 +82,7 @@ export type SalinityFlag =
   | "unreliable";
 
 export interface RecipeSummary {
+  recipeId: string;
   siteName: string;
   sourceUrl: string | null;
   servings: number | null;
@@ -96,17 +102,27 @@ export interface RecipeSummary {
 
 export interface Comparison {
   dish: string;
+  /** The section compared, or null for whole recipes. */
+  section: string | null;
+  /** Every section name found across the dish's recipes, in first-seen order. */
+  sectionsAvailable: string[];
   analysed: number;
   anchor: AnchorDecision;
   /** Recipes in which the anchor class was actually present. */
   withAnchor: number;
   commonThreshold: number;
   common: IngredientCluster[];
+  /**
+   * Too rare to be common, too frequent to be an outlier: 3 of 6 pizzas list
+   * cheese. Without this list those ingredients belonged to neither and
+   * vanished — from every grid and every chart.
+   */
+  occasional: IngredientCluster[];
   outliers: IngredientCluster[];
   recipes: RecipeSummary[];
   /** Corpus median salinity, for judging any one recipe against. */
   medianSalinity: number | null;
-  unmatched: Array<{ siteName: string; rawLine: string; basis: Basis }>;
+  unmatched: Array<{ recipeId: string; siteName: string; rawLine: string; basis: Basis }>;
 }
 
 function median(values: number[]): number {
@@ -126,6 +142,17 @@ export interface CompareOptions {
   anchor?: AnchorOptions;
   /** Below this share of resolved lines, a salinity total is not trusted. */
   minResolvedShare?: number;
+  /**
+   * Compare one named section only — "dough", "sauce".
+   *
+   * A pizza's dough salt and sauce salt are different questions. Summed, they
+   * produce a "salt % of flour" that is neither: only the dough's salt is
+   * meaningful against flour, which is what a baker's percentage IS. With a
+   * section named, each section also gets its own anchor — flour for the dough,
+   * tomato for the sauce — because the anchor is chosen from the lines compared.
+   * Recipes that do not carry the section take no part.
+   */
+  section?: string | null;
 }
 
 interface ResolvedPart {
@@ -152,12 +179,27 @@ export function compareRecipes(opts: CompareOptions): Comparison {
 
   const unmatched: Comparison["unmatched"] = [];
 
+  const section = opts.section ?? null;
+  const sectionsAvailable = [
+    ...new Set(opts.recipes.flatMap((r) => (r.sections ?? []).map((x) => x.name))),
+  ];
+
+  // Whole recipes by default; one section's lines when a section is named.
+  const inScope = opts.recipes
+    .map((recipe) => ({
+      recipe,
+      lines: section
+        ? (recipe.sections?.find((x) => x.name === section)?.ingredientLines ?? null)
+        : recipe.ingredientLines,
+    }))
+    .filter((x): x is { recipe: ExtractedRecipe; lines: string[] } => x.lines !== null);
+
   // ── Pass 1: resolve every line of every recipe ──────────────────────────
-  const resolved = opts.recipes.map((recipe) => {
+  const resolved = inScope.map(({ recipe, lines }) => {
     const parts: ResolvedPart[] = [];
     let sodiumMg = 0;
 
-    for (const rawLine of recipe.ingredientLines) {
+    for (const rawLine of lines) {
       const parsed = parseLine(rawLine);
       const result = toGrams({
         quantity: parsed.quantity,
@@ -169,7 +211,7 @@ export function compareRecipes(opts: CompareOptions): Comparison {
       });
 
       if (result.grams === null || result.fdcId === null) {
-        unmatched.push({ siteName: recipe.provenance.siteName, rawLine, basis: result.basis });
+        unmatched.push({ recipeId: recipe.id, siteName: recipe.provenance.siteName, rawLine, basis: result.basis });
         continue;
       }
 
@@ -190,7 +232,7 @@ export function compareRecipes(opts: CompareOptions): Comparison {
       recipeId: recipe.id,
       parts: parts.map((p) => ({ klass: p.klass, grams: p.grams })),
     };
-    return { recipe, parts, composition, sodiumMg };
+    return { recipe, parts, composition, sodiumMg, lineCount: lines.length };
   });
 
   // ── Pass 2: one anchor for the whole dish ───────────────────────────────
@@ -228,6 +270,7 @@ export function compareRecipes(opts: CompareOptions): Comparison {
       };
       const grams = round(p.grams);
       entry.sources.push({
+        recipeId: recipe.id,
         siteName: recipe.provenance.siteName,
         sourceUrl: recipe.provenance.sourceUrl,
         rawLine: p.lines.join("  +  "),
@@ -266,15 +309,16 @@ export function compareRecipes(opts: CompareOptions): Comparison {
   });
 
   // ── Per-recipe salinity ─────────────────────────────────────────────────
-  const drafts = resolved.map(({ recipe, parts, composition, sodiumMg }) => {
+  const drafts = resolved.map(({ recipe, parts, composition, sodiumMg, lineCount }) => {
     const saltEq = (sodiumMg / 1000) * NA_TO_NACL;
     const servings = recipe.servings && recipe.servings > 0 ? recipe.servings : null;
     return {
+      recipeId: recipe.id,
       siteName: recipe.provenance.siteName,
       sourceUrl: recipe.provenance.sourceUrl,
       servings,
       resolvedLines: parts.length,
-      totalLines: recipe.ingredientLines.length,
+      totalLines: lineCount,
       anchorGrams: anchorKlass ? round(classMass(composition, anchorKlass)) : null,
       sodiumMg: Math.round(sodiumMg),
       saltEquivalentGrams: round(saltEq),
@@ -313,11 +357,16 @@ export function compareRecipes(opts: CompareOptions): Comparison {
 
   return {
     dish: opts.recipes[0]?.dish ?? "",
+    section,
+    sectionsAvailable,
     analysed,
     anchor,
     withAnchor,
     commonThreshold,
     common: all.filter((c) => c.frequency >= commonThreshold).sort(byFrequency),
+    occasional: all
+      .filter((c) => c.frequency < commonThreshold && c.recipeCount > outlierMax)
+      .sort(byFrequency),
     outliers: all
       .filter((c) => c.recipeCount <= outlierMax)
       .sort((a, b) => a.recipeCount - b.recipeCount || (b.medianRelative ?? 0) - (a.medianRelative ?? 0)),

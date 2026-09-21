@@ -167,6 +167,82 @@ h1, h2, h3, .brand__name {
   outline-offset: -1px;
 }
 
+/* ── Comparison ──────────────────────────────────────────── */
+
+.pickers { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+.picker {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--cream-line);
+  border-radius: 3px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.picker:focus {
+  outline: 2px solid var(--saffron);
+  outline-offset: -1px;
+}
+
+.pane__sub {
+  margin: 1.75rem 0 0;
+  font-size: 1.1rem;
+  color: var(--espresso-soft);
+}
+
+/* Several grids share this page, so each takes its own height instead of
+   stretching to fill the pane as a lone DataTable does. */
+.grid-wrap--fit { flex: none; margin-top: 0.6rem; }
+
+.pane__note { margin: 0.3rem 0 0; font-size: 0.9rem; }
+
+/* A row that opens. The toggle is a button so it is reachable by keyboard. */
+.grid__toggle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.grid__toggle:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+
+.grid__chevron { width: 0.7em; color: var(--paprika); }
+
+.grid tbody tr.is-open { background: var(--parchment-warm); }
+
+.grid tbody tr.grid__detail,
+.grid tbody tr.grid__detail:hover { background: var(--parchment); }
+
+.grid tbody tr.grid__detail > td { padding: 0.6rem 0.9rem 0.9rem 1.9rem; }
+
+.grid__detail .grid-wrap--fit { margin-top: 0; }
+
+/* Headers inside an opened row scroll with it rather than pinning to the pane. */
+.grid__detail .grid thead th { position: static; }
+
+/* The header's button is only a focus target and a role; it must look like the
+   plain header text it replaced. */
+.grid__sort {
+  all: unset;
+  cursor: pointer;
+}
+
+.grid__sort:focus-visible {
+  outline: 2px solid var(--saffron);
+  outline-offset: 3px;
+}
+
+/* An answer that no longer matches the pickers, while the new one loads. */
+.stale-aware { transition: opacity 120ms ease; }
+.stale-aware[data-pending] { opacity: 0.45; pointer-events: none; }
+
 /* ── Overview tiles ──────────────────────────────────────── */
 
 .tiles {
@@ -281,9 +357,11 @@ h1, h2, h3, .brand__name {
 
 .grid td.num { text-align: right; }
 
-.grid td.url a { color: var(--plum); text-decoration: none; }
+.grid td.url a,
+.grid .url a { color: var(--plum); text-decoration: none; }
 
-.grid td.url a:hover { text-decoration: underline; }
+.grid td.url a:hover,
+.grid .url a:hover { text-decoration: underline; }
 
 /* ── Badges ──────────────────────────────────────────────── */
 
@@ -366,3 +444,69 @@ h1, h2, h3, .brand__name {
   border-radius: 3px;
   color: var(--paprika-deep);
 }
+
+/* ── Visualize ───────────────────────────────────────────── */
+
+.tabs { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 1rem; border-bottom: 2px solid var(--cream-line); }
+
+.tabs__tab {
+  padding: 0.5rem 0.9rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabs__tab:hover { color: var(--ink); }
+.tabs__tab.is-active { color: var(--paprika); border-bottom-color: var(--paprika); }
+.tabs__tab:focus-visible { outline: 2px solid var(--saffron); outline-offset: -2px; }
+
+.viz { margin-top: 1rem; min-width: 0; }
+.plot { width: 100%; }
+.legend { margin: 0.75rem 0 0; font-size: 0.85rem; }
+.pickers--inline { margin-bottom: 0.75rem; }
+
+.check { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--ink-soft); }
+
+.network { width: 100%; border: 1px solid var(--cream-line); border-radius: 3px; overflow: hidden; }
+
+.checked {
+  position: sticky;
+  bottom: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.7rem 2.4rem 0.7rem 1rem;
+  background: #fff;
+  border: 1px solid var(--cream-line);
+  border-left: 4px solid var(--saffron);
+  border-radius: 3px;
+  box-shadow: 0 4px 14px rgba(43, 33, 28, 0.12);
+}
+
+.checked__close {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.5rem;
+  border: 0;
+  background: none;
+  font-size: 1.3rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+/* UpSet: a wide SVG scrolls inside its own box, never the page. */
+.upset { overflow-x: auto; }
+.upset svg { display: block; font-family: Inter, sans-serif; }
+.upset__bar { fill: var(--espresso-soft); }
+.upset__count { font-size: 11px; text-anchor: middle; fill: var(--ink); }
+.upset__link { stroke: var(--espresso); stroke-width: 2; }
+.upset__dot { fill: var(--cream-line); }
+.upset__dot.is-in { fill: var(--espresso); cursor: pointer; }
+.upset__combo:hover .upset__bar,
+.upset__combo:hover .upset__dot.is-in { fill: var(--paprika); }
+.upset__label { font-size: 12px; text-anchor: end; fill: var(--ink); }
+.upset__setbar { fill: var(--saffron); }
+.upset__set.is-focus .upset__label { fill: var(--paprika); font-weight: 700; }

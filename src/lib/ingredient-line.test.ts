@@ -83,3 +83,17 @@ describe("extractPreparation — the raw parser never sets it", () => {
     expect(parseLine("1 cup sliced onion").preparation).toBe("sliced");
   });
 });
+
+describe("stray punctuation before the name", () => {
+  test.each([
+    ["1 tbsp. soy sauce", "soy sauce"],
+    ["2 qt. vegetable broth", "vegetable broth"],
+    ["1 c. grated parmesan cheese", "grated parmesan cheese"],
+  ])("%p names %p", (line, name) => {
+    expect(parseLine(line).name).toBe(name);
+  });
+
+  test("a leading decimal point belongs to the quantity and survives", () => {
+    expect(parseLine(".5 cup milk").quantity).toBe(0.5);
+  });
+});
