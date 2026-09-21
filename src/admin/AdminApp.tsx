@@ -127,7 +127,10 @@ export function AdminApp() {
             ))}
         </nav>
 
-        <p className="rail__foot">Read-only. Edit source files in the repo.</p>
+        <p className="rail__foot">
+          Read-only, except starring a source — that writes to
+          data/sources/curated.json. Everything else is edited in the repo.
+        </p>
       </aside>
 
       <main className="main">

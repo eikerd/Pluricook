@@ -301,6 +301,27 @@ h1, h2, h3, .brand__name {
 .badge--stop { background: #f7ddd5; color: var(--paprika-deep); }
 .badge--info { background: #e4dced; color: var(--plum); }
 .badge--mute { background: #ece4d5; color: var(--ink-soft); }
+.badge--star { background: #fbedd3; color: #8a5d12; }
+
+/* ── Star column ─────────────────────────────────────────── */
+
+.grid td.star { text-align: center; padding: 0 0.2rem; }
+
+.star__btn {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0.25rem 0.4rem;
+  color: var(--cream-line);
+}
+
+.star__btn:hover:not(:disabled) { color: var(--saffron); }
+.star__btn--required { color: var(--saffron); }
+.star__btn--favorite { color: var(--saffron); opacity: 0.75; }
+.star__btn--blocked { color: var(--paprika); cursor: not-allowed; }
+.star__btn:disabled { opacity: 0.8; }
 
 /* ── Pager ───────────────────────────────────────────────── */
 

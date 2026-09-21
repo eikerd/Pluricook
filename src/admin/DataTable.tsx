@@ -43,7 +43,59 @@ const BADGE_TONE: Record<string, string> = {
   foundation: "badge--go",
   "sr-legacy": "badge--info",
   "survey-fndds": "badge--warn",
+  // Curated tiers and acquisition decisions.
+  required: "badge--star",
+  favorite: "badge--star",
+  fetch: "badge--go",
+  licensed: "badge--go",
+  "link-only": "badge--warn",
+  "pending-review": "badge--warn",
+  none: "badge--stop",
 };
+
+/** The star cell: click cycles normal → required → favorite → normal. */
+const NEXT_TIER: Record<string, string> = {
+  normal: "required",
+  required: "favorite",
+  favorite: "normal",
+  blocked: "blocked", // a blocked site is not un-blocked by a stray click
+};
+
+const TIER_GLYPH: Record<string, string> = {
+  required: "★",
+  favorite: "☆",
+  normal: "·",
+  blocked: "⊘",
+};
+
+function StarCell({
+  row,
+  onChange,
+}: {
+  row: Record<string, unknown>;
+  onChange: (host: string, tier: string, displayName: string) => void;
+}) {
+  const tier = String(row.tier ?? "normal");
+  const host = String(row.host ?? "");
+  const blocked = tier === "blocked";
+
+  return (
+    <td className="star">
+      <button
+        className={`star__btn star__btn--${tier}`}
+        disabled={blocked}
+        title={
+          blocked
+            ? "Blocked — this site prohibits it in writing. Change it in data/sources/curated.json."
+            : `${tier} — click to make it ${NEXT_TIER[tier]}`
+        }
+        onClick={() => onChange(host, NEXT_TIER[tier]!, String(row.site ?? host))}
+      >
+        {TIER_GLYPH[tier] ?? "·"}
+      </button>
+    </td>
+  );
+}
 
 function Cell({ column, value }: { column: Column; value: unknown }) {
   if (value === null || value === undefined || value === "") {
@@ -85,6 +137,8 @@ export function DataTable({ datasetId, searchable }: { datasetId: string; search
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState(true);
+  // Bumped after a star write so the table re-reads the curated file.
+  const [refresh, setRefresh] = useState(0);
 
   // A new table starts fresh rather than inheriting the last one's sort column.
   useEffect(() => {
@@ -125,7 +179,24 @@ export function DataTable({ datasetId, searchable }: { datasetId: string; search
     }, query ? 250 : 0);
 
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [datasetId, sort, dir, page, query]);
+  }, [datasetId, sort, dir, page, query, refresh]);
+
+  /**
+   * Star a site. The write goes to data/sources/curated.json, so the change is a
+   * reviewable diff, not a hidden row in a gitignored database.
+   */
+  async function setStar(host: string, tier: string, displayName: string) {
+    const res = await fetch(`/api/admin/sources/${encodeURIComponent(host)}/tier`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tier, displayName }),
+    });
+    if (!res.ok) {
+      setError(`Could not star ${host}: HTTP ${res.status}`);
+      return;
+    }
+    setRefresh((n) => n + 1);
+  }
 
   function toggleSort(key: string) {
     if (sort === key) setDir(dir === "asc" ? "desc" : "asc");
@@ -194,9 +265,13 @@ export function DataTable({ datasetId, searchable }: { datasetId: string; search
             <tbody>
               {data.rows.map((row, i) => (
                 <tr key={i}>
-                  {data.columns.map((c) => (
-                    <Cell key={c.key} column={c} value={row[c.key]} />
-                  ))}
+                  {data.columns.map((c) =>
+                    c.key === "tier" ? (
+                      <StarCell key={c.key} row={row} onChange={setStar} />
+                    ) : (
+                      <Cell key={c.key} column={c} value={row[c.key]} />
+                    ),
+                  )}
                 </tr>
               ))}
             </tbody>

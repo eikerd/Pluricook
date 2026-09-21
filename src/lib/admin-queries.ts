@@ -8,6 +8,7 @@
 
 import { Database } from "bun:sqlite";
 import { DEFAULT_REGISTRY_PATH } from "./site-registry";
+import { curationFor, readCurated } from "./curated-sources";
 
 const USDA_PATH = "usda.db";
 
@@ -55,6 +56,14 @@ export interface DatasetDef {
    * `ORDER BY "description"` is ambiguous once foods and portions are joined.
    */
   sortMap?: Record<string, string>;
+  /**
+   * Enrich rows from the curated source file, then sort and page in memory.
+   *
+   * Only for small tables: the curated list lives in JSON, not SQL, so tier and
+   * acquisition cannot be sorted by the database. The registry is tens of rows,
+   * so reading it whole costs nothing; the USDA tables must never do this.
+   */
+  curated?: boolean;
 }
 
 export const DATASETS: DatasetDef[] = [
@@ -78,9 +87,11 @@ export const DATASETS: DatasetDef[] = [
              s.last_seen_at`,
     from: `FROM sites s LEFT JOIN site_policies p ON p.host = s.host`,
     columns: [
+      { key: "tier", label: "★", badge: true },
       { key: "site", label: "Site", width: "16rem" },
       { key: "host", label: "Host", width: "15rem" },
       { key: "stance", label: "Stance", badge: true },
+      { key: "acquisition", label: "May take", badge: true },
       { key: "dishes", label: "Dishes", numeric: true },
       { key: "seen", label: "Seen", numeric: true },
       { key: "best_rank", label: "Best rank", numeric: true },
@@ -96,6 +107,7 @@ export const DATASETS: DatasetDef[] = [
     defaultSort: "seen",
     defaultDir: "desc",
     searchable: ["s.display_name", "s.host"],
+    curated: true,
   },
   {
     id: "searches",
@@ -239,10 +251,15 @@ function withStance(row: Record<string, unknown>): Record<string, unknown> {
   return { ...rest, stance };
 }
 
-export function queryDataset(
+/** Star order, so sorting the ★ column puts required sites first. */
+const TIER_RANK: Record<string, number> = {
+  required: 0, favorite: 1, normal: 2, blocked: 3,
+};
+
+export async function queryDataset(
   id: string,
   opts: { sort?: string; dir?: string; page?: number; pageSize?: number; q?: string },
-): PageResult | null {
+): Promise<PageResult | null> {
   const def = DATASETS.find((d) => d.id === id);
   if (!def) return null;
 
@@ -285,6 +302,49 @@ export function queryDataset(
   const total = (
     db.query<{ n: number }, any[]>(`SELECT COUNT(*) AS n ${def.from}${where}`).get(...params) ?? { n: 0 }
   ).n;
+
+  if (def.curated) {
+    // Small table: read it whole, merge the curated decisions, then sort and page
+    // in memory, because tier and acquisition live in JSON rather than in SQL.
+    const curated = await readCurated();
+    const all = db
+      .query<Record<string, unknown>, any[]>(`SELECT ${def.select} ${def.from}${where}`)
+      .all(...params)
+      .map(withStance)
+      .map((row) => {
+        const c = curationFor(curated, String(row.host));
+        return { ...row, tier: c.tier, acquisition: c.acquisition, curationNote: c.note ?? null };
+      });
+
+    // A starred site we have never met in a search has no registry row, and would
+    // otherwise be invisible in the very table used to manage it.
+    const known = new Set(all.map((r) => String(r.host)));
+    for (const [host, c] of Object.entries(curated.sites)) {
+      if (known.has(host)) continue;
+      if (q && !`${host} ${c.displayName ?? ""}`.toLowerCase().includes(q.toLowerCase())) continue;
+      all.push({
+        site: c.displayName ?? host, host, stance: "unknown",
+        tier: c.tier, acquisition: c.acquisition, curationNote: c.note ?? null,
+        dishes: 0, seen: 0, best_rank: null, fetches: 0, ok: 0, blocked: 0,
+        refused: 0, json_ld: 0, ai_bans: 0, licensing_contact: null, last_seen_at: null,
+      });
+    }
+
+    const asc = dir === "asc" ? 1 : -1;
+    const cell = (row: Record<string, unknown>, key: string): unknown =>
+      key === "tier" ? (TIER_RANK[String(row.tier)] ?? 9) : row[key];
+
+    all.sort((a, b) => {
+      const [x, y] = [cell(a, sortKey), cell(b, sortKey)];
+      if (x === null || x === undefined) return 1;
+      if (y === null || y === undefined) return -1;
+      const cmp =
+        typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y));
+      return cmp * asc;
+    });
+
+    return { ...base, rows: all.slice(offset, offset + pageSize), total: all.length, pageSize };
+  }
 
   const rows = db
     .query<Record<string, unknown>, any[]>(

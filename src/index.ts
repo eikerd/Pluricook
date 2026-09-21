@@ -1,6 +1,9 @@
 import { serve } from "bun";
 import index from "./index.html";
 import { DATASETS, overview, queryDataset } from "./lib/admin-queries";
+import { setTier, type Tier } from "./lib/curated-sources";
+
+const TIERS: Tier[] = ["required", "favorite", "normal", "blocked"];
 
 const server = serve({
   routes: {
@@ -21,11 +24,34 @@ const server = serve({
         ),
     },
 
+    /**
+     * Star a site, or clear its star.
+     *
+     * The only write in the admin. It edits data/sources/curated.json rather than
+     * the database, so the decision lands in version control with the diff.
+     */
+    "/api/admin/sources/:host/tier": {
+      POST: async (req) => {
+        const { tier, displayName } = (await req.json()) as {
+          tier?: string;
+          displayName?: string;
+        };
+        if (!TIERS.includes(tier as Tier)) {
+          return Response.json(
+            { error: `tier must be one of ${TIERS.join(", ")}` },
+            { status: 400 },
+          );
+        }
+        const site = await setTier(req.params.host, tier as Tier, { displayName });
+        return Response.json({ host: req.params.host, ...site });
+      },
+    },
+
     /** One page of one table. Sorting and paging happen in SQL, not the browser. */
     "/api/admin/data/:id": {
-      GET: (req) => {
+      GET: async (req) => {
         const url = new URL(req.url);
-        const result = queryDataset(req.params.id, {
+        const result = await queryDataset(req.params.id, {
           sort: url.searchParams.get("sort") ?? undefined,
           dir: url.searchParams.get("dir") ?? undefined,
           page: Number(url.searchParams.get("page") ?? 1),

@@ -1,0 +1,52 @@
+{
+  "_comment": [
+    "Curated source list \u2014 the starred sites, and what we are permitted to do with each.",
+    "",
+    "This file is the source of truth, not sources.db. The database is gitignored and",
+    "rebuilt from data/, so a star stored only in SQLite would vanish on the next rebuild.",
+    "Starring in the admin writes back to this file; editing it in VS Code works too.",
+    "",
+    "tier:",
+    "  required  \u2014 always queried directly, not just when a search surfaces it",
+    "  favorite  \u2014 preferred when it appears, ranked above unknown sites",
+    "  normal    \u2014 met through search, no standing opinion",
+    "  blocked   \u2014 never fetched, never stored (a written prohibition, or our own decision)",
+    "",
+    "acquisition \u2014 how content from this site may legally reach our corpus:",
+    "  fetch          \u2014 automated fetch is acceptable; no prohibition found",
+    "  licensed       \u2014 we hold a licence or API agreement; terms recorded in `licence`",
+    "  link-only      \u2014 store our own facts and link out; store no expression from the page",
+    "  none           \u2014 take nothing",
+    "  pending-review \u2014 starred but not yet legally reviewed; treated as `none` until it is"
+  ],
+  "sites": {
+    "allrecipes.com": {
+      "displayName": "Allrecipes",
+      "tier": "blocked",
+      "acquisition": "none",
+      "note": "People Inc. robots.txt prohibits scraping except to direct traffic, and names TDM, LLM/RAG use and dataset creation as prohibited. Licensing contact: contentlicensing@people.inc",
+      "licence": null
+    },
+    "americastestkitchen.com": {
+      "displayName": "America's Test Kitchen",
+      "tier": "required",
+      "acquisition": "pending-review",
+      "note": "Owner-starred 2026-09-20. Subscription-gated: content behind a paid account means clickwrap terms and a contract layer that is independent of copyright. Review before any account is created for collection purposes.",
+      "licence": null
+    },
+    "seriouseats.com": {
+      "displayName": "Serious Eats",
+      "tier": "required",
+      "acquisition": "pending-review",
+      "note": "Owner-starred 2026-09-20. Believed to be People Inc, the publisher family whose robots.txt prohibits dataset creation and RAG \u2014 needs its own robots.txt and terms checked directly before anything is fetched.",
+      "licence": null
+    },
+    "simplyrecipes.com": {
+      "displayName": "Simply Recipes",
+      "tier": "blocked",
+      "acquisition": "none",
+      "note": "Identical People Inc. language to allrecipes.com.",
+      "licence": null
+    }
+  }
+}
