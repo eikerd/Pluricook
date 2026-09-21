@@ -167,6 +167,16 @@ export function countSteps(input: unknown): number | null {
 }
 
 /**
+ * UN/CEFACT common codes that turn up in recipe `PropertyValue.unitCode`.
+ * schema.org's own Recipe example uses G21 for a cup.
+ */
+const UNIT_CODES: Record<string, string> = {
+  G21: "cup", G24: "tablespoon", G25: "teaspoon",
+  GRM: "g", KGM: "kg", MGM: "mg", ONZ: "oz", LBR: "lb",
+  MLT: "ml", LTR: "liter", OZA: "fl oz", PTI: "pint", QTI: "quart",
+};
+
+/**
  * Ingredient lines, cleaned but not parsed.
  *
  * Quantity parsing belongs to the ingredient parser; this only guarantees an
@@ -183,7 +193,19 @@ export function ingredientLines(input: unknown): string[] {
       if (item && typeof item === "object") {
         const o = item as Record<string, unknown>;
         // { "@type": "PropertyValue", value: "3/4", name: "sugar", unitCode: "G21" }
-        const parts = [o.value, o.unitText, o.name].map(cleanText).filter(Boolean);
+        const value = cleanText(String(o.value ?? ""));
+        const name = cleanText(o.name);
+        const code = typeof o.unitCode === "string" ? o.unitCode.toUpperCase() : null;
+        const unit = cleanText(o.unitText) ?? (code ? UNIT_CODES[code] ?? null : null);
+
+        // A unit code we cannot decode must not be dropped: "3/4 sugar" would
+        // then read as three-quarters of ONE sugar and convert to a confident
+        // wrong mass. Put the quantity where no parser will take it for a count,
+        // so the line is refused as unquantified instead.
+        if (code && !unit) {
+          return name ? `${name}, ${value ?? "?"} [unit code ${code}]` : null;
+        }
+        const parts = [value, unit, name].filter(Boolean);
         return parts.length > 0 ? parts.join(" ") : null;
       }
       return null;

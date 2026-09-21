@@ -169,8 +169,14 @@ export function recordSearchAppearance(
   const host = a.host ?? canonicalHost(a.url);
   touchSite(db, host, a.seenAt);
   db.query(
-    `INSERT OR IGNORE INTO search_appearances (host, url, query, rank, kind, seen_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    // Upsert, not ignore: an observation file is the source of truth, so a
+    // corrected rank or kind must replace the stale one on re-import. OR IGNORE
+    // kept the old values silently, contradicting "a corrected record changes
+    // the report".
+    `INSERT INTO search_appearances (host, url, query, rank, kind, seen_at)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(query, url, seen_at) DO UPDATE SET
+       rank = excluded.rank, kind = excluded.kind, host = excluded.host`,
   ).run(host, a.url, a.query, a.rank, a.kind, a.seenAt);
 }
 
@@ -292,7 +298,9 @@ export function siteStats(db: Database): SiteStats[] {
      FROM fetch_attempts GROUP BY host, outcome, fetcher`,
   ).all();
 
-  // A "rescue" is a host a raw fetcher was BLOCKED on and a managed one cleared.
+  // A "rescue" is a PAGE a raw fetcher was BLOCKED on and a managed one cleared.
+  // Paired by URL, not just host: otherwise one blocked page made every later
+  // managed success anywhere on that site count as a rescue.
   // A refusal is deliberately excluded: it is a policy decision that must not be
   // retried, so a later success there is not a rescue, it is a violation of the
   // FetchOutcome contract — and counting it would overstate what managed
@@ -301,7 +309,7 @@ export function siteStats(db: Database): SiteStats[] {
     `SELECT host, COUNT(*) AS n FROM fetch_attempts a
      WHERE a.fetcher = 'managed' AND a.outcome = 'ok'
        AND EXISTS (SELECT 1 FROM fetch_attempts b
-                   WHERE b.host = a.host AND b.fetcher = 'raw'
+                   WHERE b.host = a.host AND b.url = a.url AND b.fetcher = 'raw'
                      AND b.outcome = 'blocked')
      GROUP BY host`,
   ).all();

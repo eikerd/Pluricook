@@ -12,9 +12,10 @@
  */
 
 import { Glob } from "bun";
-import { curationFor, mayFetch, readCurated } from "../src/lib/curated-sources";
+import { curationFor, isListed, mayFetch, readCurated } from "../src/lib/curated-sources";
 import { extractRecipe, type ExtractFailure } from "../src/lib/recipe-extract";
 import { mergeRecipes } from "../src/lib/recipe-merge";
+import { evaluateRobots, verdictForStatus, type RobotsVerdict } from "../src/lib/robots";
 import { canonicalHost, canonicalUrl } from "../src/lib/site-registry";
 import type { ExtractedRecipe } from "../src/types/provenance";
 
@@ -62,6 +63,31 @@ if (targets.length === 0) {
 
 const curated = await readCurated();
 
+// robots.txt is per host, so it is read once however many pages a host has.
+const robotsCache = new Map<string, { status: number; text: string }>();
+
+/**
+ * Clear a host nobody has reviewed, on evidence. Reading robots.txt is not a
+ * fetch of the content: the file exists to be read by a crawler before it does
+ * anything else, so this is the one request an uncleared host may receive.
+ */
+async function clearByRobots(url: string): Promise<RobotsVerdict> {
+  const u = new URL(url);
+  let entry = robotsCache.get(u.host);
+  if (!entry) {
+    try {
+      const res = await fetch(`${u.protocol}//${u.host}/robots.txt`, {
+        headers: { "user-agent": UA }, signal: AbortSignal.timeout(15_000),
+      });
+      entry = { status: res.status, text: res.ok ? await res.text() : "" };
+    } catch {
+      entry = { status: 0, text: "" };
+    }
+    robotsCache.set(u.host, entry);
+  }
+  return entry.status === 200 ? evaluateRobots(entry.text, u.pathname) : verdictForStatus(entry.status);
+}
+
 type Row = {
   site: string;
   outcome: "extracted" | "skipped" | "blocked" | "failed" | "error";
@@ -77,8 +103,22 @@ const recipes: ExtractedRecipe[] = [];
 
 for (const target of targets.sort((a, b) => a.rank - b.rank)) {
   const host = canonicalHost(target.url);
-  const site = curationFor(curated, host);
+  let site = curationFor(curated, host);
   const name = target.displayName ?? host;
+
+  // A host absent from the curated list is not fetchable by default. It is
+  // cleared here on evidence, or it waits for a person.
+  if (!isListed(curated, host)) {
+    const verdict = await clearByRobots(target.url);
+    if (!verdict.cleared) {
+      rows.push({
+        site: name, outcome: "skipped", detail: `not cleared — ${verdict.reason}`.slice(0, 96),
+        ingredients: "", steps: "", servings: "", minutes: "",
+      });
+      continue;
+    }
+    site = { ...site, acquisition: "fetch", note: `auto-cleared: ${verdict.reason}` };
+  }
 
   // Permission first. A site we may not take from is never contacted.
   if (!mayFetch(site)) {

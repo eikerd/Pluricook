@@ -205,3 +205,24 @@ describe("parseAuthor", () => {
     expect(parseAuthor({})).toBeNull();
   });
 });
+
+describe("ingredientLines — PropertyValue unit codes", () => {
+  test("decodes the UN/CEFACT code schema.org's own example uses", () => {
+    // Without this the line read "3/4 sugar": three-quarters of ONE sugar.
+    expect(ingredientLines([{ "@type": "PropertyValue", value: "3/4", name: "sugar", unitCode: "G21" }]))
+      .toEqual(["3/4 cup sugar"]);
+    expect(ingredientLines([{ "@type": "PropertyValue", value: "250", name: "flour", unitCode: "GRM" }]))
+      .toEqual(["250 g flour"]);
+  });
+
+  test("unitText wins over unitCode when both are present", () => {
+    expect(ingredientLines([{ value: "2", unitText: "tbsp", unitCode: "G21", name: "oil" }]))
+      .toEqual(["2 tbsp oil"]);
+  });
+
+  test("an unknown code is kept where no parser will take the number for a count", () => {
+    const [line] = ingredientLines([{ value: "3", name: "sugar", unitCode: "ZZZ" }]);
+    expect(line).toContain("ZZZ");
+    expect(/^\d/.test(line!)).toBe(false);   // does not open with a quantity
+  });
+});

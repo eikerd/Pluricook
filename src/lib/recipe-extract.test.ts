@@ -178,3 +178,26 @@ describe("extractRecipe — refusals", () => {
     expect(r).not.toHaveProperty("recipe");
   });
 });
+
+describe("extractRecipe — more than one Recipe node on a page", () => {
+  const stub = { "@type": "Recipe", name: "Teaser" };   // no ingredients
+
+  test("a stub in an earlier block does not hide the real recipe in a later one", () => {
+    const html =
+      `<script type="application/ld+json">${JSON.stringify(stub)}</script>` +
+      `<script type="application/ld+json">${JSON.stringify(RECIPE)}</script>`;
+    const r = extractRecipe({ ...BASE, html });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.recipe.provenance.sourceTitle).toBe("The Best Meatloaf");
+  });
+
+  test("nor does a stub beside it in the same @graph", () => {
+    const r = extractRecipe({ ...BASE, html: ld({ "@graph": [stub, RECIPE] }) });
+    expect(r.ok).toBe(true);
+  });
+
+  test("Recipe nodes with no ingredients anywhere is 'no-ingredients', not 'no-recipe-node'", () => {
+    const r = extractRecipe({ ...BASE, html: ld({ "@graph": [stub, stub] }) });
+    expect(r).toMatchObject({ ok: false, reason: "no-ingredients" });
+  });
+});

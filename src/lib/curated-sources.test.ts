@@ -3,6 +3,7 @@ import { unlink } from "node:fs/promises";
 import {
   DEFAULT_MANUAL_CAP,
   curationFor,
+  isListed,
   mayCaptureManually,
   mayFetch,
   mayStoreSourceText,
@@ -18,11 +19,15 @@ afterEach(async () => {
 });
 
 describe("curation lookup", () => {
-  test("an unlisted site gets the permissive default, matching search behaviour", async () => {
+  test("an unlisted site is NOT fetchable by default", async () => {
+    // It used to default to "fetch", which opened the gate for exactly the sites
+    // nobody had reviewed. It must now be cleared on evidence first.
     const file = await readCurated(TMP);
     const site = curationFor(file, "https://example.com/recipe/");
     expect(site.tier).toBe("normal");
-    expect(site.acquisition).toBe("fetch");
+    expect(site.acquisition).toBe("pending-review");
+    expect(mayFetch(site)).toBe(false);
+    expect(isListed(file, "https://example.com/recipe/")).toBe(false);
   });
 
   test("lookup is by canonical host, so www does not miss", async () => {

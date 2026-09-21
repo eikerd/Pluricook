@@ -299,3 +299,31 @@ describe("managed rescues exclude policy refusals", () => {
     expect(siteStats(db)[0]!.managedRescues).toBe(0);
   });
 });
+
+describe("review round 2", () => {
+  test("a corrected rank or kind replaces the stale one on re-import", () => {
+    const db = freshDb();
+    const base = { url: "https://delish.com/meatloaf/", query: "meatloaf", seenAt: AT };
+    recordSearchAppearance(db, { ...base, rank: 12, kind: "other" });
+    recordSearchAppearance(db, { ...base, rank: 3, kind: "recipe" });   // the correction
+
+    const [row] = siteStats(db);
+    expect(row!.appearances).toBe(1);
+    expect(row!.bestRank).toBe(3);
+  });
+
+  test("a rescue is paired with the page that was blocked, not just its host", () => {
+    // One blocked page used to make every later managed success on the site a rescue.
+    const db = freshDb();
+    const base = {
+      cdn: null, bodyBytes: null, elapsedMs: null, ingredientCount: null, stepCount: null,
+      yieldRaw: null, totalTimeRaw: null, note: null, attemptedAt: AT,
+    };
+    recordFetchAttempt(db, { ...base, url: "https://site.com/a/", fetcher: "raw", status: 403, outcome: "blocked", jsonLd: false });
+    recordFetchAttempt(db, { ...base, url: "https://site.com/b/", fetcher: "managed", status: 200, outcome: "ok", jsonLd: true });
+    expect(siteStats(db)[0]!.managedRescues).toBe(0);
+
+    recordFetchAttempt(db, { ...base, url: "https://site.com/a/", fetcher: "managed", status: 200, outcome: "ok", jsonLd: true });
+    expect(siteStats(db)[0]!.managedRescues).toBe(1);
+  });
+});

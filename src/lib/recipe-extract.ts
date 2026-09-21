@@ -75,6 +75,27 @@ export function findRecipeNode(node: unknown, depth = 0): Record<string, unknown
   return null;
 }
 
+/**
+ * Every Recipe node in a JSON-LD value, in document order.
+ *
+ * A page can carry more than one — a stub in one block and the real recipe in
+ * another, or a teaser beside the full node in the same @graph. Stopping at the
+ * first meant a stub with no ingredients hid a complete recipe behind it.
+ */
+export function findRecipeNodes(node: unknown, depth = 0): Record<string, unknown>[] {
+  if (depth > 8 || node === null || typeof node !== "object") return [];
+  if (Array.isArray(node)) return node.flatMap((child) => findRecipeNodes(child, depth + 1));
+
+  const obj = node as Record<string, unknown>;
+  const type = obj["@type"];
+  const own = (Array.isArray(type) ? type : [type]).includes("Recipe") ? [obj] : [];
+  return [
+    ...own,
+    ...["@graph", "mainEntity", "mainEntityOfPage", "itemListElement"]
+      .flatMap((key) => findRecipeNodes(obj[key], depth + 1)),
+  ];
+}
+
 /** Pull every JSON-LD block out of an HTML document. */
 export function jsonLdBlocks(html: string): string[] {
   return [
@@ -110,6 +131,7 @@ export function extractRecipe(opts: ExtractOptions): ExtractResult {
   if (blocks.length === 0) return { ok: false, reason: "no-json-ld", blocks: 0 };
 
   let node: Record<string, unknown> | null = null;
+  let sawRecipeNode = false;
   let parsed = 0;
 
   for (const block of blocks) {
@@ -122,12 +144,25 @@ export function extractRecipe(opts: ExtractOptions): ExtractResult {
       continue;
     }
     parsed++;
-    node = findRecipeNode(data);
+    const candidates = findRecipeNodes(data);
+    if (candidates.length > 0) sawRecipeNode = true;
+    // The first USABLE node wins, not merely the first node.
+    node = candidates.find(
+      (c) => ingredientLines(c.recipeIngredient ?? c.ingredients).length > 0,
+    ) ?? null;
     if (node) break;
   }
 
   if (parsed === 0) return { ok: false, reason: "unparseable-json-ld", blocks: blocks.length };
-  if (!node) return { ok: false, reason: "no-recipe-node", blocks: blocks.length };
+  if (!node) {
+    return {
+      ok: false,
+      // Recipe nodes existed but none carried ingredients: a different failure
+      // from a page with no Recipe at all, and worth telling apart.
+      reason: sawRecipeNode ? "no-ingredients" : "no-recipe-node",
+      blocks: blocks.length,
+    };
+  }
 
   const lines = ingredientLines(node.recipeIngredient ?? node.ingredients);
   if (lines.length === 0) return { ok: false, reason: "no-ingredients", blocks: blocks.length };

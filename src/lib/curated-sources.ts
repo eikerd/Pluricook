@@ -64,12 +64,25 @@ interface CuratedFile {
   sites: Record<string, CuratedSite>;
 }
 
+/**
+ * What a host absent from the curated list gets: NOT fetchable.
+ *
+ * This was `fetch`, which made the gate open for precisely the sites nobody had
+ * reviewed while the doc comment on mayFetch() claimed the opposite. An unlisted
+ * host must now be cleared on evidence first — see robots.ts and the clearance
+ * step in scripts/extract-dish.ts.
+ */
 export const DEFAULT_CURATION: CuratedSite = {
   tier: "normal",
-  acquisition: "fetch",
+  acquisition: "pending-review",
   note: null,
   licence: null,
 };
+
+/** Is this host explicitly in the curated list, as opposed to defaulted? */
+export function isListed(file: CuratedFile, hostOrUrl: string): boolean {
+  return canonicalHost(hostOrUrl) in file.sites;
+}
 
 export async function readCurated(path = CURATED_PATH): Promise<CuratedFile> {
   const file = Bun.file(path);
@@ -182,7 +195,7 @@ export async function setTier(
         : existing?.acquisition && existing.acquisition !== "fetch"
           ? existing.acquisition
           : tier === "normal"
-            ? (existing?.acquisition ?? "fetch")
+            ? (existing?.acquisition ?? "pending-review")
             : "pending-review",
   };
 
