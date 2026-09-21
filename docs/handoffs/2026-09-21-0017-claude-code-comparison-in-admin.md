@@ -3,18 +3,18 @@ date: 2026-09-21 00:17 America/Chicago
 tool: claude-code
 model: claude-fable-5-1
 repo: eikerd/Pluricook
-branch: comparison-in-admin
+branch: main (comparison-in-admin merged and deleted)
 pr: https://github.com/eikerd/Pluricook/pull/2
-state: pr-open
+state: merged
 deployed: no
-loose-ends: PR #2 open, Codex round 3 pending; untracked AGENTS.md in the main checkout is a full copy of CLAUDE.md written by another tool at 04:54, left untouched; no ESLint or react-hooks lint in the repo (task chip raised); no Figma file exists for this project, so the new Comparison page is not in Figma; six Detroit pizza recipes still private pending source URLs; "Charlie A" read as Charlie Anderson, unconfirmed; RecipeTin Eats broth and bouillon lines do not parse (reads "low" salinity in two dishes); 16 pre-existing type errors in ingredient-parser/unit-normalizer/build.ts; dead scaffold files App.tsx and APITester.tsx; TODO.md stale; 3 todo matcher tests; extraction is JSON-LD only
+loose-ends: untracked AGENTS.md in the main checkout is a full copy of CLAUDE.md written by another tool at 04:54, left untouched; no ESLint or react-hooks lint in the repo (task chip raised); no Figma file exists for this project, so the new Comparison page is not in Figma; six Detroit pizza recipes still private pending source URLs; "Charlie A" read as Charlie Anderson, unconfirmed; RecipeTin Eats broth and bouillon lines do not parse (reads "low" salinity in two dishes); 16 pre-existing type errors in ingredient-parser/unit-normalizer/build.ts; dead scaffold files App.tsx and APITester.tsx; TODO.md stale; 3 todo matcher tests; extraction is JSON-LD only
 supersedes: docs/handoffs/2026-09-20-1930-claude-code-source-registry-usda-admin.md
 ---
 
 # The comparison and seven visualizations, in the admin
 
 Repo [eikerd/Pluricook](https://github.com/eikerd/Pluricook) (private), branch
-`comparison-in-admin`, [PR #2](https://github.com/eikerd/Pluricook/pull/2) — **open**.
+`comparison-in-admin`, [PR #2](https://github.com/eikerd/Pluricook/pull/2) — **merged** after four review rounds. Scorecard: `reports/pr-2.html` (13 findings, 13 fixed, 12 would have been missed; grade C).
 Nothing is deployed; the project has no deploy target yet.
 
 The reasoning and the full tables live in the Claude doc, which this session
@@ -132,10 +132,10 @@ shortened to "Wheat flour, white", and Plotly keys categories by label.
 
 ## Where it is
 
-- Branch `comparison-in-admin`, pushed; PR #2 marked ready for review once this note landed.
+- Merged to `main`; branch `comparison-in-admin` deleted.
 - Working directly in the main checkout (`/Users/ernestoikerd/repos/food/compare-recipe`); no worktree was created.
 - Dev server: `bun --hot src/index.ts` on port 3000, via `.claude/launch.json` (`pluricook-admin`).
-- `bun test`: 323 pass, 3 todo, 0 fail. `tsc --noEmit`: no new errors.
+- `bun test`: 333 pass, 3 todo, 0 fail. `tsc --noEmit`: no new errors.
 
 ## What is deployed
 
@@ -143,9 +143,8 @@ Nothing. There is no deploy target yet.
 
 ## Loose ends
 
-- **PR #2 is open.** Three review rounds, the scorecard and the merge are still to do.
 - **`AGENTS.md`, untracked, in the main checkout.** Another tool wrote it at 04:54 as a 111-line copy of `CLAUDE.md`. The rule is that an `AGENTS.md` is a *pointer* to `CLAUDE.md`, never a copy. It is an instruction file, so it was not touched, added or deleted here; it is for the owner to decide.
-- **Codex rounds:** 1 and 2 done (four findings, all valid, all fixed). Round 3 was requested on `404e28a`; the Visualize commits landed after it, so round 3 may need re-requesting on the final head.
+- **Review, in one line:** Codex rounds 1–3, CodeRabbit's first completed review, and a fourth Codex round on the Visualize code: 13 findings, all valid, all fixed. Two were regressions from my own earlier fixes (the stale failure; the ternary the grams fix missed). Copilot was out of quota throughout.
 - **No linter.** The repo has no ESLint at all, so `react-hooks/exhaustive-deps` has never run on the admin. Out of scope here; raised as a task chip ("Add ESLint with react-hooks rules to Pluricook").
 - **CodeRabbit's green check on a draft is a skip, not a review.** It declines draft PRs and still reports SUCCESS. Do not count it as a round.
 - **Figma:** the project has no Figma file, so the new Comparison page is recorded nowhere but the code. Not skipped silently — there is nothing to update yet.
