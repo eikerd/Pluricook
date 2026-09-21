@@ -117,6 +117,8 @@ export function VisualizeView() {
 
       {error ? (
         <p className="failure" role="alert">{error}</p>
+      ) : dishes?.length === 0 ? (
+        <p className="empty">No recipes captured yet.</p>
       ) : !m ? (
         <p className="muted">Loading…</p>
       ) : m.recipes.length === 0 ? (

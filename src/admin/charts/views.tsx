@@ -39,7 +39,11 @@ export function Heatmap({ m, focus, onPick }: ViewProps) {
     for (const i of order) {
       const zr: Array<number | null> = [], tr: string[] = [];
       m.ingredients.forEach((_, j) => {
-        const v = m.values[i]![j]!, d = diffCell(v, base[j]!);
+        const v = m.values[i]![j]!, g = m.grams[i]![j]!;
+        // Listed, but this recipe lacks the anchor class, so there is no ratio to
+        // compare: show the grams, never "removed".
+        if (v === null && g !== null) { zr.push(null); tr.push(`${g} g`); return; }
+        const d = diffCell(v, base[j]!);
         zr.push(d.kind === "same-basis" ? Math.max(-2, Math.min(2, d.log2)) : null);
         tr.push(d.kind === "added" ? `+${v}` : d.kind === "removed" ? "−" : v === null ? "" : String(v));
       });
@@ -110,29 +114,32 @@ export function Distribution({ m, focus, onPick }: ViewProps) {
 
 export function Parallel({ m, focus }: ViewProps) {
   const cols = useMemo(() => shared(m), [m]);
+  // A recipe without the anchor class has no ratios; drawn, it would sit on every
+  // "not listed" floor as though it listed nothing. It is left out instead.
+  const rows = useMemo(() => m.recipes.map((_, i) => i).filter((i) => m.values[i]!.some((v) => v != null)), [m]);
   const { data, layout } = useMemo(() => ({
     data: [{
       type: "parcoords",
       // A line is one recipe. Plotly cannot draw a gap, so an unlisted ingredient
       // sits on a "not listed" floor below the axis's real range — never at zero.
       dimensions: cols.map((j) => {
-        const vals = m.values.map((r) => r[j]).filter((v): v is number => v != null);
+        const vals = rows.map((i) => m.values[i]![j]).filter((v): v is number => v != null);
         const lo = Math.min(...vals), hi = Math.max(...vals), floor = lo - (hi - lo || 1) * 0.25;
-        const anyMissing = vals.length < m.recipes.length;
+        const anyMissing = vals.length < rows.length;
         return {
-          label: m.ingredients[j]!.label, values: m.values.map((r) => r[j] ?? floor),
+          label: m.ingredients[j]!.label, values: rows.map((i) => m.values[i]![j] ?? floor),
           range: [anyMissing ? floor : lo, hi],
           ...(anyMissing ? { tickvals: [floor, lo, hi], ticktext: ["not listed", String(lo), String(hi)] } : {}),
         };
       }),
       line: {
-        color: m.recipes.map((_, i) => (focus === null ? i : i === focus ? 1 : 0)),
+        color: rows.map((i) => (focus === null ? i : i === focus ? 1 : 0)),
         colorscale: focus === null ? COLORWAY.map((c, k) => [k / (COLORWAY.length - 1), c]) : [[0, "#c9bba3"], [1, PAPRIKA]],
       },
       labelangle: -30, labelside: "bottom",
     }],
     layout: { margin: { l: 70, r: 70, t: 30, b: 120 } },
-  }), [m, cols, focus]);
+  }), [m, cols, focus, rows]);
 
   if (cols.length < 2) return <p className="empty">Too few shared ingredients for parallel axes.</p>;
   return <Plot label="Parallel coordinates, one line per recipe" data={data} layout={layout} />;

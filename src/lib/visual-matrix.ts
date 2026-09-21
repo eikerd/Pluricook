@@ -44,7 +44,11 @@ export interface VisualMatrix {
   normalization: { kind: "class" | "clr"; anchorClass: FoodClass | null; reason: string };
   recipes: MatrixRecipe[];
   ingredients: MatrixIngredient[];
-  /** values[recipe][ingredient]; null = not listed. */
+  /**
+   * values[recipe][ingredient], against the anchor. Null when not listed — OR
+   * when listed but this recipe lacks the anchor class, so no ratio exists.
+   * Presence is therefore read from `grams`, never from here.
+   */
   values: Array<Array<number | null>>;
   /** The line as published behind each cell, so any mark on any chart can be checked. */
   lines: Array<Array<string | null>>;
@@ -138,7 +142,10 @@ export function buildMatrix(c: Comparison): VisualMatrix {
   clusters.forEach((cluster, j) => {
     for (const s of cluster.sources) {
       const i = recipeIndex.get(s.recipeId);
-      if (i === undefined || s.relative === null) continue;
+      if (i === undefined) continue;
+      // Grams and the published line are facts whether or not a ratio exists:
+      // a recipe missing the anchor class (anchors need only 75% presence)
+      // still lists its garlic.
       values[i]![j] = s.relative;
       lines[i]![j] = s.rawLine;
       grams[i]![j] = s.grams;
@@ -156,8 +163,8 @@ export function buildMatrix(c: Comparison): VisualMatrix {
   const labels = uniqueLabels(clusters.map((x) => x.foodDescription));
   const fixedBasis = clusters
     .map((_, j) => j)
-    .filter((j) => values.length > 0 && values.every((row) => row[j] != null && row[j]! > 0));
-  const fixed = values.map((row) => fixedBasis.map((j) => row[j]!));
+    .filter((j) => grams.length > 0 && grams.every((row) => row[j] != null && row[j]! > 0));
+  const fixed = grams.map((row) => fixedBasis.map((j) => row[j]!));
 
   return {
     dish: c.dish,
@@ -185,9 +192,12 @@ export function buildMatrix(c: Comparison): VisualMatrix {
     grams,
     classes,
     classValues,
-    membershipDistance: values.map((a) => values.map((b) => jaccardDistance(a, b))),
-    sharedDistance: values.map((a) => values.map((b) => aitchison(a, b))),
-    sharedCount: values.map((a) => values.map((b) => a.filter((x, j) => x != null && b[j] != null).length)),
+    // From grams: Aitchison is scale-invariant within a recipe, so grams give the
+    // same distance as anchor ratios wherever both exist, and still work where a
+    // recipe lacks the anchor class and has no ratios at all.
+    membershipDistance: grams.map((a) => grams.map((b) => jaccardDistance(a, b))),
+    sharedDistance: grams.map((a) => grams.map((b) => aitchison(a, b))),
+    sharedCount: grams.map((a) => grams.map((b) => a.filter((x, j) => x != null && b[j] != null).length)),
     fixedBasis,
     fixedDistance: fixed.map((a) => fixed.map((b) => (fixedBasis.length < 2 ? null : aitchison(a, b)))),
   };

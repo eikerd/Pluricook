@@ -23,6 +23,8 @@ describe("listDishes", () => {
     ["an entry with no ingredient lines", { recipes: [{ id: "x" }] }],
     ["sections that are not a list", { recipes: [{ id: "x", ingredientLines: [], sections: "dough" }] }],
     ["a section with no lines", { recipes: [{ id: "x", ingredientLines: [], sections: [{ name: "dough" }] }] }],
+    ["an entry with no id", { recipes: [{ ingredientLines: [], provenance: { siteName: "a" } }] }],
+    ["an entry with no source", { recipes: [{ id: "x", ingredientLines: [] }] }],
   ])("valid JSON with %s costs one dish, not the whole list", async (_what, body) => {
     await Bun.write(BROKEN, JSON.stringify(body));
     const names = (await listDishes()).map((d) => d.dish);

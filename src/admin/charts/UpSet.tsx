@@ -16,7 +16,8 @@ interface Combo { members: number[]; ingredients: number[] }
 export function combinations(m: VisualMatrix): Combo[] {
   const byKey = new Map<string, Combo>();
   m.ingredients.forEach((_, j) => {
-    const members = m.recipes.map((_, i) => i).filter((i) => m.values[i]![j] != null);
+    // Membership from grams: listed is listed, whether or not a ratio exists.
+    const members = m.recipes.map((_, i) => i).filter((i) => m.grams[i]![j] != null);
     if (members.length === 0) return;
     const key = members.join(",");
     const combo = byKey.get(key) ?? { members, ingredients: [] };
@@ -31,7 +32,7 @@ const COL = 30, ROW = 26, BAR_H = 120, LEFT = 210, SET_BAR = 70;
 
 export function UpSet({ m, focus, onPick }: ViewProps) {
   const combos = useMemo(() => combinations(m), [m]);
-  const setSize = m.recipes.map((_, i) => m.values[i]!.filter((v) => v != null).length);
+  const setSize = m.recipes.map((_, i) => m.grams[i]!.filter((g) => g != null).length);
   const maxCombo = Math.max(1, ...combos.map((c) => c.ingredients.length));
   const maxSet = Math.max(1, ...setSize);
   const width = LEFT + SET_BAR + combos.length * COL + 20;

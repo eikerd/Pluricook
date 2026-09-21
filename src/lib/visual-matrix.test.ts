@@ -63,6 +63,26 @@ describe("buildMatrix — acceptance cases", () => {
   });
 });
 
+describe("buildMatrix — a recipe without the anchor class", () => {
+  // Anchors need only 75% presence, so a minority recipe can lack the anchor and
+  // have every ratio null. Its grams, lines and membership must survive.
+  const c = comparison();
+  for (const cluster of c.common) for (const s of cluster.sources) if (s.recipeId === "c") s.relative = null;
+  const m = buildMatrix(c);
+
+  test("keeps grams and the published line", () => {
+    expect(m.values[2]![1]).toBeNull();
+    expect(m.grams[2]![1]).toBe(70);
+    expect(m.lines[2]![1]).toBe("70 of water");
+  });
+
+  test("still counts as listing the ingredients, and still has a distance", () => {
+    expect(m.membershipDistance[0]![2]).toBe(0.25);
+    expect(m.sharedDistance[0]![2]).toBe(0);
+    expect(m.fixedBasis).toHaveLength(3);
+  });
+});
+
 describe("diffCell", () => {
   test("a missing or zero baseline is 'added', never an infinite change", () => {
     expect(diffCell(5, null)).toEqual({ kind: "added" });

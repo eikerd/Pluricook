@@ -34,7 +34,7 @@ export function Network({ m, focus, onPick }: ViewProps) {
       ...keep.map((j) => ({ id: `i${j}`, name: m.ingredients[j]!.label, kind: "ingredient" as const, index: j, val: 1 + m.ingredients[j]!.recipeCount })),
     ];
     const links: Link[] = [];
-    m.values.forEach((row, i) => keep.forEach((j) => { if (row[j] != null) links.push({ source: `r${i}`, target: `i${j}` }); }));
+    m.grams.forEach((row, i) => keep.forEach((j) => { if (row[j] != null) links.push({ source: `r${i}`, target: `i${j}` }); }));
     return { nodes, links, hidden: m.ingredients.length - keep.length };
   }, [m, focus, hideUbiquitous]);
 
@@ -73,7 +73,7 @@ export function Network({ m, focus, onPick }: ViewProps) {
             onNodeClick={(o) => {
               const n = o as Node;
               if (n.kind !== "ingredient") return;
-              const recipe = m.values.findIndex((row) => row[n.index] != null);
+              const recipe = m.grams.findIndex((row) => row[n.index] != null);
               if (recipe >= 0) onPick({ recipe, ingredient: n.index });
             }}
           />

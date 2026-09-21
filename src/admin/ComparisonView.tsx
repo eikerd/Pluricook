@@ -294,6 +294,9 @@ export function ComparisonView() {
 
       {error ? (
         <p className="failure" role="alert">{error}</p>
+      ) : dishes?.length === 0 ? (
+        // Loaded, and empty: no dish means no comparison request, so "Loading…" would never end.
+        <p className="empty">No recipes captured yet.</p>
       ) : !comparison || !columns ? (
         <p className="muted">Loading…</p>
       ) : comparison.analysed === 0 ? (

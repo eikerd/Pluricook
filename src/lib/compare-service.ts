@@ -41,6 +41,13 @@ const isStringArray = (v: unknown): v is string[] => Array.isArray(v) && v.every
  */
 function entryProblem(entry: unknown): string | null {
   if (!isObject(entry)) return "is not an object";
+  if (typeof entry.id !== "string" || entry.id === "") return "has no id";
+  // compareRecipes names every row by its source; a recipe without one is not
+  // comparable, and would throw only once someone opened that dish.
+  const p = entry.provenance;
+  if (!isObject(p) || typeof p.siteName !== "string") return "has no provenance.siteName";
+  if (p.sourceUrl !== null && p.sourceUrl !== undefined && typeof p.sourceUrl !== "string") return "has a sourceUrl that is not text";
+  if (entry.servings != null && typeof entry.servings !== "number") return "has servings that are not a number";
   if (!isStringArray(entry.ingredientLines)) return "has no ingredientLines list of strings";
   if (entry.sections === undefined) return null;
   if (!Array.isArray(entry.sections)) return "has sections that are not a list";
