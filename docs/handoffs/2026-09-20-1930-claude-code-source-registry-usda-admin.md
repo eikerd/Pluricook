@@ -6,7 +6,7 @@ branch: workflow-source-registry
 pr: https://github.com/eikerd/Pluricook/pull/1
 state: pr-open
 deployed: no
-loose-ends: 20 pre-existing type errors in ingredient-parser and unit-normalizer; dead scaffold files (App.tsx, APITester.tsx); TODO.md stale; no trusted-site list; extraction not built
+loose-ends: 16 pre-existing type errors in ingredient-parser and unit-normalizer; dead scaffold files (App.tsx, APITester.tsx); TODO.md stale; comparison not yet in the admin UI; microdata/HTML/LLM extraction tiers not built; 3 todo matcher tests
 supersedes: none
 ---
 
@@ -118,6 +118,90 @@ retired in favour of the USDA portions table**, not extended.
    sites) and the best ingredient parser (`ingredient-parser-nlp`, 98.3% word /
    95.6% sentence accuracy) are both Python. This stack is Bun. Either port the
    cascade or run a small Python service. Not decided.
+
+## Later in the same session — extraction through comparison
+
+Everything below landed on the same branch after the first version of this note.
+
+| Piece | Path | What it is |
+|---|---|---|
+| Starred sources | `data/sources/curated.json`, `src/lib/curated-sources.ts` | Tier + acquisition per site; `mayFetch()` closed by default |
+| Provenance | `src/types/provenance.ts` | Required on every recipe; no field exists for headnote, step text or photos |
+| Normalizers | `src/lib/normalize.ts` | 7 `recipeYield` shapes, non-ISO durations, `HowToSection` nesting, entities |
+| Extraction | `src/lib/recipe-extract.ts`, `scripts/extract-dish.ts` | JSON-LD tier; permission gate runs BEFORE the network call |
+| Manual entry | `scripts/add-manual-recipe.ts` | `manual-limited` acquisition with an enforced per-site cap |
+| Line repair | `src/lib/ingredient-line.ts` | Fixes the raw parser's unit at the boundary |
+| Grams | `src/lib/to-grams.ts` | Mass, volume and COUNT conversion against USDA portions |
+| Aliases | `data/ingredients/aliases.json`, `src/lib/ingredient-aliases.ts` | Our mapping, layered on USDA, never amending it |
+| Anchor | `src/lib/anchor.ts` | Dish-level reference: meat → grain → legume → dominant → clr |
+| Comparison | `src/lib/compare.ts`, `scripts/compare-dish.ts` | Consensus, outliers, salinity with sanity flags |
+| Worklist | `scripts/alias-worklist.ts` | What to add to the alias table next, by frequency |
+| Regression | `data/ingredients/expectations.json` | Golden matches, counted weights, a coverage floor |
+
+```bash
+bun scripts/extract-dish.ts meatloaf          # fetch + extract, permission-gated
+bun scripts/compare-dish.ts "lentil soup"     # anchor, consensus, salinity
+bun scripts/alias-worklist.ts --top 25        # what to map next
+bun test                                      # 184 pass, 3 todo
+```
+
+### Three decisions that are easy to get wrong later
+
+**USDA is never edited.** Our knowledge is a superset in `aliases.json`. `usda.db`
+is gitignored and rebuilt, so an edit dies at the next rebuild — and an edited
+USDA copy stops being citable, which is the whole reason to use it.
+
+**The anchor is chosen per dish, never per recipe.** Otherwise one recipe's
+"% of meat" and another's "% of crumbs" are not comparable. A class qualifies at
+75% presence and 20% median share of anchorable mass. Water, stock, condiments
+and spices are unanchorable, so broth cannot swamp a soup. On lentil soup the
+vegetables hold a larger share (48%) than the lentils (43%) and both qualify;
+priority picks legume, correctly.
+
+**Ranking heuristics are a dead end; the alias table is not.** A first-segment
+rule fixed milk and ground beef and cost 13 points of coverage on bread crumbs.
+It was reverted. Heuristics are unbounded — each rule breaks another — while a
+mapping table only improves.
+
+### Findings worth keeping
+
+- Nine of thirteen meatloaf recipes land between 1.6% and 1.96% salt-equivalent
+  by meat weight, inside the 1.5–2.0% band sausage makers use, and none says so.
+  Betty Crocker adds no table salt at all and still reaches 1.9%.
+- Meat per serving varies 2.2x across authors. "A serving" is an opinion.
+- Every LOW salinity flag pointed at a real gap: unresolved bouillon cubes, a
+  brand-named ketchup, and a recipe listing "Kosher salt" with no quantity.
+- Coverage: meatloaf 46% → 86%, lentil soup 56% → 72%. The biggest single gain
+  was not an alias but learning to COUNT — eggs, cloves, stalks, whole onions —
+  which the worklist ranked above every alias miss.
+
+### Owner decisions, continued
+
+- **"the identity of every recipe is based on the source it came from"** —
+  attribution is constitutive. No generated recipes; the corpus is observations.
+- **"the ratio of spices to a pound of meat is more important to my recipes than
+  some concept of an overall amount that a person should eat"** — the basis for
+  anchor normalization. It has precedent in baker's percentage, charcuterie
+  formulation, and Aitchison's log-ratio analysis of compositional data.
+- **"I love the idea of monitoring the salt equivalent in each dish, both for
+  health reasons and also for sanity checking"** — salinity is first-class.
+- **"We can build test suites from all the edge cases that we're finding"** —
+  hence `expectations.json` and its coverage floor.
+- Serious Eats is `manual-limited`, capped at 10 hand-entered recipes. People Inc
+  licensing was judged out of reach: "they're going to want top institutional
+  dollar and we're not going to ever do that."
+- America's Test Kitchen stays at `none`: a paid account means clickwrap terms.
+
+### What the next agent should do first
+
+1. **Work the alias worklist.** `bun scripts/alias-worklist.ts`. Every entry lifts
+   all future dishes. Verify each `fdcId` — the integrity test enforces it.
+2. **Put the comparison in the admin.** It is CLI-only. The owner reads tables;
+   `sortable-grid-views` applies, and `render-before-commit` applies to the UI.
+3. **Capture a third dish with a different backbone** — a baked good for the
+   grain anchor, or pesto, where the true backbone (basil) sits in USDA's
+   unanchorable "Spices and Herbs" category and will test the hierarchy hardest.
+4. **The three `todo` matcher tests** in `to-grams.test.ts` are real, known gaps.
 
 ## Decided by the owner this session
 
