@@ -23,19 +23,31 @@ export interface MergeResult {
   keptManual: number;
 }
 
+/**
+ * What makes two records the same recipe: its page, or — for a recipe from the
+ * owner's notes that has no URL on file — its internal id.
+ */
+function keyOf(r: ExtractedRecipe): string {
+  return r.provenance.sourceUrl ? canonicalUrl(r.provenance.sourceUrl) : `id:${r.id}`;
+}
+
+/** Entered by a person rather than fetched; a fetch must never overwrite these. */
+const isHandEntered = (r: ExtractedRecipe) =>
+  r.provenance.method === "manual-transcription" || r.provenance.method === "personal-collection";
+
 export function mergeRecipes(
   existing: ExtractedRecipe[],
   fresh: ExtractedRecipe[],
 ): MergeResult {
   const byUrl = new Map<string, ExtractedRecipe>();
-  for (const r of existing) byUrl.set(canonicalUrl(r.provenance.sourceUrl), r);
+  for (const r of existing) byUrl.set(keyOf(r), r);
 
   let refreshed = 0;
   let added = 0;
   const touched = new Set<string>();
 
   for (const r of fresh) {
-    const key = canonicalUrl(r.provenance.sourceUrl);
+    const key = keyOf(r);
     // Two spellings of one page in a single run are one recipe.
     if (touched.has(key)) continue;
     touched.add(key);
@@ -44,7 +56,9 @@ export function mergeRecipes(
     // A hand-entered recipe is never overwritten by a fetch: the person who
     // typed it in read the page, and an extractor's reading is not more
     // authoritative than theirs.
-    if (held?.provenance.method === "manual-transcription") continue;
+    // The exception is one hand-entered record replacing another: re-importing
+    // the owner's sheet after they corrected a cell must take the correction.
+    if (held && isHandEntered(held) && !isHandEntered(r)) continue;
 
     if (held) refreshed++;
     else added++;
@@ -52,14 +66,13 @@ export function mergeRecipes(
   }
 
   const recipes = [...byUrl.values()];
-  const untouched = recipes.filter((r) => !touched.has(canonicalUrl(r.provenance.sourceUrl)) ||
-    r.provenance.method === "manual-transcription");
+  const untouched = recipes.filter((r) => !touched.has(keyOf(r)));
 
   return {
     recipes,
     refreshed,
     added,
     kept: recipes.length - refreshed - added,
-    keptManual: untouched.filter((r) => r.provenance.method === "manual-transcription").length,
+    keptManual: untouched.filter(isHandEntered).length,
   };
 }

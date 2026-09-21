@@ -1,0 +1,354 @@
+{
+  "dish": "detroit-pizza",
+  "extractedAt": "2026-09-20",
+  "recipes": [
+    {
+      "id": "personal:detroit-pizza:pizzahog",
+      "provenance": {
+        "host": null,
+        "siteName": "PizzaHog",
+        "sourceUrl": null,
+        "author": null,
+        "sourceTitle": "detroit-pizza (from owner's notes)",
+        "capturedAt": "2026-09-20",
+        "method": "personal-collection",
+        "acquisitionAtCapture": "fetch",
+        "licence": null
+      },
+      "visibility": "private",
+      "dish": "detroit-pizza",
+      "sections": [
+        {
+          "name": "dough and toppings",
+          "ingredientLines": [
+            "273 g bread flour",
+            "205 g water",
+            "1.5 g yeast",
+            "4.1 g salt"
+          ]
+        }
+      ],
+      "ingredientLines": [
+        "273 g bread flour",
+        "205 g water",
+        "1.5 g yeast",
+        "4.1 g salt"
+      ],
+      "servings": null,
+      "servingsRaw": null,
+      "totalTimeMinutes": null,
+      "totalTimeRaw": null,
+      "prepTimeMinutes": null,
+      "cookTimeMinutes": null,
+      "stepCount": null,
+      "visibilityReason": "no source URL on file — add one to make it publishable"
+    },
+    {
+      "id": "personal:detroit-pizza:atk",
+      "provenance": {
+        "host": null,
+        "siteName": "America's Test Kitchen",
+        "sourceUrl": null,
+        "author": null,
+        "sourceTitle": "detroit-pizza (from owner's notes)",
+        "capturedAt": "2026-09-20",
+        "method": "personal-collection",
+        "acquisitionAtCapture": "fetch",
+        "licence": null
+      },
+      "visibility": "private",
+      "dish": "detroit-pizza",
+      "sections": [
+        {
+          "name": "dough and toppings",
+          "ingredientLines": [
+            "337 g bread flour",
+            "236 g water",
+            "10 g yeast",
+            "6 g salt",
+            "1 tb oil",
+            "6 g sugar",
+            "284 g brick cheese"
+          ]
+        },
+        {
+          "name": "sauce",
+          "ingredientLines": [
+            "1 cup tomato",
+            "1 garlic cloves",
+            "1 tb fresh basil",
+            "2 g dry basil",
+            "2 g dry oregano",
+            "4 g red pepper",
+            "1 tb olive oil",
+            "3 g sugar",
+            "2 g salt",
+            "3 g pepper"
+          ]
+        }
+      ],
+      "ingredientLines": [
+        "337 g bread flour",
+        "236 g water",
+        "10 g yeast",
+        "6 g salt",
+        "1 tb oil",
+        "6 g sugar",
+        "284 g brick cheese",
+        "1 cup tomato",
+        "1 garlic cloves",
+        "1 tb fresh basil",
+        "2 g dry basil",
+        "2 g dry oregano",
+        "4 g red pepper",
+        "1 tb olive oil",
+        "3 g sugar",
+        "2 g salt",
+        "3 g pepper"
+      ],
+      "servings": null,
+      "servingsRaw": null,
+      "totalTimeMinutes": null,
+      "totalTimeRaw": null,
+      "prepTimeMinutes": null,
+      "cookTimeMinutes": null,
+      "stepCount": null,
+      "visibilityReason": "no source URL on file — add one to make it publishable"
+    },
+    {
+      "id": "personal:detroit-pizza:serious",
+      "provenance": {
+        "host": null,
+        "siteName": "Serious Eats",
+        "sourceUrl": null,
+        "author": null,
+        "sourceTitle": "detroit-pizza (from owner's notes)",
+        "capturedAt": "2026-09-20",
+        "method": "personal-collection",
+        "acquisitionAtCapture": "fetch",
+        "licence": null
+      },
+      "visibility": "private",
+      "dish": "detroit-pizza",
+      "sections": [
+        {
+          "name": "dough and toppings",
+          "ingredientLines": [
+            "300 g bread flour",
+            "220 g water",
+            "5 g yeast",
+            "9 g salt",
+            "1 tb oil",
+            "340 g brick cheese",
+            "340 g pepperoni"
+          ]
+        },
+        {
+          "name": "sauce",
+          "ingredientLines": [
+            "28 oz tomato",
+            "6 g garlic powder",
+            "3 medium garlic cloves",
+            "6 g onion powder",
+            "5 g dry oregano",
+            "3 g red pepper",
+            "30 ml olive oil",
+            "15 g sugar",
+            "4 g salt"
+          ]
+        }
+      ],
+      "ingredientLines": [
+        "300 g bread flour",
+        "220 g water",
+        "5 g yeast",
+        "9 g salt",
+        "1 tb oil",
+        "340 g brick cheese",
+        "340 g pepperoni",
+        "28 oz tomato",
+        "6 g garlic powder",
+        "3 medium garlic cloves",
+        "6 g onion powder",
+        "5 g dry oregano",
+        "3 g red pepper",
+        "30 ml olive oil",
+        "15 g sugar",
+        "4 g salt"
+      ],
+      "servings": null,
+      "servingsRaw": null,
+      "totalTimeMinutes": null,
+      "totalTimeRaw": null,
+      "prepTimeMinutes": null,
+      "cookTimeMinutes": null,
+      "stepCount": null,
+      "visibilityReason": "no source URL on file — add one to make it publishable"
+    },
+    {
+      "id": "personal:detroit-pizza:chefjohn",
+      "provenance": {
+        "host": null,
+        "siteName": "Food Wishes",
+        "sourceUrl": null,
+        "author": "Chef John",
+        "sourceTitle": "detroit-pizza (from owner's notes)",
+        "capturedAt": "2026-09-20",
+        "method": "personal-collection",
+        "acquisitionAtCapture": "fetch",
+        "licence": null
+      },
+      "visibility": "private",
+      "dish": "detroit-pizza",
+      "sections": [
+        {
+          "name": "dough and toppings",
+          "ingredientLines": [
+            "375 g bread flour",
+            "236 g water",
+            "9 g yeast",
+            "6 g salt",
+            "3 tb oil",
+            "6 g sugar"
+          ]
+        }
+      ],
+      "ingredientLines": [
+        "375 g bread flour",
+        "236 g water",
+        "9 g yeast",
+        "6 g salt",
+        "3 tb oil",
+        "6 g sugar"
+      ],
+      "servings": null,
+      "servingsRaw": null,
+      "totalTimeMinutes": null,
+      "totalTimeRaw": null,
+      "prepTimeMinutes": null,
+      "cookTimeMinutes": null,
+      "stepCount": null,
+      "visibilityReason": "no source URL on file — add one to make it publishable"
+    },
+    {
+      "id": "personal:detroit-pizza:ethan",
+      "provenance": {
+        "host": null,
+        "siteName": "Ethan Chlebowski",
+        "sourceUrl": null,
+        "author": "Ethan Chlebowski",
+        "sourceTitle": "detroit-pizza (from owner's notes)",
+        "capturedAt": "2026-09-20",
+        "method": "personal-collection",
+        "acquisitionAtCapture": "fetch",
+        "licence": null
+      },
+      "visibility": "private",
+      "dish": "detroit-pizza",
+      "sections": [
+        {
+          "name": "dough and toppings",
+          "ingredientLines": [
+            "300 g bread flour",
+            "210 g water",
+            "5 g yeast",
+            "6 g salt"
+          ]
+        },
+        {
+          "name": "sauce",
+          "ingredientLines": [
+            "28 oz tomato",
+            "2 garlic cloves",
+            "dry oregano, to taste",
+            "red pepper, to taste",
+            "salt, to taste",
+            "42 g butter",
+            "1/4 onion"
+          ]
+        }
+      ],
+      "ingredientLines": [
+        "300 g bread flour",
+        "210 g water",
+        "5 g yeast",
+        "6 g salt",
+        "28 oz tomato",
+        "2 garlic cloves",
+        "dry oregano, to taste",
+        "red pepper, to taste",
+        "salt, to taste",
+        "42 g butter",
+        "1/4 onion"
+      ],
+      "servings": null,
+      "servingsRaw": null,
+      "totalTimeMinutes": null,
+      "totalTimeRaw": null,
+      "prepTimeMinutes": null,
+      "cookTimeMinutes": null,
+      "stepCount": null,
+      "visibilityReason": "no source URL on file — add one to make it publishable"
+    },
+    {
+      "id": "personal:detroit-pizza:charlie",
+      "provenance": {
+        "host": null,
+        "siteName": "Charlie Anderson",
+        "sourceUrl": null,
+        "author": "Charlie Anderson",
+        "sourceTitle": "detroit-pizza (from owner's notes)",
+        "capturedAt": "2026-09-20",
+        "method": "personal-collection",
+        "acquisitionAtCapture": "fetch",
+        "licence": null
+      },
+      "visibility": "private",
+      "dish": "detroit-pizza",
+      "sections": [
+        {
+          "name": "dough and toppings",
+          "ingredientLines": [
+            "315 g all-purpose flour",
+            "205 g water",
+            "1.6 g yeast",
+            "6.3 g salt",
+            "318 g brick cheese"
+          ]
+        },
+        {
+          "name": "sauce",
+          "ingredientLines": [
+            "28 oz tomato",
+            "1/4 tsp garlic powder",
+            "1.5 tsp dry oregano",
+            "3/4 tsp thyme",
+            "1/4 tsp red pepper",
+            "5 g salt"
+          ]
+        }
+      ],
+      "ingredientLines": [
+        "315 g all-purpose flour",
+        "205 g water",
+        "1.6 g yeast",
+        "6.3 g salt",
+        "318 g brick cheese",
+        "28 oz tomato",
+        "1/4 tsp garlic powder",
+        "1.5 tsp dry oregano",
+        "3/4 tsp thyme",
+        "1/4 tsp red pepper",
+        "5 g salt"
+      ],
+      "servings": null,
+      "servingsRaw": null,
+      "totalTimeMinutes": null,
+      "totalTimeRaw": null,
+      "prepTimeMinutes": null,
+      "cookTimeMinutes": null,
+      "stepCount": null,
+      "visibilityReason": "no source URL on file — add one to make it publishable"
+    }
+  ]
+}

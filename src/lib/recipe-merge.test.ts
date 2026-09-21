@@ -67,6 +67,24 @@ describe("mergeRecipes — a refresh must never shrink the corpus by accident", 
     expect(result.added).toBe(1);
   });
 
+  test("re-importing the owner's sheet takes their correction", () => {
+    // A fetch must never overwrite hand entry, but the owner fixing a cell and
+    // re-running the import is one hand-entered record replacing another.
+    const before = { ...recipe("https://x.com/p", "personal-collection", ["273 g flour"]), id: "personal:pizza:a" };
+    const after = { ...recipe("https://x.com/p", "personal-collection", ["280 g flour"]), id: "personal:pizza:a" };
+    const result = mergeRecipes([before], [after]);
+    expect(result.recipes).toHaveLength(1);
+    expect(result.recipes[0]!.ingredientLines).toEqual(["280 g flour"]);
+  });
+
+  test("recipes with no URL are told apart by their internal id", () => {
+    const a = { ...recipe("https://x.com/a", "personal-collection"), id: "personal:pizza:a" };
+    const b = { ...recipe("https://x.com/b", "personal-collection"), id: "personal:pizza:b" };
+    a.provenance = { ...a.provenance, sourceUrl: null, host: null };
+    b.provenance = { ...b.provenance, sourceUrl: null, host: null };
+    expect(mergeRecipes([], [a, b]).recipes).toHaveLength(2);
+  });
+
   test("an empty corpus plus a run is just the run", () => {
     const result = mergeRecipes([], [recipe("https://a.com/x"), recipe("https://b.com/y")]);
     expect(result.recipes).toHaveLength(2);

@@ -72,6 +72,70 @@
     "celery": {
       "fdcId": 169988,
       "note": "Celery, raw. Stalk portions: small 17 g, medium 40, large 64."
+    },
+    "water": {
+      "fdcId": 174158,
+      "note": "Water, bottled, generic. Needed for dough hydration; 'Water, as needed' is still refused via the 'as needed' reject phrase."
+    },
+    "bread flour": {
+      "fdcId": 168896,
+      "note": "Wheat flour, white, bread, enriched."
+    },
+    "all-purpose flour": {
+      "fdcId": 168894,
+      "note": "Wheat flour, white, all-purpose, enriched, bleached."
+    },
+    "yeast": {
+      "fdcId": 175043,
+      "note": "Leavening agents, yeast, baker's, active dry. Bare 'yeast' otherwise reaches 'Yeast extract spread'."
+    },
+    "brick cheese": {
+      "fdcId": 172176,
+      "note": "Cheese, brick."
+    },
+    "pepperoni": {
+      "fdcId": 174575,
+      "note": "Pepperoni, beef and pork, sliced."
+    },
+    "tomato": {
+      "fdcId": 170501,
+      "note": "Tomatoes, crushed, canned — what a pizza-sauce row means by 'tomato' at 28 oz."
+    },
+    "garlic powder": {
+      "fdcId": 171325,
+      "note": "Spices, garlic powder."
+    },
+    "onion powder": {
+      "fdcId": 171327,
+      "note": "Spices, onion powder."
+    },
+    "dry basil": {
+      "fdcId": 171317,
+      "note": "Spices, basil, dried."
+    },
+    "dry oregano": {
+      "fdcId": 171328,
+      "note": "Spices, oregano, dried."
+    },
+    "thyme": {
+      "fdcId": 170938,
+      "note": "Spices, thyme, dried."
+    },
+    "red pepper": {
+      "fdcId": 170932,
+      "note": "Spices, pepper, red or cayenne — flakes, in a pizza sauce; not a bell pepper."
+    },
+    "pepper": {
+      "fdcId": 170931,
+      "note": "Spices, pepper, black."
+    },
+    "oil": {
+      "fdcId": 171413,
+      "note": "Oil, olive, salad or cooking. A bare 'oil' in a pizza dough."
+    },
+    "salt": {
+      "fdcId": 173468,
+      "note": "Salt, table."
     }
   },
   "patterns": {
@@ -121,7 +185,6 @@
     "as needed",
     "for serving",
     "for garnish",
-    "optional",
-    "water"
+    "optional"
   ]
 }

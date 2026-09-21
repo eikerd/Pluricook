@@ -41,7 +41,7 @@ const SODIUM_DAILY_VALUE_MG = 2300;
 
 export interface SourceAmount {
   siteName: string;
-  sourceUrl: string;
+  sourceUrl: string | null;
   /** The line exactly as published, so a surprising number can be checked. */
   rawLine: string;
   grams: number;
@@ -78,7 +78,7 @@ export type SalinityFlag =
 
 export interface RecipeSummary {
   siteName: string;
-  sourceUrl: string;
+  sourceUrl: string | null;
   servings: number | null;
   resolvedLines: number;
   totalLines: number;
