@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { ComparisonView } from "./ComparisonView";
 import { DataTable } from "./DataTable";
+import { VisualizeView } from "./VisualizeView";
 import "../admin.css";
 
 interface DatasetMeta {
@@ -137,6 +138,13 @@ export function AdminApp() {
           >
             Comparison
           </button>
+          <button
+            type="button"
+            className={`rail__item ${active === "visualize" ? "is-active" : ""}`}
+            onClick={() => setActive("visualize")}
+          >
+            Visualize
+          </button>
         </nav>
 
         <p className="rail__foot">
@@ -150,6 +158,8 @@ export function AdminApp() {
           <Overview />
         ) : active === "comparison" ? (
           <ComparisonView />
+        ) : active === "visualize" ? (
+          <VisualizeView />
         ) : (
           <DataTable datasetId={active} searchable={current?.searchable ?? false} />
         )}
