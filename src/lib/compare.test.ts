@@ -51,6 +51,13 @@ function recipe(siteName: string, lines: string[], sections?: Section[]): Extrac
 /** The anchor class, or null when the dish fell through to centred log-ratio. */
 const anchorClass = (c: Comparison) => (c.anchor.kind === "class" ? c.anchor.klass : null);
 
+/** The salt cluster, asserted present — so a matching regression fails, rather than crashing on undefined. */
+function saltOf(c: Comparison) {
+  const salt = c.common.find((x) => /^salt/i.test(x.foodDescription));
+  expect(salt, "no salt cluster among the common ingredients").toBeDefined();
+  return salt!;
+}
+
 const compare = (recipes: ExtractedRecipe[], section?: string | null) =>
   compareRecipes({ recipes, db: db!, aliases, section });
 
@@ -67,7 +74,7 @@ withDb("anchor normalization", () => {
 
     // Three batch sizes, one ratio: the whole reason to anchor rather than
     // compare raw grams. 20/1000 = 10/500 = 40/2000 = 2%.
-    const salt = c.common.find((x) => /^salt/i.test(x.foodDescription))!;
+    const salt = saltOf(c);
     expect(salt.medianRelative).toBe(2);
     expect(salt.spreadRelative).toBe(1);
   });
@@ -78,7 +85,7 @@ withDb("anchor normalization", () => {
       recipe("b", ["1000 g ground beef", "20 g salt"]),
     ]);
 
-    const salt = c.common.find((x) => /^salt/i.test(x.foodDescription))!;
+    const salt = saltOf(c);
     expect(salt.recipeCount).toBe(2);
     expect(salt.sources.map((s) => s.grams).sort()).toEqual([20, 20]);
   });
@@ -132,13 +139,13 @@ withDb("sections", () => {
     const dough = compare(pizzas, "dough");
 
     // The dough's own figure is the baker's percentage: 10 / 500 = 2%.
-    const doughSalt = dough.common.find((x) => /^salt/i.test(x.foodDescription))!;
+    const doughSalt = saltOf(dough);
     expect(anchorClass(dough)).toBe("grain");
     expect(doughSalt.medianRelative).toBe(2);
 
     // Whole-recipe salt for a and b is (10 + 4) / 500 = 2.8% — a number that
     // describes neither the dough nor the sauce.
-    const wholeSalt = whole.common.find((x) => /^salt/i.test(x.foodDescription))!;
+    const wholeSalt = saltOf(whole);
     expect(wholeSalt.medianRelative).toBe(2.8);
   });
 
@@ -146,7 +153,7 @@ withDb("sections", () => {
     const sauce = compare(pizzas, "sauce");
     expect(anchorClass(sauce)).toBe("vegetable");
 
-    const salt = sauce.common.find((x) => /^salt/i.test(x.foodDescription))!;
+    const salt = saltOf(sauce);
     expect(salt.medianRelative).toBe(1);   // 4 / 400
   });
 
