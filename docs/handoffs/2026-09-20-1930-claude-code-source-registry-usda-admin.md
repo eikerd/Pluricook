@@ -4,17 +4,17 @@ model: Fable 5.1, then Opus 5
 repo: eikerd/Pluricook
 branch: workflow-source-registry
 pr: https://github.com/eikerd/Pluricook/pull/1
-state: pr-open
+state: merged
 deployed: no
-loose-ends: 16 pre-existing type errors in ingredient-parser and unit-normalizer; dead scaffold files (App.tsx, APITester.tsx); TODO.md stale; comparison not yet in the admin UI; microdata/HTML/LLM extraction tiers not built; 3 todo matcher tests
+loose-ends: round-3 fixes (514f12c) merged UNREVIEWED; CodeRabbit never completed a review; 16 pre-existing type errors in ingredient-parser and unit-normalizer; dead scaffold files (App.tsx, APITester.tsx); TODO.md stale; comparison not in the admin UI and not section-aware; microdata/HTML/LLM extraction tiers not built; 3 todo matcher tests; six Detroit Pizza recipes private pending source URLs
 supersedes: none
 ---
 
 # Source registry, USDA reference tables, and the Pluricook admin
 
 Repo [eikerd/Pluricook](https://github.com/eikerd/Pluricook) (private), branch
-`workflow-source-registry`, draft [PR #1](https://github.com/eikerd/Pluricook/pull/1).
-Nothing is deployed. `agent-sweep.sh` reports only this PR.
+`workflow-source-registry`, [PR #1](https://github.com/eikerd/Pluricook/pull/1) — **merged** after three
+review rounds. Scorecard: `reports/pr-1.html`. Nothing is deployed; the project has no deploy target yet.
 
 > The repo did not exist at session start. It was created this session from an
 > existing local checkout that had one commit (`chore: initialize repository`)
@@ -202,6 +202,59 @@ mapping table only improves.
    grain anchor, or pesto, where the true backbone (basil) sits in USDA's
    unanchorable "Spices and Herbs" category and will test the hierarchy hardest.
 4. **The three `todo` matcher tests** in `to-grams.test.ts` are real, known gaps.
+
+## Review, and what it found
+
+Three completed rounds, all from **Codex**. Copilot was out of quota. CodeRabbit
+never delivered: each push restarted its run, so it was still "processing" at
+merge and is NOT counted as a round.
+
+| Round | Commit reviewed | Findings | P1 |
+|---|---|---|---|
+| 1 | `7225c82` | 6 | 4 |
+| 2 | `19282f9` | 5 | 1 |
+| 3 | `8fe27cf` | 3 | 2 |
+
+Fourteen findings, all valid, all fixed; thirteen were blind spots I would not
+have caught — every one found while the test suite was green. The ones to
+remember:
+
+- **The permission gate was open for every unreviewed site** (round 2). An unlisted
+  host defaulted to `fetch` while the doc comment, and what the owner had been
+  told repeatedly, said the gate was closed by default. Now `pending-review`, with
+  clearance on evidence in `src/lib/robots.ts`.
+- **`preparation` was never populated** (round 1), so the ground-vs-leaf oregano
+  distinction was dead everywhere except the test that fed it by hand.
+- **Re-running extract-dish would have deleted the owner's hand-entered recipe.**
+- **Round 3's two P1s were regressions from work done earlier the same day** — a
+  star click revoking a clearance (caused by round 2's own fix), and a manual cap
+  that could be doubled (caused by the personal-collection importer).
+
+**Honest caveat: the round-3 fixes (`514f12c`) merged without a fourth look.**
+Findings fell 6 → 5 → 3, but round 3 still held two P1s, so the next PR's first
+review should be read as also covering that commit.
+
+## Added after the first handoff: personal collections
+
+| Piece | Path |
+|---|---|
+| Matrix importer | `src/lib/personal-collection.ts`, `scripts/import-collection.ts` |
+| Shared cap counting | `src/lib/hand-entry.ts` |
+| robots.txt clearance | `src/lib/robots.ts` |
+| The owner's sheet | `data/personal/detroit-pizza.json` |
+
+The owner's Detroit Pizza sheet — six sources, ingredients × sources, mostly grams —
+imports as one attributed recipe per column. All six are **private**: the sheet has
+names, not links, and no URL was guessed. Adding a `sourceUrl` and re-importing
+re-decides visibility against the curated list. `"ownWork": true` marks the owner's
+own recipe, publishable with no outbound link because the internal record is its
+source. Every recipe has an internal address via `internalRef()`.
+
+The anchor hierarchy chose **grain** unprompted, so the sheet reads in baker's
+percentages: hydration 70% of flour (1.2x spread), yeast 1.67% (5.8x spread).
+**Salt is misleading as computed**: dough and sauce salt are summed, and only dough
+salt is meaningful against flour. Sections are stored but the comparison does not
+use them yet — that is the next fix.
 
 ## Decided by the owner this session
 
