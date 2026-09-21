@@ -29,7 +29,7 @@ import {
   type Composition,
   type FoodClass,
 } from "./anchor";
-import { parseIngredientLine } from "./ingredient-parser";
+import { parseLine } from "./ingredient-line";
 import { EMPTY_TABLE, type AliasTable } from "./ingredient-aliases";
 import { toGrams, type Basis } from "./to-grams";
 import type { ExtractedRecipe } from "../types/provenance";
@@ -158,12 +158,12 @@ export function compareRecipes(opts: CompareOptions): Comparison {
     let sodiumMg = 0;
 
     for (const rawLine of recipe.ingredientLines) {
-      const parsed = parseIngredientLine(rawLine);
+      const parsed = parseLine(rawLine);
       const result = toGrams({
         quantity: parsed.quantity,
         unit: parsed.unit,
-        name: parsed.ingredientName,
-        condition: parsed.preparation ?? null,
+        name: parsed.name,
+        condition: parsed.preparation,
         db: opts.db,
         aliases: opts.aliases ?? EMPTY_TABLE,
       });

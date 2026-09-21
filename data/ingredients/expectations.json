@@ -123,6 +123,24 @@
       "expect": "salt",
       "reject": "",
       "found": "Natasha's Kitchen — a bracketed hedge beside a real quantity was being rejected outright, zeroing her table salt"
+    },
+    {
+      "line": "2 garlic cloves, minced",
+      "expect": "garlic",
+      "reject": "spices",
+      "found": "Natasha's Kitchen — the raw parser read unit='garlic' and name='cloves', which matched the clove spice"
+    },
+    {
+      "line": "1 yellow onion, chopped",
+      "expect": "onion",
+      "reject": "",
+      "found": "several — the raw parser read unit='yellow'"
+    },
+    {
+      "line": "2 stalks celery",
+      "expect": "celery",
+      "reject": "broccoli",
+      "found": "lentil soup — 'stalks' once resolved to 'Broccoli, stalks, raw'"
     }
   ],
   "rejections": [
@@ -141,7 +159,45 @@
   ],
   "coverageFloor": {
     "dish": "meatloaf",
-    "minimumPercent": 70,
-    "note": "Coverage on the meatloaf corpus must not regress below this. It was 46% before the stemming and dataset-preference fixes, 69% after, and 75% once the alias table landed. Raise this number when it is genuinely beaten; never lower it to make a change pass."
-  }
+    "minimumPercent": 84,
+    "note": "Coverage on the meatloaf corpus must not regress below this. History: 46% raw; 69% after the stemming and dataset-preference fixes; 75% with the alias table; 81% once counted ingredients were read against USDA's per-item portions; 86% after the raw parser's 'to taste' default stopped swallowing unitless counts. Raise it when genuinely beaten; never lower it to make a change pass."
+  },
+  "counts": [
+    {
+      "line": "2 large eggs",
+      "grams": 100,
+      "tolerance": 2,
+      "found": "USDA: 1 large egg = 50 g"
+    },
+    {
+      "line": "1 medium egg",
+      "grams": 44,
+      "tolerance": 1,
+      "found": "USDA: 1 medium egg = 44 g"
+    },
+    {
+      "line": "3 cloves garlic, minced",
+      "grams": 9,
+      "tolerance": 0.5,
+      "found": "USDA: 1 clove = 3 g"
+    },
+    {
+      "line": "1 large onion",
+      "grams": 150,
+      "tolerance": 2,
+      "found": "USDA: 1 large onion = 150 g"
+    },
+    {
+      "line": "1 onion",
+      "grams": 110,
+      "tolerance": 2,
+      "found": "no size stated, so medium: 110 g"
+    },
+    {
+      "line": "2 stalks celery",
+      "grams": 80,
+      "tolerance": 2,
+      "found": "no size stated, so medium stalk: 40 g each"
+    }
+  ]
 }

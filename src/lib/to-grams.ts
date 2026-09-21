@@ -201,6 +201,27 @@ export function matchFood(
   return null;
 }
 
+const SIZE_WORDS = ["large", "medium", "small", "jumbo"];
+
+/**
+ * Portions describing ONE WHOLE ITEM, for lines that count rather than measure:
+ * "2 large eggs", "1 onion". USDA publishes these — an egg is 38, 44, 50, 56 or
+ * 63 g by size, a medium onion 110 g — so counting is as grounded as weighing.
+ *
+ * Volumes, cuts and label servings are excluded: "1 cup, chopped" is a portion
+ * of onion but not a whole onion.
+ */
+function wholeItemPortions(portions: PortionRow[]): PortionRow[] {
+  return portions.filter((p) => {
+    const text = `${p.unit ?? ""} ${p.modifier ?? ""}`.toLowerCase();
+    if (/\b(cup|cups|tbsp|tsp|tablespoon|teaspoon|oz|fl|slice|chopped|sliced|diced|grated|mashed|nlea|serving|stalk|clove|sprig|ring|wedge)/.test(text)) {
+      return false;
+    }
+    return /\b(extra large|large|medium|small|jumbo|whole|each|fruit|item)\b/.test(text) ||
+      (p.unit !== null && p.unit !== "");
+  });
+}
+
 /** Does a USDA portion row describe the unit we are trying to convert? */
 function portionMatchesUnit(p: PortionRow, unit: string): boolean {
   const text = `${p.unit ?? ""} ${p.modifier ?? ""}`.toLowerCase();
@@ -298,17 +319,25 @@ export function toGrams(opts: ToGramsOptions): GramResult {
   const describe = (p: PortionRow) =>
     `${p.amount ?? 1} ${p.modifier ?? p.unit ?? ""} = ${p.gram_weight} g`.replace(/\s+/g, " ").trim();
 
-  const candidates = portions.filter((p) => portionMatchesUnit(p, unit));
+  // A line that counts ("2 large eggs", "1 onion") wants a whole-item portion;
+  // one that measures ("1 cup", "2 cloves") wants a portion in that unit.
+  const isCount = unit === "each" || SIZE_WORDS.includes(unit);
+  const candidates = isCount
+    ? wholeItemPortions(portions)
+    : portions.filter((p) => portionMatchesUnit(p, unit));
 
   if (candidates.length > 0) {
-    // Prefer a portion whose modifier also matches the stated condition; this is
-    // the whole reason condition is a parameter. "1 tsp, ground" and
-    // "1 tsp, leaves" are both teaspoons of the same dried oregano.
+    const has = (p: PortionRow, word: string) =>
+      `${p.unit ?? ""} ${p.modifier ?? ""}`.toLowerCase().includes(word);
+
+    // In order: the size the recipe stated; the preparation it stated (this is
+    // where "1 tsp, ground" and "1 tsp, leaves" part ways); then medium, which
+    // is what an unqualified "1 onion" or "2 stalks celery" means in practice.
     const cond = opts.condition?.toLowerCase().trim();
-    const byCondition = cond
-      ? candidates.find((p) => (p.modifier ?? "").toLowerCase().includes(cond))
-      : undefined;
-    const chosen = byCondition ?? candidates[0]!;
+    const bySize = SIZE_WORDS.includes(unit) ? candidates.find((p) => has(p, unit)) : undefined;
+    const byCondition = cond ? candidates.find((p) => has(p, cond)) : undefined;
+    const byMedium = candidates.length > 1 ? candidates.find((p) => has(p, "medium")) : undefined;
+    const chosen = bySize ?? byCondition ?? byMedium ?? candidates[0]!;
 
     const per = chosen.gram_weight / (chosen.amount && chosen.amount > 0 ? chosen.amount : 1);
     return {
@@ -318,9 +347,11 @@ export function toGrams(opts: ToGramsOptions): GramResult {
       foodDescription: food.description,
       portionUsed: describe(chosen),
       note:
-        !byCondition && cond && candidates.length > 1
-          ? `condition "${cond}" not matched; used "${chosen.modifier ?? chosen.unit}" of ${candidates.length} portions`
-          : null,
+        !bySize && !byCondition && byMedium
+          ? `size not stated; assumed medium of ${candidates.length} portions`
+          : !byCondition && cond && candidates.length > 1
+            ? `condition "${cond}" not matched; used "${chosen.modifier ?? chosen.unit}" of ${candidates.length} portions`
+            : null,
     };
   }
 

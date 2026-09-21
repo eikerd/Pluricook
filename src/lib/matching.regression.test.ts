@@ -11,7 +11,7 @@
 
 import { Database } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
-import { parseIngredientLine } from "./ingredient-parser";
+import { parseLine } from "./ingredient-line";
 import { readAliases } from "./ingredient-aliases";
 import { toGrams } from "./to-grams";
 import type { ExtractedRecipe } from "../types/provenance";
@@ -33,12 +33,12 @@ const aliases = await readAliases();
 
 /** Resolve a raw ingredient line exactly as the pipeline does. */
 function resolve(line: string) {
-  const parsed = parseIngredientLine(line);
+  const parsed = parseLine(line);
   return toGrams({
     quantity: parsed.quantity,
     unit: parsed.unit,
-    name: parsed.ingredientName,
-    condition: parsed.preparation ?? null,
+    name: parsed.name,
+    condition: parsed.preparation,
     db: db!,
     aliases,
   });
@@ -102,4 +102,42 @@ suite("coverage floor", () => {
       `coverage is ${percent}% of ${lines} lines. ${fixture.coverageFloor.note}`,
     ).toBeGreaterThanOrEqual(fixture.coverageFloor.minimumPercent);
   });
+});
+
+suite("alias table integrity", () => {
+  test("every fdcId in aliases.json names a real USDA record", async () => {
+    // A mistyped id falls through to the heuristics silently, so a wrong alias
+    // looks exactly like a working one until someone reads the output closely.
+    const file = (await Bun.file("data/ingredients/aliases.json").json()) as {
+      exact?: Record<string, { fdcId: number }>;
+      patterns?: Record<string, { fdcId: number }>;
+    };
+    const exists = db!.query<{ n: number }, [number]>(
+      `SELECT COUNT(*) AS n FROM foods WHERE fdc_id = ?1`,
+    );
+    const missing: string[] = [];
+    for (const [kind, table] of [["exact", file.exact], ["pattern", file.patterns]] as const) {
+      for (const [phrase, entry] of Object.entries(table ?? {})) {
+        if ((exists.get(entry.fdcId)?.n ?? 0) === 0) missing.push(`${kind} "${phrase}" → ${entry.fdcId}`);
+      }
+    }
+    expect(missing, `aliases pointing at no USDA record:\n  ${missing.join("\n  ")}`).toEqual([]);
+  });
+});
+
+suite("counted ingredients convert at USDA's published per-item weights", () => {
+  const counts = (fixture as unknown as {
+    counts?: Array<{ line: string; grams: number; tolerance: number; found: string }>;
+  }).counts ?? [];
+
+  for (const c of counts) {
+    test(`${c.line}  =  ${c.grams} g`, () => {
+      const result = resolve(c.line);
+      expect(result.grams, `did not convert (basis: ${result.basis}) — ${c.found}`).not.toBeNull();
+      expect(
+        Math.abs(result.grams! - c.grams),
+        `got ${result.grams} g via "${result.portionUsed}", wanted ${c.grams} — ${c.found}`,
+      ).toBeLessThanOrEqual(c.tolerance);
+    });
+  }
 });
