@@ -147,6 +147,36 @@
       "expect": "parsley",
       "reject": "",
       "found": "lentil soup — a reject phrase ('for serving') discarded the whole line although it states a quarter cup. A stated amount now outranks a reject phrase."
+    },
+    {
+      "line": "2 tablespoons soy sauce",
+      "expect": "soy sauce made from soy and wheat",
+      "reject": "peanut",
+      "found": "compare.test.ts — sodium came out 4x low; the match was peanut sauce"
+    },
+    {
+      "line": "1 tbsp. reduced-sodium soy sauce",
+      "expect": "reduced sodium",
+      "reject": "peanut",
+      "found": "Pioneer Woman — must stay on the reduced-sodium record, and 'tbsp.' must not leak its dot into the name"
+    },
+    {
+      "line": "8 ounces bacon (optional)",
+      "expect": "pork, cured, bacon",
+      "reject": "meatless",
+      "found": "meatloaf corpus"
+    },
+    {
+      "line": "1/2 cup chicken stock",
+      "expect": "chicken broth",
+      "reject": "no broth",
+      "found": "meatloaf corpus — 'Chicken, canned, no broth' matched on the word it negates"
+    },
+    {
+      "line": "2 qt. vegetable broth",
+      "expect": "vegetable broth, ready to serve",
+      "reject": "swanson",
+      "found": "lentil soup corpus — 'qt.' left '. vegetable broth', which no exact alias can match"
     }
   ],
   "rejections": [
@@ -228,6 +258,24 @@
       "grams": 115,
       "tolerance": 2,
       "found": "USDA: 1 cup, sliced = 115 g"
+    },
+    {
+      "line": "10 slices bacon",
+      "grams": 280,
+      "tolerance": 2,
+      "found": "USDA: 1 slice raw = 28 g"
+    },
+    {
+      "line": "1 c. grated parmesan cheese",
+      "grams": 100,
+      "tolerance": 2,
+      "found": "USDA: 1 cup grated = 100 g. 'c.' is a cup."
+    },
+    {
+      "line": "2 tablespoons soy sauce",
+      "grams": 32,
+      "tolerance": 1,
+      "found": "USDA: 1 tbsp shoyu = 16 g"
     }
   ]
 }

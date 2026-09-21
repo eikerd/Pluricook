@@ -92,7 +92,10 @@ export interface ParsedLine {
 export function parseLine(rawLine: string): ParsedLine {
   const p = parseIngredientLine(rawLine);
   let unit = (p.unit ?? "").trim();
-  let name = (p.ingredientName ?? "").trim();
+  // "1 tbsp. soy sauce" and "2 qt. broth" leave the abbreviation's dot on the
+  // name. Fuzzy matching shrugs it off, which is how it hid: an EXACT alias for
+  // "soy sauce" can never match ". soy sauce", so the alias silently did nothing.
+  let name = (p.ingredientName ?? "").trim().replace(/^[\s.,;:/–-]+/, "");
 
   // 0. The raw parser returns "to taste" as its DEFAULT when it finds no unit,
   //    so "1 onion" came back as unit "to taste" and was then rejected as not a
