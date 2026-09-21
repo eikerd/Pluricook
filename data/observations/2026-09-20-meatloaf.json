@@ -1,0 +1,127 @@
+{
+  "query": "meatloaf",
+  "searchQuery": "meatloaf recipe",
+  "seenAt": "2026-09-20",
+  "engine": "firecrawl-web-search",
+  "rawResultCount": 30,
+  "creditsUsed": 6,
+  "note": "First worked example. Raw GET of the top 15 recipe results, then a managed fetcher retry on three of the blocked ones.",
+
+  "appearances": [
+    { "rank": 1, "url": "https://natashaskitchen.com/meatloaf-recipe/", "kind": "recipe", "displayName": "Natasha's Kitchen" },
+    { "rank": 2, "url": "https://www.spendwithpennies.com/best-meatloaf-recipe/", "kind": "recipe", "displayName": "Spend With Pennies" },
+    { "rank": 3, "url": "https://www.budgetbytes.com/classic-homemade-meatloaf/", "kind": "recipe", "displayName": "Budget Bytes" },
+    { "rank": 4, "url": "https://www.pauladeen.com/recipe/old-fashioned-southern-meatloaf-recipe-aka-basic-meatloaf/", "kind": "recipe", "displayName": "Paula Deen" },
+    { "rank": 5, "url": "https://www.youtube.com/watch?v=vI9drA405a8", "kind": "video", "displayName": "YouTube" },
+    { "rank": 6, "url": "https://www.allrecipes.com/recipe/16354/easy-meatloaf/", "kind": "recipe", "displayName": "Allrecipes" },
+    { "rank": 7, "url": "https://www.youtube.com/watch?v=BPP-AxFcTtw", "kind": "video", "displayName": "YouTube" },
+    { "rank": 8, "url": "https://joyfoodsunshine.com/meatloaf-recipe/", "kind": "recipe", "displayName": "JoyFoodSunshine" },
+    { "rank": 9, "url": "https://www.thediaryofarealhousewife.com/meatloaf-recipe/", "kind": "recipe", "displayName": "The Diary of a Real Housewife" },
+    { "rank": 10, "url": "https://www.simplyrecipes.com/easy-meatloaf-recipe-7551214", "kind": "recipe", "displayName": "Simply Recipes" },
+    { "rank": 11, "url": "https://www.thewholesomedish.com/the-best-classic-meatloaf/", "kind": "recipe", "displayName": "The Wholesome Dish" },
+    { "rank": 12, "url": "https://www.delish.com/cooking/a50262/meatloaf-recipe/", "kind": "recipe", "displayName": "Delish" },
+    { "rank": 13, "url": "https://preppykitchen.com/meatloaf/", "kind": "recipe", "displayName": "Preppy Kitchen" },
+    { "rank": 14, "url": "https://www.facebook.com/mamasuessouthernkitchen/videos/x/1888488722532879/", "kind": "social", "displayName": "Facebook" },
+    { "rank": 15, "url": "https://www.thepioneerwoman.com/food-cooking/recipes/a11695/my-favorite-meatloaf/", "kind": "recipe", "displayName": "The Pioneer Woman" },
+    { "rank": 16, "url": "https://sugarspunrun.com/best-meatloaf-recipe/", "kind": "recipe", "displayName": "Sugar Spun Run" },
+    { "rank": 17, "url": "https://www.facebook.com/gulfcoastsmoke/posts/x/1690560919743896/", "kind": "social", "displayName": "Facebook" },
+    { "rank": 18, "url": "https://thesaltymarshmallow.com/best-meatloaf-recipe/", "kind": "recipe", "displayName": "The Salty Marshmallow" },
+    { "rank": 19, "url": "https://www.recipetineats.com/meatloaf-recipe/", "kind": "recipe", "displayName": "RecipeTin Eats" },
+    { "rank": 20, "url": "https://www.thecountrycook.net/mommas-best-meatloaf/", "kind": "recipe", "displayName": "The Country Cook" },
+    { "rank": 21, "url": "https://www.mccormick.com/blogs/recipes/traditional-meatloaf-recipe", "kind": "recipe", "displayName": "McCormick" },
+    { "rank": 22, "url": "https://www.beefitswhatsfordinner.com/recipes/recipe/55558/classic-beef-meatloaf", "kind": "recipe", "displayName": "Beef It's What's For Dinner" },
+    { "rank": 23, "url": "https://iwashyoudry.com/best-classic-meatloaf-recipe/", "kind": "recipe", "displayName": "I Wash You Dry" },
+    { "rank": 24, "url": "https://www.howtocook.recipes/best-classic-meatloaf-recipe/", "kind": "recipe", "displayName": "How To Cook Recipes" },
+    { "rank": 25, "url": "https://www.seriouseats.com/the-food-lab-all-american-meatloaf-excerpt-recipe", "kind": "recipe", "displayName": "Serious Eats" },
+    { "rank": 26, "url": "https://www.youtube.com/watch?v=FkEWvpGUIio", "kind": "video", "displayName": "YouTube" },
+    { "rank": 27, "url": "https://www.bettycrocker.com/recipes/traditional-meatloaf/a88edb8e-d80a-4b01-b91a-b6f89a9fd101", "kind": "recipe", "displayName": "Betty Crocker" },
+    { "rank": 28, "url": "https://www.thekitchn.com/how-to-make-meatloaf-cooking-lessons-from-the-kitchn-197077", "kind": "recipe", "displayName": "The Kitchn" },
+    { "rank": 29, "url": "https://www.culinaryhill.com/meatloaf/", "kind": "recipe", "displayName": "Culinary Hill" },
+    { "rank": 30, "url": "https://themodernproper.com/classic-meatloaf", "kind": "recipe", "displayName": "The Modern Proper" }
+  ],
+
+  "fetchAttempts": [
+    { "url": "https://natashaskitchen.com/meatloaf-recipe/", "fetcher": "raw", "status": 200, "outcome": "ok", "cdn": "Cloudflare", "bodyBytes": 678000, "elapsedMs": 118, "jsonLd": true, "ingredientCount": 17, "stepCount": 6, "yieldRaw": "8", "totalTimeRaw": "PT80M", "note": "1 ld+json block" },
+    { "url": "https://www.spendwithpennies.com/best-meatloaf-recipe/", "fetcher": "raw", "status": 200, "outcome": "ok", "cdn": "Cloudflare", "bodyBytes": 712704, "elapsedMs": 159, "jsonLd": true, "ingredientCount": 14, "stepCount": 7, "yieldRaw": "8", "totalTimeRaw": "PT85M", "note": "1 ld+json block" },
+    { "url": "https://www.budgetbytes.com/classic-homemade-meatloaf/", "fetcher": "raw", "status": 403, "outcome": "blocked", "cdn": "Cloudflare", "bodyBytes": 6144, "elapsedMs": 57, "jsonLd": false, "note": "small refusal body, bot challenge" },
+    { "url": "https://www.pauladeen.com/recipe/old-fashioned-southern-meatloaf-recipe-aka-basic-meatloaf/", "fetcher": "raw", "status": 200, "outcome": "ok", "cdn": "Cloudflare", "bodyBytes": 117760, "elapsedMs": 169, "jsonLd": false, "note": "2 ld+json blocks, 1 unparseable, no Recipe node" },
+    { "url": "https://www.allrecipes.com/recipe/16354/easy-meatloaf/", "fetcher": "raw", "status": 403, "outcome": "blocked", "cdn": "Cloudflare", "bodyBytes": 680960, "elapsedMs": 101, "jsonLd": false, "note": "large interstitial challenge page" },
+    { "url": "https://joyfoodsunshine.com/meatloaf-recipe/", "fetcher": "raw", "status": 403, "outcome": "blocked", "cdn": "Cloudflare", "bodyBytes": 6144, "elapsedMs": 58, "jsonLd": false, "note": "small refusal body, bot challenge" },
+    { "url": "https://www.thediaryofarealhousewife.com/meatloaf-recipe/", "fetcher": "raw", "status": 403, "outcome": "blocked", "cdn": "Cloudflare", "bodyBytes": 6144, "elapsedMs": 82, "jsonLd": false, "note": "small refusal body, bot challenge" },
+    { "url": "https://www.simplyrecipes.com/easy-meatloaf-recipe-7551214", "fetcher": "raw", "status": 403, "outcome": "blocked", "cdn": "Cloudflare", "bodyBytes": 680960, "elapsedMs": 120, "jsonLd": false, "note": "large interstitial challenge page" },
+    { "url": "https://www.thewholesomedish.com/the-best-classic-meatloaf/", "fetcher": "raw", "status": 403, "outcome": "blocked", "cdn": "Cloudflare", "bodyBytes": 6144, "elapsedMs": 115, "jsonLd": false, "note": "small refusal body, bot challenge" },
+    { "url": "https://www.delish.com/cooking/a50262/meatloaf-recipe/", "fetcher": "raw", "status": 200, "outcome": "ok", "cdn": null, "bodyBytes": 1540096, "elapsedMs": 162, "jsonLd": true, "ingredientCount": 20, "stepCount": 8, "yieldRaw": "6 - 8 serving(s)", "totalTimeRaw": "PT1H30M", "note": "1 ld+json block" },
+    { "url": "https://preppykitchen.com/meatloaf/", "fetcher": "raw", "status": 403, "outcome": "blocked", "cdn": "Cloudflare", "bodyBytes": 6144, "elapsedMs": 217, "jsonLd": false, "note": "small refusal body, bot challenge" },
+    { "url": "https://www.thepioneerwoman.com/food-cooking/recipes/a11695/my-favorite-meatloaf/", "fetcher": "raw", "status": 200, "outcome": "ok", "cdn": null, "bodyBytes": 614400, "elapsedMs": 155, "jsonLd": true, "ingredientCount": 14, "stepCount": 7, "yieldRaw": "8 serving(s)", "totalTimeRaw": "PT1H15M", "note": "1 ld+json block" },
+    { "url": "https://sugarspunrun.com/best-meatloaf-recipe/", "fetcher": "raw", "status": 403, "outcome": "blocked", "cdn": "Cloudflare", "bodyBytes": 6144, "elapsedMs": 52, "jsonLd": false, "note": "small refusal body, bot challenge" },
+    { "url": "https://thesaltymarshmallow.com/best-meatloaf-recipe/", "fetcher": "raw", "status": 403, "outcome": "blocked", "cdn": "Cloudflare", "bodyBytes": 6144, "elapsedMs": 50, "jsonLd": false, "note": "small refusal body, bot challenge" },
+    { "url": "https://www.recipetineats.com/meatloaf-recipe/", "fetcher": "raw", "status": 200, "outcome": "ok", "cdn": "nginx", "bodyBytes": 514048, "elapsedMs": 53, "jsonLd": true, "ingredientCount": 14, "stepCount": 9, "yieldRaw": "8", "totalTimeRaw": "PT90M", "note": "2 ld+json blocks" },
+
+    { "url": "https://www.budgetbytes.com/classic-homemade-meatloaf/", "fetcher": "managed", "status": 200, "outcome": "ok", "cdn": null, "bodyBytes": null, "elapsedMs": null, "jsonLd": true, "ingredientCount": 14, "stepCount": 5, "yieldRaw": "7 slices", "totalTimeRaw": "1 h 5 min", "note": "managed fetcher cleared the challenge" },
+    { "url": "https://preppykitchen.com/meatloaf/", "fetcher": "managed", "status": 200, "outcome": "ok", "cdn": null, "bodyBytes": null, "elapsedMs": null, "jsonLd": true, "ingredientCount": 15, "stepCount": 6, "yieldRaw": "8 servings", "totalTimeRaw": "1 h 25 min", "note": "managed fetcher cleared the challenge" },
+    { "url": "https://www.allrecipes.com/recipe/16354/easy-meatloaf/", "fetcher": "managed", "status": 0, "outcome": "refused", "cdn": null, "bodyBytes": null, "elapsedMs": null, "jsonLd": false, "note": "refused on stated policy, not a challenge" }
+  ],
+
+  "policies": [
+    {
+      "host": "allrecipes.com",
+      "robotsGenericAllows": true,
+      "aiCrawlersBlocked": ["anthropic-ai", "Claude-SearchBot", "CCBot", "PerplexityBot", "Google-Extended", "cohere-ai", "Meta-ExternalAgent", "meta-webindexer"],
+      "adNetworkInjected": false,
+      "writtenProhibition": true,
+      "licensingContact": "contentlicensing@people.inc",
+      "note": "People Inc. robots.txt comment prohibits scraping except to direct traffic; names TDM, LLM/RAG use and dataset creation as prohibited, and pre-emptively denies that absence from robots.txt implies permission.",
+      "checkedAt": "2026-09-20"
+    },
+    {
+      "host": "simplyrecipes.com",
+      "robotsGenericAllows": true,
+      "aiCrawlersBlocked": ["anthropic-ai", "Claude-SearchBot", "CCBot", "PerplexityBot", "Google-Extended", "cohere-ai", "Meta-ExternalAgent", "meta-webindexer"],
+      "adNetworkInjected": false,
+      "writtenProhibition": true,
+      "licensingContact": "contentlicensing@people.inc",
+      "note": "Identical People Inc. language to allrecipes.com.",
+      "checkedAt": "2026-09-20"
+    },
+    {
+      "host": "budgetbytes.com",
+      "robotsGenericAllows": true,
+      "aiCrawlersBlocked": ["anthropic-ai", "Amazonbot", "Applebot-Extended", "Bytespider"],
+      "adNetworkInjected": false,
+      "writtenProhibition": false,
+      "licensingContact": null,
+      "note": "Generic crawling allowed; ad-verification bots explicitly allowed; several AI crawlers disallowed.",
+      "checkedAt": "2026-09-20"
+    },
+    {
+      "host": "recipetineats.com",
+      "robotsGenericAllows": true,
+      "aiCrawlersBlocked": ["anthropic-ai", "Claude-Web", "CCbot", "FacebookBot", "PiplBot"],
+      "adNetworkInjected": true,
+      "writtenProhibition": false,
+      "licensingContact": null,
+      "note": "AI bans sit inside a 'Raptive Begin/End' block injected by the ad network; the site's own Yoast block is 'Disallow:' (fully open).",
+      "checkedAt": "2026-09-20"
+    },
+    {
+      "host": "natashaskitchen.com",
+      "robotsGenericAllows": true,
+      "aiCrawlersBlocked": [],
+      "adNetworkInjected": false,
+      "writtenProhibition": false,
+      "licensingContact": null,
+      "note": "Minimal robots.txt: wp-admin and search pages only.",
+      "checkedAt": "2026-09-20"
+    },
+    {
+      "host": "joyfoodsunshine.com",
+      "robotsGenericAllows": true,
+      "aiCrawlersBlocked": [],
+      "adNetworkInjected": false,
+      "writtenProhibition": false,
+      "licensingContact": null,
+      "note": "No restrictions in robots.txt, yet the raw GET was still blocked at the CDN. Cloudflare settings, not stated policy.",
+      "checkedAt": "2026-09-20"
+    }
+  ]
+}

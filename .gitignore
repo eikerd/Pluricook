@@ -43,3 +43,8 @@ node_modules/
 .next/
 dist/
 build/
+
+# source registry (rebuild with: bun scripts/import-observations.ts)
+sources.db
+sources.db-wal
+sources.db-shm
