@@ -12,6 +12,7 @@
 import { Database } from "bun:sqlite";
 import { parseIngredientLine } from "../src/lib/ingredient-parser";
 import { toGrams, type Basis } from "../src/lib/to-grams";
+import { readAliases } from "../src/lib/ingredient-aliases";
 import type { ExtractedRecipe } from "../src/types/provenance";
 
 const dish = process.argv[2] ?? "meatloaf";
@@ -24,6 +25,7 @@ if (!(await file.exists())) {
 }
 
 const db = new Database("usda.db", { readonly: true });
+const aliases = await readAliases();
 const { recipes } = (await file.json()) as { recipes: ExtractedRecipe[] };
 
 const byBasis = new Map<Basis, number>();
@@ -44,6 +46,7 @@ for (const recipe of recipes) {
       name: parsed.ingredientName,
       condition: parsed.preparation ?? null,
       db,
+      aliases,
     });
 
     byBasis.set(result.basis, (byBasis.get(result.basis) ?? 0) + 1);

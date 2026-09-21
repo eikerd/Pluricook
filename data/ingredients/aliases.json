@@ -1,0 +1,77 @@
+{
+  "_comment": [
+    "Our own ingredient → USDA mapping. A SUPERSET, not an amendment.",
+    "",
+    "usda.db is reference data. It is gitignored, rebuilt by",
+    "`bun scripts/build-usda-db.ts`, and never edited: amending it in place would",
+    "be destroyed on the next rebuild, and would quietly detach the nutrition",
+    "figures from the published USDA release they claim to come from. The whole",
+    "value of USDA is that it is citable, and an edited copy is not.",
+    "",
+    "So our knowledge lives here instead, in version control, where each decision",
+    "carries a reason and shows up in a diff. Same principle as curated.json",
+    "against sources.db: the decision file is tracked, the derived database is",
+    "disposable.",
+    "",
+    "Resolution order, first hit wins:",
+    "  1. an exact `match` in this file",
+    "  2. a `pattern` in this file (substring, checked longest-first)",
+    "  3. the full-text search heuristics in to-grams.ts",
+    "",
+    "Fields:",
+    "  fdcId   — the USDA record to use. Look it up in the admin's USDA foods tab.",
+    "  note    — why this mapping, especially when the obvious match was wrong.",
+    "  reject  — true to say 'this is not a food' (e.g. 'to taste'), so the",
+    "            heuristics are not given a chance to invent something."
+  ],
+
+  "exact": {
+    "ground beef": {
+      "fdcId": 174036,
+      "note": "Beef, ground, 80% lean / 20% fat, raw. The default for meatloaf; heuristics reached corned beef."
+    },
+    "milk": {
+      "fdcId": 746782,
+      "note": "Milk, whole, 3.25% milkfat. Heuristics reached 'Crackers, milk' and 'Milk dessert, frozen'."
+    },
+    "whole milk": { "fdcId": 746782, "note": "Same record as plain milk." },
+    "egg": {
+      "fdcId": 748967,
+      "note": "Eggs, Grade A, Large, egg whole. Heuristics reached 'Bread, egg' and 'Eggs, scrambled, frozen mixture'."
+    },
+    "eggs": { "fdcId": 748967, "note": "Same record as egg." },
+    "large eggs": { "fdcId": 748967, "note": "Size is a portion concern, not an identity one." },
+    "garlic": {
+      "fdcId": 169230,
+      "note": "Garlic, raw. 'garlic cloves' matched 'Spices, cloves, ground' — the unit word is also a food."
+    },
+    "garlic cloves": { "fdcId": 169230, "note": "See garlic." },
+    "ketchup": {
+      "fdcId": 168556,
+      "note": "Catsup. USDA files the cup portion under the older spelling; the 'Ketchup' records carry none."
+    }
+  },
+
+  "patterns": {
+    "ground beef": { "fdcId": 174036, "note": "Covers 'lean ground beef', 'ground beef chuck'." },
+    "ground chuck": { "fdcId": 174036, "note": "Same cut for our purposes." },
+    "bread crumb": {
+      "fdcId": 174928,
+      "note": "Bread, crumbs, dry, grated, plain. Covers breadcrumb, bread crumbs, Italian bread crumbs."
+    },
+    "breadcrumb": { "fdcId": 174928, "note": "See bread crumb." },
+    "worcestershire": { "fdcId": 171610, "note": "Sauce, worcestershire." },
+    "brown sugar": { "fdcId": 168833, "note": "Sugars, brown." },
+    "kosher salt": { "fdcId": 173468, "note": "Salt, table. Kosher differs by crystal size, not composition." },
+    "black pepper": { "fdcId": 170931, "note": "Spices, pepper, black. Heuristics reached 'Peppers, bell, red, raw'." }
+  },
+
+  "reject": [
+    "to taste",
+    "as needed",
+    "for serving",
+    "for garnish",
+    "optional",
+    "water"
+  ]
+}

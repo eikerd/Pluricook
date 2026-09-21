@@ -14,6 +14,7 @@
  */
 
 import type { Database } from "bun:sqlite";
+import { EMPTY_TABLE, resolveAlias, type AliasTable } from "./ingredient-aliases";
 
 /** Units that are a mass already — no food lookup needed. */
 const MASS_GRAMS: Record<string, number> = {
@@ -65,7 +66,9 @@ export type Basis =
   /** Food matched, but it publishes no portion for this unit. */
   | "no-portion-match"
   /** The unit is not one we can reason about (e.g. "to taste", "pinch"). */
-  | "unconvertible-unit";
+  | "unconvertible-unit"
+  /** Our alias table says this phrase is not a food at all. */
+  | "rejected-by-alias";
 
 export interface GramResult {
   grams: number | null;
@@ -95,9 +98,12 @@ interface FoodRow { fdc_id: number; description: string }
  * "minced" matched "Ham, minced". Preparation belongs in `condition`, where it
  * selects between portions, not in the query that decides what the food IS.
  */
+// NB: "ground" is deliberately absent. It identifies a food at least as often
+// as it describes a treatment — "ground beef" is a distinct USDA record
+// ("Beef, ground"), and stripping it resolved the line to corned beef.
 const PREPARATION_WORDS = new Set([
   "chopped", "finely", "coarsely", "minced", "diced", "sliced", "grated", "shredded",
-  "crushed", "ground", "peeled", "seeded", "trimmed", "cubed", "julienned", "quartered",
+  "crushed", "peeled", "seeded", "trimmed", "cubed", "julienned", "quartered",
   "halved", "melted", "softened", "beaten", "packed", "sifted", "divided", "optional",
   "fresh", "freshly", "dried", "frozen", "canned", "cooked", "raw", "plus", "more",
   "taste", "needed", "room", "temperature", "large", "medium", "small", "thinly",
@@ -155,6 +161,12 @@ export function matchFood(
   const terms = foodTerms(name);
   if (terms.length === 0) return null;
 
+  // The head noun is what the food IS: "unsalted butter" is a butter, "ground
+  // beef chuck" is a beef. Records whose description opens with it are ranked
+  // first, which is what separates "Milk, whole" from "Crackers, milk" — bm25
+  // alone gives a single short term too little to discriminate on.
+  const head = terms[terms.length - 1]!;
+
   // Ranking happens in a subquery: bm25() cannot be used alongside GROUP BY.
   const sql = (having: string) => `
     SELECT fdc_id, description FROM (
@@ -162,24 +174,28 @@ export function matchFood(
              (SELECT COUNT(*) FROM portions p WHERE p.fdc_id = f.fdc_id) AS portions
       FROM foods_fts JOIN foods f ON f.fdc_id = foods_fts.rowid
       WHERE foods_fts MATCH ?1
-      ORDER BY rank LIMIT 200
+      ORDER BY rank LIMIT 400
     ) ${having}
     ORDER BY ${needsPortion ? "CASE WHEN portions > 0 THEN 0 ELSE 1 END," : ""}
+             CASE WHEN lower(description) LIKE ?2 THEN 0 ELSE 1 END,
              CASE dataset
                WHEN '${needsPortion ? "sr-legacy" : "foundation"}' THEN 0
                WHEN '${needsPortion ? "foundation" : "sr-legacy"}' THEN 1
                ELSE 2 END,
-             rank, length(description)
+             rank,
+             length(description) - length(replace(description, ',', '')),
+             length(description)
     LIMIT 1`;
 
+  const startsWith = `${head}%`;
   for (const query of [
     terms.map((t) => `"${t}"`).join(" "),  // all identifying words
-    `"${terms[terms.length - 1]!}"`,        // head noun alone: "unsalted butter" → butter
+    `"${head}"`,                            // head noun alone
   ]) {
     const hit =
       (needsPortion &&
-        db.query<FoodRow, [string]>(sql("WHERE portions > 0")).get(query)) ||
-      db.query<FoodRow, [string]>(sql("")).get(query);
+        db.query<FoodRow, [string, string]>(sql("WHERE portions > 0")).get(query, startsWith)) ||
+      db.query<FoodRow, [string, string]>(sql("")).get(query, startsWith);
     if (hit) return hit;
   }
   return null;
@@ -206,32 +222,71 @@ export interface ToGramsOptions {
    */
   condition?: string | null;
   db: Database;
+  /**
+   * Our own mapping, consulted before the search heuristics.
+   *
+   * Omitted in tests that only exercise arithmetic; callers doing real work
+   * pass one from readAliases().
+   */
+  aliases?: AliasTable;
 }
 
 export function toGrams(opts: ToGramsOptions): GramResult {
   const unit = normalizeUnit(opts.unit);
+  const aliases = opts.aliases ?? EMPTY_TABLE;
+  const alias = resolveAlias(aliases, opts.name);
+
+  /**
+   * Our table first, heuristics second.
+   *
+   * A mapped fdc_id is looked up directly rather than searched for, so a
+   * curated decision cannot be overturned by a ranking change.
+   */
+  const identify = (needsPortion: boolean): FoodRow | null => {
+    if (alias.kind === "exact" || alias.kind === "pattern") {
+      const row = opts.db
+        ?.query<FoodRow, [number]>(`SELECT fdc_id, description FROM foods WHERE fdc_id = ?1`)
+        .get(alias.fdcId);
+      if (row) return row;
+    }
+    return opts.db ? matchFood(opts.db, opts.name, needsPortion) : null;
+  };
+
   const empty: GramResult = {
     grams: null, basis: "unconvertible-unit", fdcId: null,
     foodDescription: null, portionUsed: null, note: null,
   };
 
+  if (alias.kind === "reject") {
+    return { ...empty, basis: "rejected-by-alias", note: `"${alias.matched}" is not a food` };
+  }
+
   if (!Number.isFinite(opts.quantity) || opts.quantity <= 0) {
     return { ...empty, note: "no usable quantity" };
   }
 
-  // 1. Already a mass. No food lookup, no ambiguity.
+  // 1. Already a mass. The arithmetic needs no food, but the IDENTITY still
+  //    does: comparison clusters ingredients by fdc_id, and returning null here
+  //    made every mass-measured line — which is most of the meat in any recipe —
+  //    invisible to clustering. Look the food up anyway, without needing a
+  //    portion, and never let a failed lookup cost us the exact mass.
   const massFactor = MASS_GRAMS[unit];
   if (massFactor !== undefined) {
+    // opts.db may legitimately be absent: a mass needs no lookup to be exact.
+    const identified = identify(false);
     return {
       grams: Math.round(opts.quantity * massFactor * 10) / 10,
-      basis: "direct-mass", fdcId: null, foodDescription: null,
-      portionUsed: null, note: null,
+      basis: "direct-mass",
+      fdcId: identified?.fdc_id ?? null,
+      foodDescription: identified?.description ?? null,
+      portionUsed: null,
+      note: identified ? null : "mass exact; food not identified",
     };
   }
 
   // 2. Everything else needs the food, because everything else needs a density.
   // needsPortion: everything past a plain mass requires a household measure.
-  const food = matchFood(opts.db, opts.name, true);
+  const food = identify(true);
   if (!food) return { ...empty, basis: "no-food-match", note: `no USDA match for "${opts.name}"` };
 
   const portions = opts.db
