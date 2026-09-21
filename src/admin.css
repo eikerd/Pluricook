@@ -1,0 +1,347 @@
+/**
+ * Pluricook admin theme.
+ *
+ * A restaurant palette rather than a dashboard one: paprika, parchment,
+ * espresso, saffron and olive. Headings are a serif with a menu-board feel;
+ * table data stays in a tight sans so dense grids remain readable.
+ */
+
+:root {
+  --paprika: #8c2f1e;
+  --paprika-deep: #6d2315;
+  --espresso: #2b211c;
+  --espresso-soft: #4a3b33;
+  --parchment: #fbf6ec;
+  --parchment-warm: #f4ead7;
+  --cream-line: #e3d6bf;
+  --saffron: #d99a2b;
+  --olive: #5f6b3c;
+  --plum: #6b3a52;
+
+  --ink: var(--espresso);
+  --ink-soft: #6d5c52;
+  --rail-w: 15rem;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--parchment);
+  color: var(--ink);
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .brand__name {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  height: 100vh;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  background: var(--espresso);
+  color: var(--parchment-warm);
+  padding: 1.25rem 0 1rem;
+  overflow-y: auto;
+}
+
+.brand {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 0 0.6rem;
+  align-items: center;
+  padding: 0 1.25rem 1.5rem;
+}
+
+.brand__mark {
+  grid-row: span 2;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--saffron);
+}
+
+.brand__name { font-size: 1.3rem; color: var(--parchment); }
+
+.brand__sub {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--saffron);
+}
+
+.rail__group {
+  margin: 1.1rem 1.25rem 0.35rem;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #9a8577;
+}
+
+.rail__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 1.25rem;
+  border: 0;
+  border-left: 3px solid transparent;
+  background: none;
+  color: var(--parchment-warm);
+  font: inherit;
+  cursor: pointer;
+}
+
+.rail__item:hover { background: #3a2d26; }
+
+.rail__item.is-active {
+  background: #3a2d26;
+  border-left-color: var(--paprika);
+  color: #fff;
+  font-weight: 600;
+}
+
+.rail__foot {
+  margin: auto 1.25rem 0;
+  padding-top: 1.5rem;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: #8a7568;
+}
+
+/* ── Main pane ───────────────────────────────────────────── */
+
+.main { overflow: auto; }
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 1.75rem 2rem 1rem;
+}
+
+.pane__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--cream-line);
+}
+
+.pane h2 { margin: 0; font-size: 1.6rem; color: var(--paprika-deep); }
+
+.muted { color: var(--ink-soft); }
+
+.empty {
+  padding: 3rem 0;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.search {
+  flex: 0 0 16rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--cream-line);
+  border-radius: 3px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.search:focus {
+  outline: 2px solid var(--saffron);
+  outline-offset: -1px;
+}
+
+/* ── Overview tiles ──────────────────────────────────────── */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.9rem;
+  margin: 1.5rem 0;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 1rem 1.1rem;
+  background: #fff;
+  border: 1px solid var(--cream-line);
+  border-top: 3px solid var(--saffron);
+  border-radius: 3px;
+}
+
+.tile__label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+.tile__value {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.9rem;
+  font-weight: 600;
+  color: var(--paprika);
+}
+
+.warnings {
+  margin: 0.5rem 0 0;
+  padding: 0.9rem 1rem 0.9rem 2.4rem;
+  background: #fdf1ea;
+  border: 1px solid #e8c3b2;
+  border-left: 4px solid var(--paprika);
+  border-radius: 3px;
+  color: var(--paprika-deep);
+}
+
+.warnings li { margin: 0.15rem 0; }
+
+/* ── Grid ────────────────────────────────────────────────── */
+
+.grid-wrap {
+  flex: 1;
+  margin-top: 1.25rem;
+  overflow: auto;
+  border: 1px solid var(--cream-line);
+  border-radius: 3px;
+  background: #fff;
+  transition: opacity 120ms ease;
+}
+
+/* A refetch dims the grid rather than blanking it, so sorting does not flicker. */
+.grid-wrap[data-pending] { opacity: 0.55; }
+
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.grid thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.55rem 0.7rem;
+  background: var(--parchment-warm);
+  border-bottom: 2px solid var(--cream-line);
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--espresso-soft);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.grid thead th:hover { background: #ecdfc6; }
+
+.grid thead th.sorted { color: var(--paprika); background: #ecdfc6; }
+
+.grid thead th.num { text-align: right; }
+
+.arrow {
+  margin-left: 0.35rem;
+  font-size: 0.65rem;
+  opacity: 0.4;
+}
+
+.grid thead th.sorted .arrow { opacity: 1; }
+
+.grid tbody td {
+  padding: 0.42rem 0.7rem;
+  border-bottom: 1px solid #f0e8d8;
+  max-width: 34rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grid tbody tr:nth-child(even) { background: #fdfaf4; }
+
+.grid tbody tr:hover { background: var(--parchment-warm); }
+
+.grid td.num { text-align: right; }
+
+.grid td.url a { color: var(--plum); text-decoration: none; }
+
+.grid td.url a:hover { text-decoration: underline; }
+
+/* ── Badges ──────────────────────────────────────────────── */
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge--go   { background: #e6ecd9; color: var(--olive); }
+.badge--warn { background: #fbedd3; color: #8a5d12; }
+.badge--stop { background: #f7ddd5; color: var(--paprika-deep); }
+.badge--info { background: #e4dced; color: var(--plum); }
+.badge--mute { background: #ece4d5; color: var(--ink-soft); }
+
+/* ── Pager ───────────────────────────────────────────────── */
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0 0.25rem;
+  font-size: 0.8rem;
+}
+
+.pager__buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pager button {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--cream-line);
+  border-radius: 3px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pager button:hover:not(:disabled) {
+  background: var(--parchment-warm);
+  border-color: var(--saffron);
+}
+
+.pager button:disabled { opacity: 0.4; cursor: default; }
+
+.failure {
+  margin: 1.5rem 0 0;
+  padding: 1rem 1.15rem;
+  background: #fdf1ea;
+  border: 1px solid #e8c3b2;
+  border-left: 4px solid var(--paprika);
+  border-radius: 3px;
+  color: var(--paprika-deep);
+}

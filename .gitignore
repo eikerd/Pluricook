@@ -48,3 +48,9 @@ build/
 sources.db
 sources.db-wal
 sources.db-shm
+
+# USDA FoodData Central archives (rebuild with: bun scripts/fetch-usda.ts)
+data/usda/
+usda.db
+usda.db-wal
+usda.db-shm

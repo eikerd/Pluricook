@@ -15,3 +15,14 @@ declare module "*.module.css" {
   const classes: { readonly [key: string]: string };
   export = classes;
 }
+
+/**
+ * Plain stylesheets imported for their side effect — Bun's bundler injects them.
+ * Declared here so `import "./admin.css"` type-checks; there is no value to use.
+ */
+declare module "*.css";
+
+declare module "*.png" {
+  const path: `${string}.png`;
+  export = path;
+}
