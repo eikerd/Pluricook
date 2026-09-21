@@ -2,6 +2,7 @@ import { serve } from "bun";
 import index from "./index.html";
 import { DATASETS, overview, queryDataset } from "./lib/admin-queries";
 import { compareDish, listDishes } from "./lib/compare-service";
+import { buildMatrix } from "./lib/visual-matrix";
 import { setTier, type Tier } from "./lib/curated-sources";
 
 const TIERS: Tier[] = ["required", "favorite", "normal", "blocked"];
@@ -37,6 +38,17 @@ const server = serve({
         const result = await compareDish(req.params.dish, section || null);
         return result.ok
           ? Response.json(result.comparison)
+          : Response.json({ error: result.error }, { status: result.status });
+      },
+    },
+
+    /** The one payload every chart reads: recipe × ingredient, plus distances. */
+    "/api/admin/matrix/:dish": {
+      GET: async (req) => {
+        const section = new URL(req.url).searchParams.get("section");
+        const result = await compareDish(req.params.dish, section || null);
+        return result.ok
+          ? Response.json(buildMatrix(result.comparison))
           : Response.json({ error: result.error }, { status: result.status });
       },
     },
