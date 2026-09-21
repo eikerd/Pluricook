@@ -11,7 +11,7 @@ const server = serve({
 
     /** Headline counts and any standing warnings. */
     "/api/admin/overview": {
-      GET: () => Response.json(overview()),
+      GET: async () => Response.json(await overview()),
     },
 
     /** The sidebar: which tables exist and what they hold. */

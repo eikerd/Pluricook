@@ -6,9 +6,11 @@
  * renders whatever it is given — adding a table here is enough to expose it.
  */
 
-import { Database } from "bun:sqlite";
+import { Database, } from "bun:sqlite";
+import { Glob } from "bun";
 import { DEFAULT_REGISTRY_PATH } from "./site-registry";
 import { curationFor, readCurated } from "./curated-sources";
+import type { ExtractedRecipe } from "../types/provenance";
 
 const USDA_PATH = "usda.db";
 
@@ -64,6 +66,8 @@ export interface DatasetDef {
    * so reading it whole costs nothing; the USDA tables must never do this.
    */
   curated?: boolean;
+  /** Glob of JSON files backing this table instead of a database. */
+  files?: string;
 }
 
 export const DATASETS: DatasetDef[] = [
@@ -214,17 +218,28 @@ export const DATASETS: DatasetDef[] = [
   {
     id: "recipes",
     label: "Recipes",
-    db: DEFAULT_REGISTRY_PATH,
-    select: `NULL AS dish, NULL AS site, NULL AS ingredients, NULL AS steps`,
-    from: `FROM (SELECT 1) WHERE 0`,
+    db: "",                    // file-backed: data/recipes/*.json, not a database
+    files: "data/recipes/*.json",
+    select: "",
+    from: "",
     columns: [
-      { key: "dish", label: "Dish" },
-      { key: "site", label: "Site" },
-      { key: "ingredients", label: "Ingredients", numeric: true },
+      { key: "dish", label: "Dish", width: "8rem" },
+      { key: "site", label: "Source", width: "15rem" },
+      { key: "author", label: "Author", width: "11rem" },
+      { key: "title", label: "Title as published", width: "26rem" },
+      { key: "ingredients", label: "Ingr", numeric: true },
       { key: "steps", label: "Steps", numeric: true },
+      { key: "servings", label: "Serves", numeric: true },
+      { key: "minutes", label: "Minutes", numeric: true },
+      { key: "servingsRaw", label: "Yield (raw)", width: "11rem" },
+      { key: "totalTimeRaw", label: "Time (raw)", width: "9rem" },
+      { key: "acquisition", label: "Basis", badge: true },
+      { key: "capturedAt", label: "Captured" },
+      { key: "url", label: "Source URL", width: "30rem" },
     ],
-    defaultSort: "dish",
+    defaultSort: "site",
     defaultDir: "asc",
+    searchable: ["site", "title", "dish"],
   },
 ];
 
@@ -251,6 +266,42 @@ function withStance(row: Record<string, unknown>): Record<string, unknown> {
   return { ...rest, stance };
 }
 
+/**
+ * Flatten the extracted recipe files into table rows.
+ *
+ * Provenance is spread across the row rather than nested, so every credit field
+ * is directly visible and sortable — the source is not something you have to
+ * expand a row to see.
+ */
+async function readRecipeFiles(glob: string): Promise<Record<string, unknown>[]> {
+  const rows: Record<string, unknown>[] = [];
+
+  for await (const path of new Glob(glob).scan(".")) {
+    const file = (await Bun.file(path).json()) as {
+      dish: string;
+      recipes: ExtractedRecipe[];
+    };
+    for (const r of file.recipes ?? []) {
+      rows.push({
+        dish: r.dish,
+        site: r.provenance.siteName,
+        author: r.provenance.author,
+        title: r.provenance.sourceTitle,
+        ingredients: r.ingredientLines.length,
+        steps: r.stepCount,
+        servings: r.servings,
+        minutes: r.totalTimeMinutes,
+        servingsRaw: r.servingsRaw,
+        totalTimeRaw: r.totalTimeRaw,
+        acquisition: r.provenance.acquisitionAtCapture,
+        capturedAt: r.provenance.capturedAt,
+        url: r.provenance.sourceUrl,
+      });
+    }
+  }
+  return rows;
+}
+
 /** Star order, so sorting the ★ column puts required sites first. */
 const TIER_RANK: Record<string, number> = {
   required: 0, favorite: 1, normal: 2, blocked: 3,
@@ -269,6 +320,38 @@ export async function queryDataset(
     columns: def.columns,
     label: def.label,
   };
+
+  if (def.files) {
+    const rows = await readRecipeFiles(def.files);
+    const sortKey = def.columns.some((c) => c.key === opts.sort) ? opts.sort! : def.defaultSort;
+    const dir = opts.dir === "asc" || opts.dir === "desc" ? opts.dir : def.defaultDir;
+    const pageSize = Math.min(Math.max(base.pageSize, 1), 500);
+    const offset = (Math.max(base.page, 1) - 1) * pageSize;
+
+    const needle = (opts.q ?? "").trim().toLowerCase();
+    const filtered = needle
+      ? rows.filter((r) =>
+          (def.searchable ?? []).some((k) => String(r[k] ?? "").toLowerCase().includes(needle)),
+        )
+      : rows;
+
+    const asc = dir === "asc" ? 1 : -1;
+    filtered.sort((a, b) => {
+      const [x, y] = [a[sortKey], b[sortKey]];
+      if (x === null || x === undefined) return 1;
+      if (y === null || y === undefined) return -1;
+      const cmp =
+        typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y));
+      return cmp * asc;
+    });
+
+    return {
+      ...base,
+      rows: filtered.slice(offset, offset + pageSize),
+      total: filtered.length,
+      pageSize,
+    };
+  }
 
   const db = open(def.db);
   if (!db) {
@@ -363,7 +446,8 @@ export interface OverviewStat {
   value: number | string;
 }
 
-export function overview(): { stats: OverviewStat[]; warnings: string[] } {
+export async function overview(): Promise<{ stats: OverviewStat[]; warnings: string[] }> {
+  const recipeCount = (await readRecipeFiles("data/recipes/*.json")).length;
   const reg = open(DEFAULT_REGISTRY_PATH);
   const usda = open(USDA_PATH);
   const n = (db: Database | null, sql: string): number =>
@@ -375,7 +459,7 @@ export function overview(): { stats: OverviewStat[]; warnings: string[] } {
     { label: "Search results", value: n(reg, "SELECT COUNT(*) n FROM search_appearances") },
     { label: "Fetch attempts", value: n(reg, "SELECT COUNT(*) n FROM fetch_attempts") },
     { label: "Pages reached", value: n(reg, "SELECT COUNT(*) n FROM fetch_attempts WHERE outcome='ok'") },
-    { label: "Recipes extracted", value: 0 },
+    { label: "Recipes extracted", value: recipeCount },
     { label: "USDA foods", value: n(usda, "SELECT COUNT(*) n FROM foods") },
     { label: "USDA portions", value: n(usda, "SELECT COUNT(*) n FROM portions") },
   ];
