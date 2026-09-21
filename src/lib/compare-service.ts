@@ -93,7 +93,11 @@ export async function compareDish(dish: string, section: string | null): Promise
 
   try {
     const comparison = compareRecipes({ recipes, db, aliases: await readAliases(), section });
-    return { ok: true, comparison };
+    // compareRecipes names the dish from the first recipe's own field. Here the
+    // filename is the identifier, so the answer is named by what was asked for —
+    // otherwise a copied file answers under its original's name, and an empty
+    // file under none at all.
+    return { ok: true, comparison: { ...comparison, dish } };
   } catch (error) {
     // Answer in the API's own shape; an uncaught throw becomes Bun's plain-text 500.
     console.error(`[compare-service] comparison failed for "${dish}":`, error);

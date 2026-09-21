@@ -26,7 +26,28 @@ describe("listDishes", () => {
   });
 });
 
+const hasUsda = await Bun.file("usda.db").exists();
+
 describe("compareDish", () => {
+  // Needs usda.db only because compareDish opens it before comparing.
+  test.skipIf(!hasUsda)("answers under the name it was asked for, not the one inside the file", async () => {
+    const { recipes } = (await Bun.file("data/recipes/meatloaf.json").json()) as { recipes: unknown[] };
+    await Bun.write(MISLABELLED, JSON.stringify({ dish: "meatloaf", recipes: recipes.slice(0, 2) }));
+
+    const outcome = await compareDish("zz-test-mislabelled", null);
+    expect(outcome.ok).toBe(true);
+    if (outcome.ok) {
+      expect(outcome.comparison.dish).toBe("zz-test-mislabelled");
+      expect(outcome.comparison.analysed).toBe(2);
+    }
+  });
+
+  test.skipIf(!hasUsda)("an empty file still answers under its own name", async () => {
+    await Bun.write(MISLABELLED, JSON.stringify({ dish: "meatloaf", recipes: [] }));
+    const outcome = await compareDish("zz-test-mislabelled", null);
+    expect(outcome).toMatchObject({ ok: true, comparison: { dish: "zz-test-mislabelled", analysed: 0 } });
+  });
+
   test.each(["../../package", "Meatloaf", "meat loaf", ".hidden", ""])(
     "refuses %p as a dish name",
     async (name) => {

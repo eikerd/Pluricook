@@ -168,7 +168,11 @@ export function ComparisonView() {
   // The answer is kept with the question it answers, so the page can tell when
   // what is on screen no longer matches what the pickers say.
   const [loaded, setLoaded] = useState<{ question: string; comparison: Comparison } | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // A failure is kept with the question that failed, like an answer is. Moving a
+  // picker then makes it stop applying by itself — and the pickers stay on
+  // screen, so one unreadable dish is never a dead end.
+  const [failed, setFailed] = useState<{ question: string; message: string } | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
 
   const question = `${dish ?? ""}\n${section}`;
   const comparison = loaded?.comparison ?? null;
@@ -182,7 +186,7 @@ export function ComparisonView() {
         setDishes(list);
         setDish((current) => current ?? list[0]?.dish ?? null);
       })
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not list dishes"));
+      .catch((e: unknown) => setListError(e instanceof Error ? e.message : "Could not list dishes"));
   }, []);
 
   useEffect(() => {
@@ -194,10 +198,10 @@ export function ComparisonView() {
       .then(async (r) => {
         const body = (await r.json()) as Comparison | { error: string };
         if (!r.ok) throw new Error("error" in body ? body.error : `HTTP ${r.status}`);
-        if (!stale) { setLoaded({ question, comparison: body as Comparison }); setError(null); }
+        if (!stale) setLoaded({ question, comparison: body as Comparison });
       })
       .catch((e: unknown) => {
-        if (!stale) setError(e instanceof Error ? e.message : "Comparison failed");
+        if (!stale) setFailed({ question, message: e instanceof Error ? e.message : "Comparison failed" });
       });
 
     // A slow answer for the previous dish must not overwrite the current one.
@@ -238,21 +242,14 @@ export function ComparisonView() {
       />
     );
 
-  if (error) {
-    return (
-      <div className="pane">
-        <header className="pane__head"><div><h2>Something broke</h2></div></header>
-        <p className="failure">{error}</p>
-      </div>
-    );
-  }
+  const error = listError ?? (failed?.question === question ? failed.message : null);
 
   return (
     <div className="pane">
       <header className="pane__head">
         <div>
           <h2>Comparison</h2>
-          {comparison && comparison.analysed > 0 && (
+          {!error && comparison && comparison.analysed > 0 && (
             <p className="muted pane__note stale-aware" data-pending={isStale || undefined}>
               {comparison.anchor.reason}
             </p>
@@ -286,7 +283,9 @@ export function ComparisonView() {
         </div>
       </header>
 
-      {!comparison || !columns ? (
+      {error ? (
+        <p className="failure" role="alert">{error}</p>
+      ) : !comparison || !columns ? (
         <p className="muted">Loading…</p>
       ) : comparison.analysed === 0 ? (
         <p className="empty">No recipes to compare.</p>
