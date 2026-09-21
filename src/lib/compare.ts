@@ -40,6 +40,11 @@ const NA_TO_NACL = 2.54;
 const SODIUM_DAILY_VALUE_MG = 2300;
 
 export interface SourceAmount {
+  /**
+   * The recipe's own id. A site name cannot identify a row: two recipes from
+   * one site, or two hand-entered ones with no URL, share everything else.
+   */
+  recipeId: string;
   siteName: string;
   sourceUrl: string | null;
   /** The line exactly as published, so a surprising number can be checked. */
@@ -77,6 +82,7 @@ export type SalinityFlag =
   | "unreliable";
 
 export interface RecipeSummary {
+  recipeId: string;
   siteName: string;
   sourceUrl: string | null;
   servings: number | null;
@@ -110,7 +116,7 @@ export interface Comparison {
   recipes: RecipeSummary[];
   /** Corpus median salinity, for judging any one recipe against. */
   medianSalinity: number | null;
-  unmatched: Array<{ siteName: string; rawLine: string; basis: Basis }>;
+  unmatched: Array<{ recipeId: string; siteName: string; rawLine: string; basis: Basis }>;
 }
 
 function median(values: number[]): number {
@@ -199,7 +205,7 @@ export function compareRecipes(opts: CompareOptions): Comparison {
       });
 
       if (result.grams === null || result.fdcId === null) {
-        unmatched.push({ siteName: recipe.provenance.siteName, rawLine, basis: result.basis });
+        unmatched.push({ recipeId: recipe.id, siteName: recipe.provenance.siteName, rawLine, basis: result.basis });
         continue;
       }
 
@@ -258,6 +264,7 @@ export function compareRecipes(opts: CompareOptions): Comparison {
       };
       const grams = round(p.grams);
       entry.sources.push({
+        recipeId: recipe.id,
         siteName: recipe.provenance.siteName,
         sourceUrl: recipe.provenance.sourceUrl,
         rawLine: p.lines.join("  +  "),
@@ -300,6 +307,7 @@ export function compareRecipes(opts: CompareOptions): Comparison {
     const saltEq = (sodiumMg / 1000) * NA_TO_NACL;
     const servings = recipe.servings && recipe.servings > 0 ? recipe.servings : null;
     return {
+      recipeId: recipe.id,
       siteName: recipe.provenance.siteName,
       sourceUrl: recipe.provenance.sourceUrl,
       servings,

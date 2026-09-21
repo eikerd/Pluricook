@@ -227,10 +227,21 @@ h1, h2, h3, .brand__name {
 /* Headers inside an opened row scroll with it rather than pinning to the pane. */
 .grid__detail .grid thead th { position: static; }
 
-.grid thead th:focus-visible {
-  outline: 2px solid var(--saffron);
-  outline-offset: -2px;
+/* The header's button is only a focus target and a role; it must look like the
+   plain header text it replaced. */
+.grid__sort {
+  all: unset;
+  cursor: pointer;
 }
+
+.grid__sort:focus-visible {
+  outline: 2px solid var(--saffron);
+  outline-offset: 3px;
+}
+
+/* An answer that no longer matches the pickers, while the new one loads. */
+.stale-aware { transition: opacity 120ms ease; }
+.stale-aware[data-pending] { opacity: 0.45; pointer-events: none; }
 
 /* ── Overview tiles ──────────────────────────────────────── */
 

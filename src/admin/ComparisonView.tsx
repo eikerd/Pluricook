@@ -57,6 +57,13 @@ function clusterColumns(c: Comparison): GridColumn<IngredientCluster>[] {
 
 type Unmatched = Comparison["unmatched"][number];
 
+// Row keys, at module scope so their identity is stable across renders. A
+// cluster is one food; a salinity or source row is one recipe; an unmatched
+// line needs its place too, since one recipe can list "salt, to taste" twice.
+const byFood = (r: IngredientCluster) => String(r.fdcId);
+const byRecipe = (r: { recipeId: string }) => r.recipeId;
+const byRecipeAndPlace = (r: Unmatched, index: number) => `${r.recipeId}:${index}`;
+
 /**
  * Only a web address becomes a link. assertProvenance already refuses anything
  * else at capture, but personal collections are JSON edited by hand, and an
@@ -158,8 +165,14 @@ export function ComparisonView() {
   const [dishes, setDishes] = useState<DishSummary[] | null>(null);
   const [dish, setDish] = useState<string | null>(null);
   const [section, setSection] = useState(WHOLE_RECIPE);
-  const [comparison, setComparison] = useState<Comparison | null>(null);
+  // The answer is kept with the question it answers, so the page can tell when
+  // what is on screen no longer matches what the pickers say.
+  const [loaded, setLoaded] = useState<{ question: string; comparison: Comparison } | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const question = `${dish ?? ""}\n${section}`;
+  const comparison = loaded?.comparison ?? null;
+  const isStale = loaded !== null && loaded.question !== question;
 
   useEffect(() => {
     fetch("/api/admin/dishes")
@@ -181,7 +194,7 @@ export function ComparisonView() {
       .then(async (r) => {
         const body = (await r.json()) as Comparison | { error: string };
         if (!r.ok) throw new Error("error" in body ? body.error : `HTTP ${r.status}`);
-        if (!stale) { setComparison(body as Comparison); setError(null); }
+        if (!stale) { setLoaded({ question, comparison: body as Comparison }); setError(null); }
       })
       .catch((e: unknown) => {
         if (!stale) setError(e instanceof Error ? e.message : "Comparison failed");
@@ -189,7 +202,19 @@ export function ComparisonView() {
 
     // A slow answer for the previous dish must not overwrite the current one.
     return () => { stale = true; };
-  }, [dish, section]);
+  }, [dish, section, question]);
+
+  // Built once per answer. Rebuilt on every render, fresh column arrays would
+  // make each open row's nested grid re-sort whenever the outer grid changed.
+  const columns = useMemo(
+    () =>
+      comparison && {
+        cluster: clusterColumns(comparison),
+        salinity: salinityColumns(comparison),
+        source: sourceColumns(comparison),
+      },
+    [comparison],
+  );
 
   const sections = useMemo(
     () => dishes?.find((d) => d.dish === dish)?.sections ?? [],
@@ -199,8 +224,19 @@ export function ComparisonView() {
   const pickDish = (next: string) => {
     setDish(next);
     setSection(WHOLE_RECIPE);   // sections belong to a dish; "sauce" means nothing for meatloaf
-    setComparison(null);
+    setLoaded(null);
   };
+
+  const sourcesOf = (cluster: IngredientCluster) =>
+    columns && (
+      <SortableGrid
+        label={`Sources for ${cluster.foodDescription}`}
+        columns={columns.source}
+        rows={cluster.sources}
+        rowKey={byRecipe}
+        initialSort={{ key: "relative", dir: "desc" }}
+      />
+    );
 
   if (error) {
     return (
@@ -217,7 +253,9 @@ export function ComparisonView() {
         <div>
           <h2>Comparison</h2>
           {comparison && comparison.analysed > 0 && (
-            <p className="muted pane__note">{comparison.anchor.reason}</p>
+            <p className="muted pane__note stale-aware" data-pending={isStale || undefined}>
+              {comparison.anchor.reason}
+            </p>
           )}
         </div>
         <div className="pickers">
@@ -248,61 +286,53 @@ export function ComparisonView() {
         </div>
       </header>
 
-      {!comparison ? (
+      {!comparison || !columns ? (
         <p className="muted">Loading…</p>
       ) : comparison.analysed === 0 ? (
         <p className="empty">No recipes to compare.</p>
       ) : (
         // Keyed by dish and section so each grid starts from its default sort
         // when the question changes, rather than carrying over the last one.
-        <div key={`${comparison.dish}:${comparison.section ?? ""}`}>
+        // Dimmed while a new section loads: old numbers under a new section name
+        // are the one thing a comparison page must never show at full strength.
+        <div key={loaded?.question} className="stale-aware" data-pending={isStale || undefined}>
           <h3 className="pane__sub">Consensus</h3>
           <SortableGrid
-            columns={clusterColumns(comparison)}
+            label="Consensus"
+            columns={columns.cluster}
             rows={comparison.common}
-            rowKey={(r) => String(r.fdcId)}
+            rowKey={byFood}
             initialSort={{ key: "recipes", dir: "desc" }}
-            detail={(cluster) => (
-              <SortableGrid
-                columns={sourceColumns(comparison)}
-                rows={cluster.sources}
-                rowKey={(r) => `${r.siteName}:${r.rawLine}`}
-                initialSort={{ key: "relative", dir: "desc" }}
-              />
-            )}
+            detail={sourcesOf}
           />
 
           <h3 className="pane__sub">Salinity</h3>
           <SortableGrid
-            columns={salinityColumns(comparison)}
+            label="Salinity"
+            columns={columns.salinity}
             rows={comparison.recipes}
-            rowKey={(r) => `${r.siteName}:${r.sourceUrl ?? ""}`}
+            rowKey={byRecipe}
             initialSort={{ key: "salinity", dir: "desc" }}
           />
 
           <h3 className="pane__sub">Outliers</h3>
           <SortableGrid
-            columns={clusterColumns(comparison)}
+            label="Outliers"
+            columns={columns.cluster}
             rows={comparison.outliers}
-            rowKey={(r) => String(r.fdcId)}
+            rowKey={byFood}
             initialSort={{ key: "recipes", dir: "desc" }}
-            detail={(cluster) => (
-              <SortableGrid
-                columns={sourceColumns(comparison)}
-                rows={cluster.sources}
-                rowKey={(r) => `${r.siteName}:${r.rawLine}`}
-                initialSort={{ key: "relative", dir: "desc" }}
-              />
-            )}
+            detail={sourcesOf}
           />
 
           {comparison.unmatched.length > 0 && (
             <>
               <h3 className="pane__sub">Unmatched lines</h3>
               <SortableGrid
+                label="Unmatched lines"
                 columns={UNMATCHED_COLUMNS}
                 rows={comparison.unmatched}
-                rowKey={(r) => `${r.siteName}:${r.rawLine}`}
+                rowKey={byRecipeAndPlace}
                 initialSort={{ key: "source", dir: "asc" }}
               />
             </>

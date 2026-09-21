@@ -25,7 +25,14 @@ export interface GridColumn<T> {
 interface SortableGridProps<T> {
   columns: GridColumn<T>[];
   rows: T[];
-  rowKey: (row: T) => string;
+  /** What the table is, for a screen reader — several grids share one page, some nested. */
+  label: string;
+  /**
+   * A stable, unique key. `index` is the row's place in `rows` as given, which
+   * does not move when the grid is sorted — use it when the data alone cannot
+   * tell two rows apart (one recipe listing "salt, to taste" twice).
+   */
+  rowKey: (row: T, index: number) => string;
   initialSort: { key: string; dir: SortDir };
   /**
    * What a row opens to show. When given, the first cell carries a toggle.
@@ -46,7 +53,7 @@ function compare(a: SortValue, b: SortValue, dir: SortDir): number {
   return dir === "asc" ? order : -order;
 }
 
-export function SortableGrid<T>({ columns, rows, rowKey, initialSort, detail }: SortableGridProps<T>) {
+export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, detail }: SortableGridProps<T>) {
   const [sort, setSort] = useState(initialSort);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
@@ -58,17 +65,19 @@ export function SortableGrid<T>({ columns, rows, rowKey, initialSort, detail }: 
     });
 
   const sorted = useMemo(() => {
+    // Keys are taken before sorting, while a row's index still means something.
+    const keyed = rows.map((row, index) => ({ row, key: rowKey(row, index) }));
     const column = columns.find((c) => c.key === sort.key);
-    if (!column) return rows;
-    return [...rows].sort((a, b) => compare(column.value(a), column.value(b), sort.dir));
-  }, [columns, rows, sort]);
+    if (!column) return keyed;
+    return keyed.sort((a, b) => compare(column.value(a.row), column.value(b.row), sort.dir));
+  }, [columns, rows, rowKey, sort]);
 
   const toggle = (key: string) =>
     setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
 
   return (
     <div className="grid-wrap grid-wrap--fit">
-      <table className="grid">
+      <table className="grid" aria-label={label}>
         <thead>
           <tr>
             {columns.map((c) => {
@@ -78,25 +87,23 @@ export function SortableGrid<T>({ columns, rows, rowKey, initialSort, detail }: 
                   key={c.key}
                   className={`${c.numeric ? "num" : ""} ${active ? "sorted" : ""}`}
                   aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}
-                  tabIndex={0}
                   onClick={() => toggle(c.key)}
-                  onKeyDown={(e) => {
-                    if (e.key !== "Enter" && e.key !== " ") return;
-                    e.preventDefault();
-                    toggle(c.key);
-                  }}
                   title={`Sort by ${c.label}`}
                 >
-                  {c.label}
-                  <span className="arrow">{active ? (sort.dir === "asc" ? "▲" : "▼") : "↕"}</span>
+                  {/* A button gives focus, Enter and Space for nothing, and tells a
+                      screen reader the header does something. Its click bubbles to
+                      the th, so the whole header cell stays the target. */}
+                  <button type="button" className="grid__sort">
+                    {c.label}
+                    <span className="arrow" aria-hidden="true">{active ? (sort.dir === "asc" ? "▲" : "▼") : "↕"}</span>
+                  </button>
                 </th>
               );
             })}
           </tr>
         </thead>
         <tbody>
-          {sorted.map((row) => {
-            const key = rowKey(row);
+          {sorted.map(({ row, key }) => {
             const isOpen = open.has(key);
             return (
               <Fragment key={key}>
@@ -107,6 +114,7 @@ export function SortableGrid<T>({ columns, rows, rowKey, initialSort, detail }: 
                       <td key={c.key} className={c.numeric ? "num" : ""}>
                         {detail && i === 0 ? (
                           <button
+                            type="button"
                             className="grid__toggle"
                             aria-expanded={isOpen}
                             onClick={() => toggleOpen(key)}

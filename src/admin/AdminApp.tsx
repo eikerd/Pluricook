@@ -82,6 +82,7 @@ export function AdminApp() {
         <nav>
           <p className="rail__group">Summary</p>
           <button
+            type="button"
             className={`rail__item ${active === "overview" ? "is-active" : ""}`}
             onClick={() => setActive("overview")}
           >
@@ -93,6 +94,7 @@ export function AdminApp() {
             .filter((d) => ["sources", "searches", "fetches"].includes(d.id))
             .map((d) => (
               <button
+                type="button"
                 key={d.id}
                 className={`rail__item ${active === d.id ? "is-active" : ""}`}
                 onClick={() => setActive(d.id)}
@@ -106,6 +108,7 @@ export function AdminApp() {
             .filter((d) => d.id.startsWith("usda"))
             .map((d) => (
               <button
+                type="button"
                 key={d.id}
                 className={`rail__item ${active === d.id ? "is-active" : ""}`}
                 onClick={() => setActive(d.id)}
@@ -119,6 +122,7 @@ export function AdminApp() {
             .filter((d) => d.id === "recipes")
             .map((d) => (
               <button
+                type="button"
                 key={d.id}
                 className={`rail__item ${active === d.id ? "is-active" : ""}`}
                 onClick={() => setActive(d.id)}
@@ -127,6 +131,7 @@ export function AdminApp() {
               </button>
             ))}
           <button
+            type="button"
             className={`rail__item ${active === "comparison" ? "is-active" : ""}`}
             onClick={() => setActive("comparison")}
           >
