@@ -1,0 +1,299 @@
+/**
+ * Convert a measured ingredient into grams.
+ *
+ * Grams are the source of truth for comparison; imperial is a display
+ * conversion handled later. Nothing here guesses: a conversion that cannot be
+ * grounded returns a reason instead of a number, because a plausible-looking
+ * wrong mass is worse than a gap — it silently skews every comparison built on
+ * it, and there is no way to spot it downstream.
+ *
+ * Density is keyed by (food, condition), not by ingredient alone. USDA carries
+ * the condition in two places and both are needed: the food description
+ * ("Spices, oregano, dried") and the portion modifier ("tsp, leaves" vs
+ * "tsp, ground"). Those two differ by 80% for the same dried oregano.
+ */
+
+import type { Database } from "bun:sqlite";
+
+/** Units that are a mass already — no food lookup needed. */
+const MASS_GRAMS: Record<string, number> = {
+  g: 1, gram: 1, grams: 1, gm: 1,
+  kg: 1000, kilogram: 1000, kilograms: 1000,
+  mg: 0.001, milligram: 0.001, milligrams: 0.001,
+  oz: 28.3495, ounce: 28.3495, ounces: 28.3495,
+  lb: 453.592, lbs: 453.592, pound: 453.592, pounds: 453.592,
+};
+
+/** Spelling variants collapsed to the form USDA's modifiers tend to use. */
+const UNIT_ALIASES: Record<string, string> = {
+  c: "cup", cups: "cup",
+  tbsp: "tbsp", tbs: "tbsp", tb: "tbsp", tablespoon: "tbsp", tablespoons: "tbsp", t: "tsp",
+  tsp: "tsp", teaspoon: "tsp", teaspoons: "tsp",
+  "fl oz": "fl oz", "fluid ounce": "fl oz", "fluid ounces": "fl oz",
+  ml: "ml", milliliter: "ml", milliliters: "ml", millilitre: "ml",
+  l: "liter", liter: "liter", liters: "liter", litre: "liter",
+  pt: "pint", pint: "pint", pints: "pint",
+  qt: "quart", quart: "quart", quarts: "quart",
+  clove: "clove", cloves: "clove",
+  slice: "slice", slices: "slice",
+  stick: "stick", sticks: "stick",
+  can: "can", cans: "can",
+  large: "large", medium: "medium", small: "small",
+};
+
+/**
+ * Volume units expressed in millilitres, used only as a last resort.
+ *
+ * Converting volume to mass without a density is guessing, so these are NOT
+ * applied on their own — they exist to translate a recipe's unit into the
+ * measure USDA actually published for that food (usually a cup).
+ */
+const ML: Record<string, number> = {
+  cup: 236.588, tbsp: 14.7868, tsp: 4.92892,
+  "fl oz": 29.5735, ml: 1, liter: 1000, pint: 473.176, quart: 946.353,
+};
+
+export type Basis =
+  /** The unit was already a mass. Exact. */
+  | "direct-mass"
+  /** Matched a USDA portion whose measure and condition both fit. */
+  | "usda-portion"
+  /** Scaled from a USDA portion in a different but convertible volume unit. */
+  | "usda-portion-scaled"
+  /** No food matched in USDA. */
+  | "no-food-match"
+  /** Food matched, but it publishes no portion for this unit. */
+  | "no-portion-match"
+  /** The unit is not one we can reason about (e.g. "to taste", "pinch"). */
+  | "unconvertible-unit";
+
+export interface GramResult {
+  grams: number | null;
+  basis: Basis;
+  /** The USDA record used, so a surprising number can be traced back. */
+  fdcId: number | null;
+  foodDescription: string | null;
+  /** The portion row relied on, e.g. "1 tsp, ground = 1.8 g". */
+  portionUsed: string | null;
+  /** Free-text note when the conversion is approximate or refused. */
+  note: string | null;
+}
+
+export function normalizeUnit(unit: string): string {
+  const u = unit.trim().toLowerCase().replace(/\.$/, "");
+  return UNIT_ALIASES[u] ?? u;
+}
+
+interface FoodRow { fdc_id: number; description: string }
+
+/**
+ * Words describing preparation, not identity.
+ *
+ * These must never reach the search index. The FTS tokenizer is a Porter
+ * stemmer, so "chopped" stems to "chop" and matches "Pork, chop, center cut" —
+ * which is how "1 medium onion, finely chopped" was resolving to pork. Likewise
+ * "minced" matched "Ham, minced". Preparation belongs in `condition`, where it
+ * selects between portions, not in the query that decides what the food IS.
+ */
+const PREPARATION_WORDS = new Set([
+  "chopped", "finely", "coarsely", "minced", "diced", "sliced", "grated", "shredded",
+  "crushed", "ground", "peeled", "seeded", "trimmed", "cubed", "julienned", "quartered",
+  "halved", "melted", "softened", "beaten", "packed", "sifted", "divided", "optional",
+  "fresh", "freshly", "dried", "frozen", "canned", "cooked", "raw", "plus", "more",
+  "taste", "needed", "room", "temperature", "large", "medium", "small", "thinly",
+  "roughly", "lightly", "well", "drained", "rinsed", "warm", "cold", "hot",
+]);
+
+/**
+ * Reduce an ingredient phrase to the words that identify the food.
+ *
+ * Parentheticals go first: "salt (or to taste)", "chili sauce (see note)" and
+ * "bread crumbs (or seasoned breadcrumbs)" all failed to match because the
+ * aside was being searched as if it were part of the name.
+ */
+export function foodTerms(name: string): string[] {
+  return name
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, " ")   // drop asides entirely
+    .split(/,|;/)[0]!             // keep only the head phrase
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length > 2 && !PREPARATION_WORDS.has(t));
+}
+interface PortionRow {
+  amount: number | null;
+  unit: string | null;
+  modifier: string | null;
+  gram_weight: number;
+}
+
+/**
+ * Find the USDA food that best matches an ingredient name.
+ *
+ * Foundation and SR Legacy are preferred over FNDDS survey foods: survey
+ * records describe prepared dishes ("Beef, ground, patty"), and a recipe
+ * ingredient is almost always the raw component.
+ *
+ * Shortest description wins among equally-ranked hits, because USDA's shortest
+ * entries are the generic ones — "Onions, raw" rather than "Onions, raw, with
+ * salt added, drained".
+ */
+export function matchFood(
+  db: Database,
+  name: string,
+  /**
+   * True when the caller needs a household measure, not just an identity.
+   *
+   * This flips the dataset preference, and the numbers say why: Foundation has
+   * 469 foods but only 187 portions, while SR Legacy has 7,793 foods and 14,449.
+   * Preferring Foundation gives the most precisely analysed record and then no
+   * way to convert a cup of it — which is how "ketchup" resolved to "Ketchup,
+   * restaurant" with zero portions while SR Legacy's "Catsup" had the cup.
+   */
+  needsPortion = false,
+): FoodRow | null {
+  const terms = foodTerms(name);
+  if (terms.length === 0) return null;
+
+  // Ranking happens in a subquery: bm25() cannot be used alongside GROUP BY.
+  const sql = (having: string) => `
+    SELECT fdc_id, description FROM (
+      SELECT f.fdc_id, f.description, f.dataset, bm25(foods_fts) AS rank,
+             (SELECT COUNT(*) FROM portions p WHERE p.fdc_id = f.fdc_id) AS portions
+      FROM foods_fts JOIN foods f ON f.fdc_id = foods_fts.rowid
+      WHERE foods_fts MATCH ?1
+      ORDER BY rank LIMIT 200
+    ) ${having}
+    ORDER BY ${needsPortion ? "CASE WHEN portions > 0 THEN 0 ELSE 1 END," : ""}
+             CASE dataset
+               WHEN '${needsPortion ? "sr-legacy" : "foundation"}' THEN 0
+               WHEN '${needsPortion ? "foundation" : "sr-legacy"}' THEN 1
+               ELSE 2 END,
+             rank, length(description)
+    LIMIT 1`;
+
+  for (const query of [
+    terms.map((t) => `"${t}"`).join(" "),  // all identifying words
+    `"${terms[terms.length - 1]!}"`,        // head noun alone: "unsalted butter" → butter
+  ]) {
+    const hit =
+      (needsPortion &&
+        db.query<FoodRow, [string]>(sql("WHERE portions > 0")).get(query)) ||
+      db.query<FoodRow, [string]>(sql("")).get(query);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+/** Does a USDA portion row describe the unit we are trying to convert? */
+function portionMatchesUnit(p: PortionRow, unit: string): boolean {
+  const text = `${p.unit ?? ""} ${p.modifier ?? ""}`.toLowerCase();
+  if (unit === "cup") return /\bcup\b/.test(text);
+  if (unit === "tbsp") return /\btbsp\b|\btablespoon/.test(text);
+  if (unit === "tsp") return /\btsp\b|\bteaspoon/.test(text);
+  return new RegExp(`\\b${unit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(text);
+}
+
+export interface ToGramsOptions {
+  quantity: number;
+  unit: string;
+  /** Ingredient name, already stripped of quantity and preparation words. */
+  name: string;
+  /**
+   * Preparation or form, when the recipe states one — "chopped", "ground",
+   * "minced". Used to choose between USDA portions of the same unit, which is
+   * where the oregano 1.0 g / 1.8 g difference lives.
+   */
+  condition?: string | null;
+  db: Database;
+}
+
+export function toGrams(opts: ToGramsOptions): GramResult {
+  const unit = normalizeUnit(opts.unit);
+  const empty: GramResult = {
+    grams: null, basis: "unconvertible-unit", fdcId: null,
+    foodDescription: null, portionUsed: null, note: null,
+  };
+
+  if (!Number.isFinite(opts.quantity) || opts.quantity <= 0) {
+    return { ...empty, note: "no usable quantity" };
+  }
+
+  // 1. Already a mass. No food lookup, no ambiguity.
+  const massFactor = MASS_GRAMS[unit];
+  if (massFactor !== undefined) {
+    return {
+      grams: Math.round(opts.quantity * massFactor * 10) / 10,
+      basis: "direct-mass", fdcId: null, foodDescription: null,
+      portionUsed: null, note: null,
+    };
+  }
+
+  // 2. Everything else needs the food, because everything else needs a density.
+  // needsPortion: everything past a plain mass requires a household measure.
+  const food = matchFood(opts.db, opts.name, true);
+  if (!food) return { ...empty, basis: "no-food-match", note: `no USDA match for "${opts.name}"` };
+
+  const portions = opts.db
+    .query<PortionRow, [number]>(
+      `SELECT amount, unit, modifier, gram_weight FROM portions WHERE fdc_id = ?1`,
+    )
+    .all(food.fdc_id);
+
+  const describe = (p: PortionRow) =>
+    `${p.amount ?? 1} ${p.modifier ?? p.unit ?? ""} = ${p.gram_weight} g`.replace(/\s+/g, " ").trim();
+
+  const candidates = portions.filter((p) => portionMatchesUnit(p, unit));
+
+  if (candidates.length > 0) {
+    // Prefer a portion whose modifier also matches the stated condition; this is
+    // the whole reason condition is a parameter. "1 tsp, ground" and
+    // "1 tsp, leaves" are both teaspoons of the same dried oregano.
+    const cond = opts.condition?.toLowerCase().trim();
+    const byCondition = cond
+      ? candidates.find((p) => (p.modifier ?? "").toLowerCase().includes(cond))
+      : undefined;
+    const chosen = byCondition ?? candidates[0]!;
+
+    const per = chosen.gram_weight / (chosen.amount && chosen.amount > 0 ? chosen.amount : 1);
+    return {
+      grams: Math.round(opts.quantity * per * 10) / 10,
+      basis: "usda-portion",
+      fdcId: food.fdc_id,
+      foodDescription: food.description,
+      portionUsed: describe(chosen),
+      note:
+        !byCondition && cond && candidates.length > 1
+          ? `condition "${cond}" not matched; used "${chosen.modifier ?? chosen.unit}" of ${candidates.length} portions`
+          : null,
+    };
+  }
+
+  // 3. No portion in this unit — but if the food publishes another VOLUME
+  //    measure, the ratio between the two volumes is exact, so scaling is
+  //    arithmetic rather than a density guess.
+  const thisMl = ML[unit];
+  if (thisMl !== undefined) {
+    for (const [otherUnit, otherMl] of Object.entries(ML)) {
+      const alt = portions.find((p) => portionMatchesUnit(p, otherUnit));
+      if (!alt) continue;
+      const per = alt.gram_weight / (alt.amount && alt.amount > 0 ? alt.amount : 1);
+      return {
+        grams: Math.round(opts.quantity * per * (thisMl / otherMl) * 10) / 10,
+        basis: "usda-portion-scaled",
+        fdcId: food.fdc_id,
+        foodDescription: food.description,
+        portionUsed: describe(alt),
+        note: `scaled from ${otherUnit} to ${unit} by volume`,
+      };
+    }
+  }
+
+  return {
+    ...empty,
+    basis: "no-portion-match",
+    fdcId: food.fdc_id,
+    foodDescription: food.description,
+    note: `"${food.description}" publishes no ${unit} portion (${portions.length} portions available)`,
+  };
+}
