@@ -334,3 +334,38 @@ lines across components.
 **Today.** Both lemon juices resolve to *Lemon juice, raw*. The salts and
 vanillas convert line by line, except the ¼ tsp salt (G7). Nothing is merged
 across components.
+
+---
+
+## Prior art
+
+*Checked 2026-09-26, against package registries, repositories and live demos.*
+
+Is there a standard or library that already handles all of this? No.
+
+- **Parsing one line** is close to solved.
+- **Finding section headers** is half solved.
+- **Linking a sub-recipe to its section** (G1–G4) is solved nowhere. Some
+  formats can store "this ingredient is that section's output", but no parser
+  infers it from free text. It is a relation between lines, and line parsers
+  look at one line at a time.
+
+| Tool | Covers here | Does not |
+|---|---|---|
+| [parse-ingredient](https://github.com/jakeboone02/parse-ingredient) · TypeScript · MIT · 3.0.0 | Unicode fractions glued to digits (G7).<br>`1tsp` and `tBsp` (G10).<br>`about`, with the `leadingQuantityPrefixes` option (G10).<br>`(360 g)` and a `+ ½ tsp` part, with `descriptionMeasurements` (G11, G13).<br>`isGroupHeader` for lines that start "For " or end with ":" (G5).<br>Its own tests run on `bun test`. | A glued `(360g)` stays in the description.<br>Bare headers such as `DOUGH` are not flagged.<br>`about1tBsp` and `cutto` are not repaired.<br>`1large` gives the unit "large". |
+| [ingredient-parser](https://github.com/strangetom/ingredient-parser) · Python · MIT · 2.8.0 | A CRF model trained on about 81k labelled sentences.<br>Several amounts per line (G11), an "approximate" flag (G10), and `+`/`plus` composites (G13).<br>Size and preparation fields.<br>USDA FoodData Central ids (G15). | English only.<br>One line at a time.<br>No headers. |
+| [recipe-scrapers](https://github.com/hhursev/recipe-scrapers) · Python · MIT, with a [TypeScript port](https://github.com/recipe-scrapers/recipe-scrapers) | `ingredient_groups()` reads each group's heading and lines from the page HTML, which keeps the groups JSON-LD drops (G5). | Only markup it knows (WP Recipe Maker, Tasty Recipes by default).<br>The TypeScript port has about 15 site scrapers. |
+| [schema.org Recipe](https://schema.org/recipeIngredient) | Since 29.3, `recipeIngredient` may be a structured value ([#4454](https://github.com/schemaorg/schemaorg/issues/4454)). | No example of grouped ingredients, and Google's guidance still says plain text.<br>A recipe-as-ingredient proposal ([#4677](https://github.com/schemaorg/schemaorg/issues/4677)) was closed with a pointer to `hasPart`.<br>Expect a flat list (G5). |
+| [Cooklang](https://github.com/cooklang/spec) | The nearest model for G1–G4:<br>• sections (`== Filling ==`);<br>• references to another recipe's output with an amount, `@./Cider Reduction{15%g}` against a declared `yield: 40%g` (experimental);<br>• in the Rust parser, references to a section's output. | A format you write recipes in, not a parser for free text. |
+
+Mealie's data model gives each ingredient a section title and a
+`referenced_recipe` (AGPL-3.0). It is a working example of the G1 model, not a
+standard. The paid APIs (Zestful, Edamam, Spoonacular) parse one line at a
+time, and none handles sub-recipes.
+
+Regression data under permissive licences:
+- [ingredient-parser's training sentences](https://github.com/strangetom/ingredient-parser/tree/master/train/data) (MIT)
+- the NYT ingredient-phrase-tagger's 179,207 labelled lines (Apache-2.0, 2015)
+- [TASTEset](https://github.com/taisti/TASTEset) (MIT, 700 ingredient lists)
+
+RecipeNLG is for non-commercial research only.
