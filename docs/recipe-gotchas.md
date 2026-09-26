@@ -358,6 +358,9 @@ Is there a standard or library that already handles all of this? No.
 | [schema.org Recipe](https://schema.org/recipeIngredient) | Since 29.3, `recipeIngredient` may be a structured value ([#4454](https://github.com/schemaorg/schemaorg/issues/4454)). | No example of grouped ingredients, and Google's guidance still says plain text.<br>A recipe-as-ingredient proposal ([#4677](https://github.com/schemaorg/schemaorg/issues/4677)) was closed with a pointer to `hasPart`.<br>Expect a flat list (G5). |
 | [Cooklang](https://github.com/cooklang/spec) | The nearest model for G1–G4:<br>• sections (`== Filling ==`);<br>• references to another recipe's output with an amount, `@./Cider Reduction{15%g}` against a declared `yield: 40%g` (experimental);<br>• in the Rust parser, references to a section's output. | A format you write recipes in, not a parser for free text. |
 
+Cooklang was considered as Pluricook's own format and not adopted for now. The
+decision, and what we take from it, is in `docs/recipe-format.md`.
+
 Mealie's data model gives each ingredient a section title and a
 `referenced_recipe` (AGPL-3.0). It is a working example of the G1 model, not a
 standard. The paid APIs (Zestful, Edamam, Spoonacular) parse one line at a
