@@ -1,5 +1,5 @@
 /**
- * Seven ways of looking at one dish, side by side until one proves the most
+ * Eight ways of looking at one dish, side by side until one proves the most
  * useful. All of them read the same payload, /api/admin/matrix, so no two can
  * disagree about a number — and a click on any mark shows the line behind it.
  */
@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { DishSummary } from "../lib/compare-service";
 import type { VisualMatrix } from "../lib/visual-matrix";
 import { Network } from "./charts/Network";
+import { Stacked } from "./charts/Stacked";
 import { UpSet } from "./charts/UpSet";
 import { Distribution, Heatmap, Map3D, Parallel, recipeLabel, Ternary, type Picked, type ViewProps } from "./charts/views";
 
@@ -21,6 +22,7 @@ const VIEWS: Array<{ id: string; label: string; View: (p: ViewProps) => React.Re
   { id: "map3d", label: "3D map", View: Map3D },
   { id: "network", label: "3D network", View: Network },
   { id: "ternary", label: "Ternary", View: Ternary },
+  { id: "stacked", label: "Stacked", View: Stacked },
 ];
 
 const dishName = (slug: string) => {
