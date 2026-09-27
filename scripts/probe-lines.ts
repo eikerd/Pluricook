@@ -12,8 +12,7 @@
  */
 
 import { Database } from "bun:sqlite";
-import { parseIngredientLine } from "../src/lib/ingredient-parser";
-import { parseLine } from "../src/lib/ingredient-line";
+import { conversionInput, parseLine } from "../src/lib/ingredient-line";
 import { toGrams } from "../src/lib/to-grams";
 import { readAliases } from "../src/lib/ingredient-aliases";
 
@@ -38,10 +37,8 @@ for (const raw of lines) {
   // A paste carries its bullets; a JSON-LD recipeIngredient entry does not.
   const line = stripBullets ? raw.replace(/^\s*[•∙·▪*-]\s*/, "") : raw;
   const parsed = parseLine(line);
-  const stated = parseIngredientLine(line).alternateQuantity;
   const result = toGrams({
-    quantity: parsed.quantity,
-    unit: parsed.unit,
+    ...conversionInput(parsed),
     name: parsed.name,
     condition: parsed.preparation,
     db,
@@ -50,7 +47,7 @@ for (const raw of lines) {
 
   console.log(line);
   console.log(`  parsed  ${parsed.quantity} ${parsed.unit} · ${JSON.stringify(parsed.name)}`);
-  console.log(`  stated  ${stated ? `${stated.quantity} ${stated.unit}` : "—"}`);
+  console.log(`  stated  ${parsed.statedGrams === null ? "—" : `${parsed.statedGrams} g`}`);
   console.log(
     `  grams   ${result.grams === null ? "—" : result.grams.toFixed(1)} · ${result.foodDescription ?? result.basis}`,
   );

@@ -10,7 +10,7 @@
  */
 
 import { Database } from "bun:sqlite";
-import { parseLine } from "../src/lib/ingredient-line";
+import { conversionInput, parseLine } from "../src/lib/ingredient-line";
 import { toGrams, type Basis } from "../src/lib/to-grams";
 import { readAliases } from "../src/lib/ingredient-aliases";
 import type { ExtractedRecipe } from "../src/types/provenance";
@@ -41,8 +41,7 @@ for (const recipe of recipes) {
   for (const line of recipe.ingredientLines) {
     const parsed = parseLine(line);
     const result = toGrams({
-      quantity: parsed.quantity,
-      unit: parsed.unit,
+      ...conversionInput(parsed),
       name: parsed.name,
       condition: parsed.preparation,
       db,

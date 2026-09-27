@@ -191,3 +191,25 @@ withDb("every ingredient lands in exactly one list", () => {
   });
 });
 
+
+withDb("recipe gotchas end to end — docs/recipe-gotchas.md", () => {
+  test("G11: a line's own gram weight is used, not USDA's cup of apples", () => {
+    // USDA's portion would make 2½ cups of Granny Smith 272.5 g; the recipe says 375.
+    const c = compare([
+      recipe("a", ["1000 g ground beef", "2½ cups (375g) Granny Smith apples"]),
+      recipe("b", ["1000 g ground beef", "2½ cups (375g) Granny Smith apples"]),
+    ]);
+    const apples = c.common.find((x) => /granny smith/i.test(x.foodDescription));
+    expect(apples, "no Granny Smith cluster").toBeDefined();
+    expect(apples!.sources.map((s) => s.grams)).toEqual([375, 375]);
+  });
+
+  test("G7: a ¼-cup line reaches the comparison instead of Unmatched lines", () => {
+    // The Modern Proper's meatloaf lost its ketchup this way.
+    const c = compare([
+      recipe("a", ["1000 g ground beef", "¼ cup ketchup"]),
+      recipe("b", ["1000 g ground beef", "60 g ketchup"]),
+    ]);
+    expect(c.unmatched.map((u) => u.rawLine)).not.toContain("¼ cup ketchup");
+  });
+});

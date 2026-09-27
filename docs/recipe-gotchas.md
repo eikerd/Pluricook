@@ -31,17 +31,18 @@ its number and says it is fixed.
 | G3 | A sub-recipe goes by different names | structure | not modelled |
 | G4 | A sub-recipe's yield is not the sum of its inputs | structure | not modelled |
 | G5 | Recipes have components, not one list | structure | partly |
-| G6 | A bullet is read as part of the number | text | broken |
-| G7 | ¼ is not read as a number | text | broken |
+| G6 | A bullet is read as part of the number | text | fixed |
+| G7 | ¼ is not read as a number | text | fixed |
 | G8 | Lines wrapped mid-ingredient | text | broken |
 | G9 | A method step inside the ingredient list | text | broken |
 | G10 | Text damaged by PDF copying | text | partly |
-| G11 | Stated grams are thrown away | quantity | broken |
-| G12 | Decimal grams leak into the name | quantity | broken |
-| G13 | Compound measures | quantity | broken |
+| G11 | Stated grams are thrown away | quantity | fixed |
+| G12 | Decimal grams leak into the name | quantity | fixed |
+| G13 | Compound measures | quantity | partly |
 | G14 | A counted item with no weight | quantity | broken |
-| G15 | Plain foods match the wrong USDA record | matching | broken |
+| G15 | Plain foods match the wrong USDA record | matching | partly |
 | G16 | One food, several names, several components | matching | OK |
+| G17 | Small weights rounded to a tenth of a gram | quantity | broken |
 
 ---
 
@@ -93,8 +94,9 @@ ingredients. They check that the consumers add up to the yield: 15 + 25 = 40.
 
 **Today.** The allocation lines become ingredients:
 `0 to taste · "about 2⅛ tsp for the apples"` and
-`0 to taste · "about1tBsp + ½ tsp for the"`. Both references are
-`no-food-match`. The trap from G1 applies here too. Alias
+`0 to taste · "about1tBsp + ½ tsp for the"`. Both references now carry their
+stated 15 g and 25 g (G11), but no food is found for either name, so they still
+land in Unmatched lines. The trap from G1 applies here too. Alias
 `apple cider reduction` to apple cider and 15 g of a 6:1 reduction would count
 as 15 g of cider, a sixth of its sugar. The 240 g of raw cider would count as
 well, once its stated grams are used (G11).
@@ -169,11 +171,14 @@ as a bullet.
 **Should.** Strip any leading bullet (•, ∙, ·, ▪, -, *) before parsing, and name
 the fraction characters one by one instead of as a range.
 
-**Today.** As pasted, every bulleted line parses to quantity `NaN`
-(`NaN cups · "AP Flour"`) and nothing converts. The same range swallows an en
-dash: `2–3 cloves garlic` gives `NaN clove`, while `2-3 cloves garlic` gives 2.
-No line in `data/recipes/` is affected, because JSON-LD lines carry no bullets.
-Any pasted or PDF recipe will be.
+**Fixed 2026-09-27.**
+- The fractions are listed one by one (`VULGAR` in `ingredient-parser.ts`).
+- A leading bullet is stripped.
+- An en-dash range reads as its first figure.
+
+`• 3 cups (360g) AP Flour` now parses as `3 cups`. Tests: "G6: …" in
+`ingredient-line.test.ts`. Before the fix, every bulleted line parsed to
+quantity `NaN`, and so did `2–3 cloves garlic`.
 
 ### G7 · ¼ is not read as a number
 
@@ -184,12 +189,15 @@ leaves it out.
 
 **Should.** 0.25.
 
-**Today.** `0 each · "¼ tsp (1.5g) Salt"`, unconvertible. All four ¼ lines
-already in `data/recipes/` are broken. They are The Country Cook's
-`¼ teaspoon black pepper` and `¼ teaspoon hot sauce ((optional))`, and The Modern
-Proper's `¼ cup ketchup` and `¼ teaspoon freshly cracked black pepper`. The
-ketchup matters: it is one of meatloaf's main sodium sources, so The Modern
-Proper's salinity leaves out the ketchup's sodium.
+**Fixed 2026-09-27**, by the same change as G6. `¼ tsp (1.5g) Salt` now parses
+as `0.25 tsp`.
+
+All four ¼ lines in `data/recipes/` now resolve: The Country Cook's black pepper
+and hot sauce, and The Modern Proper's ketchup and black pepper. With its
+ketchup counted, The Modern Proper's meatloaf salinity rises from 1.96 to 2.11,
+and the corpus median from 1.87 to 1.88.
+
+Tests: "G7: …" in `ingredient-line.test.ts` and `compare.test.ts`.
 
 ### G8 · Lines wrapped mid-ingredient
 
@@ -215,9 +223,8 @@ ingredient. It is a step, and here it is also the sub-recipe's yield (G4).
 **Should.** A line that opens with a cooking verb (reduce, whisk, divide, cook)
 is a step. Keep what it states: "reduce to 40 g" is the yield.
 
-**Today.** As pasted: `0 each · "reduce to about 2 tBsp ,"`, since the parser
-takes the dash for the quantity. With the bullet stripped:
-`0 to taste · "Reduce to about 2 tBsp ,"`. Unconvertible either way.
+**Today.** `0 to taste · "Reduce to about 2 tBsp ,"`, unconvertible. Until the G6
+fix, the parser also took the dash for the quantity.
 
 ### G10 · Text damaged by PDF copying
 
@@ -254,12 +261,15 @@ it does not. Record which was used. The stated mass also settles what a volume
 cannot: `1tsp (6g) Salt` is table salt, while a teaspoon of Diamond Crystal
 kosher salt weighs about 3 g.
 
-**Today.** The parser keeps `(360g)` as `alternateQuantity`, and nothing reads
-it.
-- `2½ cups (375g) Granny Smith Apples` converts to 272.5 g.
-- `1 cup (240g) Fresh Apple Cider`, `1½ cups (225g) Honeycrisp Apples` and
-  `2½ cups (300g) Confectioners’ Sugar` match the right food, find no cup
-  portion, and get no grams at all.
+**Fixed 2026-09-27.** `parseLine` returns `statedGrams`, and `conversionInput`
+makes every caller of `toGrams` use it: `compare.ts`, `probe-lines`,
+`gram-coverage` and `alias-worklist`. Only metric masses count, because
+`(8 oz)` is as often fluid ounces as weight.
+- `2½ cups (375g) Granny Smith Apples` now converts to 375 g; it was 272.5 g.
+- The apple cider, Honeycrisp and confectioners' sugar lines had no grams at
+  all. They now take their stated 240, 225 and 300 g.
+
+Tests: "G11: …" in `ingredient-line.test.ts` and `compare.test.ts`.
 
 ### G12 · Decimal grams leak into the name
 
@@ -269,9 +279,9 @@ it.
 **Goes wrong.** The pattern for a bracketed amount has no `.` in it, so `0.25g`
 is not recognised as one.
 
-**Today.** The bracket stays in the name: `0.125 tsp · "(0.25g) Nutmeg"` matches
-*Oil, nutmeg butter*. The lemon juice, salt and vanilla lines still find their
-food.
+**Fixed 2026-09-27**, with G11: the bracketed-amount pattern accepts decimals.
+`⅛ tsp (0.25g) Nutmeg` now gives the name `Nutmeg` and a stated 0.25 g. It still
+matches *Oil, nutmeg butter* (G15), and it is rounded to 0.3 g (G17).
 
 ### G13 · Compound measures
 
@@ -280,7 +290,9 @@ food.
 **Should.** Add them: 1 tbsp + ½ tsp is 3½ tsp. Better still, use the stated
 25 g (G11).
 
-**Today.** `1 tbsp · "+ ½ tsp Cider Reduction"`.
+**Today.** `1 tbsp · "+ ½ tsp Cider Reduction"`. The stated 25 g now carries the
+amount (G11), but `+ ½ tsp` is still in the name. A line with no stated mass
+would still lose the ½ tsp.
 
 ### G14 · A counted item with no weight
 
@@ -292,24 +304,41 @@ without grams.
 **Today.** `1 large · "Egg, room temp, beaten"` matches *Egg substitute,
 powder*, with no grams.
 
+### G17 · Small weights rounded to a tenth of a gram
+
+**Seen in** apple fritters: `⅛ tsp (0.25g) Nutmeg`, `⅛ tsp (0.75g) Salt`.
+
+**Goes wrong.** `toGrams` rounds every result to 0.1 g. So 0.25 g of nutmeg
+becomes 0.3 g, 20% more, and 0.75 g of salt becomes 0.8 g. Spices and salt are
+the lines where that matters, and salinity is computed from the salt.
+
+**Should.** Keep a stated figure as written, and round a conversion to 0.01 g.
+
+**Today.** 0.25 g gives `0.3`, and 0.75 g gives `0.8`. Found once G11 let the
+stated grams through.
+
 ## Food matching
 
 ### G15 · Plain foods match the wrong USDA record
 
-**Seen in** apple fritters, with the bullets stripped:
+**Seen in** apple fritters. First seen 2026-09-26; updated 2026-09-27, after G11:
 
-| Parsed name | Matched |
-|---|---|
-| `AP Flour` | *Carob flour* |
-| `Sugar` | *Sugars, brown* |
-| `Instant Yeast` | *Yeast extract spread* |
-| `Whole Milk, lukewarm` | *Milk dessert, frozen, milk-fat free, chocolate* |
-| `Egg, room temp, beaten` | *Egg substitute, powder* |
-| `Whole Milk Powder` | *Protein supplement, milk based, Muscle Milk, powder* |
-| `Cinnamon` | *Cinnamon buns, frosted (includes honey buns)* |
-| `(0.25g) Nutmeg` | *Oil, nutmeg butter* |
-| `Neutral Oil` | *Oil, oat* |
-| `Bourbon` | no match |
+| Parsed name | Matched now | Matched before G11 |
+|---|---|---|
+| `AP Flour` | *Flour, 00* | *Carob flour* |
+| `Sugar` | *Sugars, granulated* ✓ | *Sugars, brown* |
+| `Instant Yeast` | *Yeast extract spread* | same |
+| `Whole Milk, lukewarm` | *Milk, whole, 3.25% milkfat* ✓ | *Milk dessert, frozen, milk-fat free, chocolate* |
+| `Egg, room temp, beaten` | *Egg substitute, powder* | same |
+| `Whole Milk Powder` | *Protein supplement, milk based, Muscle Milk, powder* | same |
+| `Cinnamon` | *Cinnamon buns, frosted (includes honey buns)* | same |
+| `Nutmeg` | *Oil, nutmeg butter* | same |
+| `Neutral Oil` | *Oil, corn* | *Oil, oat* |
+| `Bourbon`, `Apple Cider Reduction` | no match | same |
+
+Three matches came right as a side effect of G11. A line that needs a
+household measure makes `matchFood` consider only foods that publish one. A
+line with a stated mass needs none, so the whole search is open to it.
 
 **Goes wrong.** Search ranks a record that contains the word above the plain
 food. "AP" is not known to mean all-purpose. The matcher also sees descriptors

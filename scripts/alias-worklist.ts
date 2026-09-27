@@ -14,7 +14,7 @@
 
 import { Database } from "bun:sqlite";
 import { Glob } from "bun";
-import { parseLine } from "../src/lib/ingredient-line";
+import { conversionInput, parseLine } from "../src/lib/ingredient-line";
 import { readAliases } from "../src/lib/ingredient-aliases";
 import { foodTerms, toGrams } from "../src/lib/to-grams";
 import type { ExtractedRecipe } from "../src/types/provenance";
@@ -33,7 +33,7 @@ for await (const path of new Glob("data/recipes/*.json").scan(".")) {
       lines++;
       const p = parseLine(line);
       const r = toGrams({
-        quantity: p.quantity, unit: p.unit, name: p.name,
+        ...conversionInput(p), name: p.name,
         condition: p.preparation, db, aliases,
       });
       if (r.grams !== null) { converted++; continue; }
