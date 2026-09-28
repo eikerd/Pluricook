@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DishSummary } from "../lib/compare-service";
 import type { VisualMatrix } from "../lib/visual-matrix";
-import { RecipeDrawer } from "./RecipeDrawer";
+import { navigate, recipePath } from "./route";
 import { Network } from "./charts/Network";
 import { Stacked } from "./charts/Stacked";
 import { UpSet } from "./charts/UpSet";
@@ -42,8 +42,6 @@ export function VisualizeView() {
   const [view, setView] = useState("heatmap");
   const [focus, setFocus] = useState<number | null>(null);
   const [picked, setPicked] = useState<Picked | null>(null);
-  /** The recipe open in the detail drawer, and the published line to mark in it. */
-  const [opened, setOpened] = useState<{ recipeId: string; line: string | null } | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [listError, setListError] = useState<string | null>(null);
 
@@ -79,16 +77,14 @@ export function VisualizeView() {
   }, [dish, section, question]);
 
   // A new question invalidates anything that pointed into the old matrix.
-  useEffect(() => { setFocus(null); setPicked(null); setOpened(null); }, [question]);
+  useEffect(() => { setFocus(null); setPicked(null); }, [question]);
 
+  // A recipe clicked on a chart opens its page; the line clicked travels with it, to be marked there.
   const openRecipe = useCallback((recipe: number, ingredient: number | null) => {
     if (!m) return;
-    setOpened({
-      recipeId: m.recipes[recipe]!.recipeId,
-      line: ingredient === null ? null : (m.lines[recipe]?.[ingredient] ?? null),
-    });
+    const line = ingredient === null ? null : (m.lines[recipe]?.[ingredient] ?? null);
+    navigate(recipePath(m.recipes[recipe]!.recipeId), { from: "visualize", line });
   }, [m]);
-  const closeRecipe = useCallback(() => setOpened(null), []);
 
   const sections = useMemo(() => dishes?.find((d) => d.dish === dish)?.sections ?? [], [dishes, dish]);
   const Active = VIEWS.find((v) => v.id === view)!.View;
@@ -160,7 +156,6 @@ export function VisualizeView() {
           )}
         </>
       )}
-      {opened && dish && <RecipeDrawer dish={dish} recipeId={opened.recipeId} highlight={opened.line} onClose={closeRecipe} />}
     </div>
   );
 }

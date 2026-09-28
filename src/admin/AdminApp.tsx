@@ -8,6 +8,8 @@
 import { useEffect, useState } from "react";
 import { ComparisonView } from "./ComparisonView";
 import { DataTable } from "./DataTable";
+import { RecipePage } from "./RecipePage";
+import { navigate, recipeIdFromPath, recipePath, usePath } from "./route";
 import { VisualizeView } from "./VisualizeView";
 import "../admin.css";
 
@@ -63,13 +65,22 @@ function Overview() {
 
 export function AdminApp() {
   const [datasets, setDatasets] = useState<DatasetMeta[]>([]);
-  const [active, setActive] = useState<string>("overview");
+  const path = usePath();
+  const recipeId = recipeIdFromPath(path);
+  // Opened straight at a recipe's address, Back lands on the list it belongs to.
+  const [active, setActive] = useState<string>(() => (recipeIdFromPath(location.pathname) ? "recipes" : "overview"));
 
   useEffect(() => {
     fetch("/api/admin/datasets").then((r) => r.json()).then(setDatasets).catch(() => setDatasets([]));
   }, []);
 
   const current = datasets.find((d) => d.id === active);
+  /** A rail item always leaves a recipe page for the view it names. */
+  const open = (view: string) => {
+    setActive(view);
+    if (recipeId) navigate("/");
+  };
+  const isActive = (view: string) => (recipeId ? view === "recipes" : active === view);
 
   return (
     <div className="shell">
@@ -84,8 +95,8 @@ export function AdminApp() {
           <p className="rail__group">Summary</p>
           <button
             type="button"
-            className={`rail__item ${active === "overview" ? "is-active" : ""}`}
-            onClick={() => setActive("overview")}
+            className={`rail__item ${isActive("overview") ? "is-active" : ""}`}
+            onClick={() => open("overview")}
           >
             Overview
           </button>
@@ -97,8 +108,8 @@ export function AdminApp() {
               <button
                 type="button"
                 key={d.id}
-                className={`rail__item ${active === d.id ? "is-active" : ""}`}
-                onClick={() => setActive(d.id)}
+                className={`rail__item ${isActive(d.id) ? "is-active" : ""}`}
+                onClick={() => open(d.id)}
               >
                 {d.label}
               </button>
@@ -111,8 +122,8 @@ export function AdminApp() {
               <button
                 type="button"
                 key={d.id}
-                className={`rail__item ${active === d.id ? "is-active" : ""}`}
-                onClick={() => setActive(d.id)}
+                className={`rail__item ${isActive(d.id) ? "is-active" : ""}`}
+                onClick={() => open(d.id)}
               >
                 {d.label}
               </button>
@@ -125,44 +136,54 @@ export function AdminApp() {
               <button
                 type="button"
                 key={d.id}
-                className={`rail__item ${active === d.id ? "is-active" : ""}`}
-                onClick={() => setActive(d.id)}
+                className={`rail__item ${isActive(d.id) ? "is-active" : ""}`}
+                onClick={() => open(d.id)}
               >
                 {d.label}
               </button>
             ))}
           <button
             type="button"
-            className={`rail__item ${active === "comparison" ? "is-active" : ""}`}
-            onClick={() => setActive("comparison")}
+            className={`rail__item ${isActive("comparison") ? "is-active" : ""}`}
+            onClick={() => open("comparison")}
           >
             Comparison
           </button>
           <button
             type="button"
-            className={`rail__item ${active === "visualize" ? "is-active" : ""}`}
-            onClick={() => setActive("visualize")}
+            className={`rail__item ${isActive("visualize") ? "is-active" : ""}`}
+            onClick={() => open("visualize")}
           >
             Visualize
           </button>
         </nav>
 
         <p className="rail__foot">
-          Read-only, except starring a source — that writes to
-          data/sources/curated.json. Everything else is edited in the repo.
+          Read-only, except starring a source, which writes to
+          data/sources/curated.json, and correcting a recipe, which writes to
+          data/corrections/. Everything else is edited in the repo.
         </p>
       </aside>
 
       <main className="main">
-        {active === "overview" ? (
-          <Overview />
-        ) : active === "comparison" ? (
-          <ComparisonView />
-        ) : active === "visualize" ? (
-          <VisualizeView />
-        ) : (
-          <DataTable datasetId={active} searchable={current?.searchable ?? false} />
-        )}
+        {recipeId && <RecipePage id={recipeId} onLeave={() => open("recipes")} />}
+        {/* Kept mounted under a recipe page, so Back returns to the same dish,
+            section and chart rather than to a fresh view. */}
+        <div style={{ display: recipeId ? "none" : "contents" }}>
+          {active === "overview" ? (
+            <Overview />
+          ) : active === "comparison" ? (
+            <ComparisonView />
+          ) : active === "visualize" ? (
+            <VisualizeView />
+          ) : (
+            <DataTable
+              datasetId={active}
+              searchable={current?.searchable ?? false}
+              onRowClick={active === "recipes" ? (row) => navigate(recipePath(String(row.id)), { from: "recipes" }) : undefined}
+            />
+          )}
+        </div>
       </main>
     </div>
   );

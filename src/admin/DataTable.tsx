@@ -129,7 +129,14 @@ function Cell({ column, value }: { column: Column; value: unknown }) {
   return <td title={String(value)}>{String(value)}</td>;
 }
 
-export function DataTable({ datasetId, searchable }: { datasetId: string; searchable: boolean }) {
+interface DataTableProps {
+  datasetId: string;
+  searchable: boolean;
+  /** Open a row's own page. Rows become clickable, and reachable by keyboard. */
+  onRowClick?: (row: Record<string, unknown>) => void;
+}
+
+export function DataTable({ datasetId, searchable, onRowClick }: DataTableProps) {
   const [data, setData] = useState<PageResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sort, setSort] = useState<string | null>(null);
@@ -264,7 +271,15 @@ export function DataTable({ datasetId, searchable }: { datasetId: string; search
             </thead>
             <tbody>
               {data.rows.map((row, i) => (
-                <tr key={i}>
+                <tr
+                  key={i}
+                  {...(onRowClick && {
+                    className: "is-link",
+                    tabIndex: 0,
+                    onClick: () => onRowClick(row),
+                    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter") onRowClick(row); },
+                  })}
+                >
                   {data.columns.map((c) =>
                     c.key === "tier" ? (
                       <StarCell key={c.key} row={row} onChange={setStar} />

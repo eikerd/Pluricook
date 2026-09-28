@@ -16,6 +16,7 @@ import { Database } from "bun:sqlite";
 import { Glob } from "bun";
 import { conversionInput, parseLine } from "../src/lib/ingredient-line";
 import { readAliases } from "../src/lib/ingredient-aliases";
+import { applyCorrections, readCorrections } from "../src/lib/corrections";
 import { foodTerms, toGrams } from "../src/lib/to-grams";
 import type { ExtractedRecipe } from "../src/types/provenance";
 
@@ -27,7 +28,10 @@ const misses = new Map<string, { count: number; dishes: Set<string>; example: st
 let lines = 0, converted = 0;
 
 for await (const path of new Glob("data/recipes/*.json").scan(".")) {
-  const { dish, recipes } = (await Bun.file(path).json()) as { dish: string; recipes: ExtractedRecipe[] };
+  const { dish, recipes: published } = (await Bun.file(path).json()) as { dish: string; recipes: ExtractedRecipe[] };
+  // A line the owner has already corrected is not a miss to chase.
+  const slug = path.slice(path.lastIndexOf("/") + 1).replace(/\.json$/, "");
+  const recipes = applyCorrections(published, await readCorrections(slug));
   for (const recipe of recipes) {
     for (const line of recipe.ingredientLines) {
       lines++;

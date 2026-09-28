@@ -13,6 +13,7 @@ import { Database } from "bun:sqlite";
 import { conversionInput, parseLine } from "../src/lib/ingredient-line";
 import { toGrams, type Basis } from "../src/lib/to-grams";
 import { readAliases } from "../src/lib/ingredient-aliases";
+import { applyCorrections, readCorrections } from "../src/lib/corrections";
 import type { ExtractedRecipe } from "../src/types/provenance";
 
 const dish = process.argv[2] ?? "meatloaf";
@@ -26,7 +27,9 @@ if (!(await file.exists())) {
 
 const db = new Database("usda.db", { readonly: true });
 const aliases = await readAliases();
-const { recipes } = (await file.json()) as { recipes: ExtractedRecipe[] };
+const { recipes: published } = (await file.json()) as { recipes: ExtractedRecipe[] };
+// Coverage of what the comparison actually reads: the owner's corrections applied.
+const recipes = applyCorrections(published, await readCorrections(dish));
 
 const byBasis = new Map<Basis, number>();
 const unconverted: Array<{ site: string; line: string; basis: Basis; note: string | null }> = [];

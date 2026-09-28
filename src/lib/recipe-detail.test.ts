@@ -70,7 +70,27 @@ withDb("describeRecipe", () => {
 
   test("a line the comparison cannot resolve has no grams and no food", () => {
     const [line] = describeRecipe(recipe(["Brown Butter (from above)"]), db!, aliases).sections[0]!.lines;
-    expect(line).toEqual({ line: "Brown Butter (from above)", grams: null, food: null });
+    expect(line).toMatchObject({ line: "Brown Butter (from above)", grams: null, share: null, food: null });
+  });
+
+  test("each counted line carries its share of the recipe's weight", () => {
+    const d = describeRecipe(recipe(["300 g bread flour", "100 g water", "Brown Butter (from above)"]), db!, aliases);
+    expect(d.totalGrams).toBe(400);
+    expect(d.sections[0]!.lines.map((l) => l.share)).toEqual([75, 25, null]);
+  });
+
+  test("shares are of the whole recipe, across its sections", () => {
+    const lines = ["300 g bread flour", "100 g water"];
+    const d = describeRecipe(recipe(lines, [
+      { name: "dough", ingredientLines: lines.slice(0, 1) },
+      { name: "wash", ingredientLines: lines.slice(1) },
+    ]), db!, aliases);
+    expect(d.sections.map((s) => s.lines[0]!.share)).toEqual([75, 25]);
+  });
+
+  test("each line says how the parser read it", () => {
+    const [line] = describeRecipe(recipe(["3 cups (360g) AP Flour"]), db!, aliases).sections[0]!.lines;
+    expect(line!.read).toEqual({ quantity: 3, unit: "cups", name: "AP Flour", statedGrams: 360 });
   });
 
   test("a mass with no food identified is unresolved, as the comparison counts it", () => {

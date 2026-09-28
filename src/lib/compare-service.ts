@@ -9,8 +9,9 @@
 import { Database } from "bun:sqlite";
 import { Glob } from "bun";
 import { compareRecipes, type Comparison } from "./compare";
+import { applyCorrections, readCorrections, removeCorrection, validateCorrection, writeCorrection, type RecipeCorrection } from "./corrections";
 import { readAliases } from "./ingredient-aliases";
-import { describeRecipe, type RecipeDetail } from "./recipe-detail";
+import { describeRecipe, factsOf, groupsOf, type RecipeDetail, type RecipeFacts } from "./recipe-detail";
 import type { ExtractedRecipe } from "../types/provenance";
 
 export interface DishSummary {
@@ -84,7 +85,8 @@ async function readDish(dish: string): Promise<ExtractedRecipe[] | null> {
   if (!SLUG.test(dish)) return null;
   const path = `${RECIPES_DIR}/${dish}.json`;
   if (!(await Bun.file(path).exists())) return null;
-  return readRecipes(path);
+  // The comparison, and every chart drawn from it, uses the owner's corrections.
+  return applyCorrections(await readRecipes(path), await readCorrections(dish));
 }
 
 export async function listDishes(): Promise<DishSummary[]> {
@@ -97,7 +99,8 @@ export async function listDishes(): Promise<DishSummary[]> {
     // in valid JSON — should cost one dish, not the whole picker, and the log
     // should say which file. Everything that reads the file sits inside this guard.
     try {
-      out.push(summarize(dish, await readRecipes(path)));
+      // Corrected, so a section the owner renamed is offered under its new name.
+      out.push(summarize(dish, applyCorrections(await readRecipes(path), await readCorrections(dish))));
     } catch (error) {
       console.error(`[compare-service] skipped ${path}:`, error);
     }
@@ -142,27 +145,55 @@ export async function compareDish(dish: string, section: string | null): Promise
   }
 }
 
-export type DetailOutcome =
-  | { ok: true; detail: RecipeDetail }
+/** Everything the recipe page shows. */
+export interface RecipePageData {
+  dish: string;
+  /** As the comparison uses it: the owner's correction applied. */
+  detail: RecipeDetail;
+  /** As captured, to show beside a correction. */
+  published: {
+    sourceTitle: string;
+    author: string | null;
+    sourceUrl: string | null;
+    facts: RecipeFacts;
+    sections: Array<{ name: string | null; lines: string[] }>;
+  };
+  correction: RecipeCorrection | null;
+}
+
+export type PageOutcome =
+  | { ok: true; page: RecipePageData }
   | { ok: false; status: number; error: string };
 
-/**
- * One recipe of a dish, line by line. The id only selects among the dish's own
- * recipes — it never reaches a path — so it may hold the colons and dots every
- * captured id has.
- */
-export async function recipeDetail(dish: string, recipeId: string): Promise<DetailOutcome> {
-  let recipes: ExtractedRecipe[] | null;
-  try {
-    recipes = await readDish(dish);
-  } catch (error) {
-    console.error(`[compare-service] could not read "${dish}":`, error);
-    return { ok: false, status: 500, error: `The recipe file for "${dish}" could not be read. See the server log.` };
-  }
-  if (recipes === null) return { ok: false, status: 404, error: `No recipes captured for "${dish}".` };
+const notFound = (id: string): PageOutcome => ({ ok: false, status: 404, error: `No captured recipe has the id "${id}".` });
 
-  const recipe = recipes.find((r) => r.id === recipeId);
-  if (!recipe) return { ok: false, status: 404, error: `"${dish}" holds no recipe "${recipeId}".` };
+/**
+ * Which dish holds a recipe, by id alone — a recipe's page is addressed by its
+ * id, /recipes/<id>. The dish is then a file's own slug, never text from the
+ * request, so it is safe to build the corrections path from.
+ */
+async function findRecipe(id: string): Promise<{ dish: string; recipe: ExtractedRecipe } | null> {
+  for await (const path of new Glob(`${RECIPES_DIR}/*.json`).scan(".")) {
+    const dish = slugOf(path);
+    if (!SLUG.test(dish)) continue;
+    let recipes: ExtractedRecipe[];
+    try {
+      recipes = await readRecipes(path);
+    } catch {
+      continue;   // one broken file costs its own recipes, as in listDishes
+    }
+    const recipe = recipes.find((r) => r.id === id);
+    if (recipe) return { dish, recipe };
+  }
+  return null;
+}
+
+export async function recipePage(id: string): Promise<PageOutcome> {
+  const found = await findRecipe(id);
+  if (!found) return notFound(id);
+  const { dish, recipe } = found;
+  const correction = (await readCorrections(dish))[id] ?? null;
+  const [corrected] = applyCorrections([recipe], correction ? { [id]: correction } : {});
 
   let db: Database;
   try {
@@ -172,11 +203,53 @@ export async function recipeDetail(dish: string, recipeId: string): Promise<Deta
   }
 
   try {
-    return { ok: true, detail: describeRecipe(recipe, db, await readAliases()) };
+    return {
+      ok: true,
+      page: {
+        dish,
+        detail: describeRecipe(corrected!, db, await readAliases()),
+        published: {
+          sourceTitle: recipe.provenance.sourceTitle,
+          author: recipe.provenance.author,
+          sourceUrl: recipe.provenance.sourceUrl,
+          facts: factsOf(recipe),
+          sections: groupsOf(recipe),
+        },
+        correction,
+      },
+    };
   } catch (error) {
-    console.error(`[compare-service] describing "${recipeId}" failed:`, error);
-    return { ok: false, status: 500, error: `Reading "${recipeId}" failed. See the server log.` };
+    console.error(`[compare-service] describing "${id}" failed:`, error);
+    return { ok: false, status: 500, error: `Reading "${id}" failed. See the server log.` };
   } finally {
     db.close();
   }
+}
+
+/** Save the owner's version of a recipe beside the published one. */
+export async function saveCorrection(id: string, body: unknown): Promise<PageOutcome> {
+  const found = await findRecipe(id);
+  if (!found) return notFound(id);
+  const valid = validateCorrection(body);
+  if (!valid.ok) return { ok: false, status: 400, error: valid.error };
+  try {
+    await writeCorrection(found.dish, id, valid.correction);
+  } catch (error) {
+    console.error(`[compare-service] could not save the correction to "${id}":`, error);
+    return { ok: false, status: 500, error: "The correction could not be saved. See the server log." };
+  }
+  return recipePage(id);
+}
+
+/** Drop the owner's correction; the recipe reads as published again. */
+export async function revertCorrection(id: string): Promise<PageOutcome> {
+  const found = await findRecipe(id);
+  if (!found) return notFound(id);
+  try {
+    await removeCorrection(found.dish, id);
+  } catch (error) {
+    console.error(`[compare-service] could not remove the correction to "${id}":`, error);
+    return { ok: false, status: 500, error: "The correction could not be removed. See the server log." };
+  }
+  return recipePage(id);
 }

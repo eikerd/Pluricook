@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { rm } from "node:fs/promises";
-import { compareDish, listDishes, recipeDetail } from "./compare-service";
+import { compareDish, listDishes, recipePage, revertCorrection, saveCorrection } from "./compare-service";
+import { readCorrections } from "./corrections";
 
 const BROKEN = "data/recipes/zz-test-broken.json";
 const MISLABELLED = "data/recipes/zz-test-mislabelled.json";
@@ -83,20 +84,63 @@ describe("compareDish", () => {
   });
 });
 
-describe("recipeDetail", () => {
-  test("a captured recipe is described, credit and lines", async () => {
-    const result = await recipeDetail("meatloaf", "natashaskitchen.com:meatloaf:2026-09-21");
+describe("recipePage", () => {
+  test("a recipe's page is found by its id alone, whichever dish holds it", async () => {
+    const result = await recipePage("natashaskitchen.com:meatloaf:2026-09-21");
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.detail.siteName).toBeTruthy();
-    expect(result.detail.sections.flatMap((s) => s.lines).length).toBeGreaterThan(0);
+    expect(result.page.dish).toBe("meatloaf");
+    expect(result.page.detail.sections.flatMap((s) => s.lines).length).toBeGreaterThan(0);
   });
 
-  test("a recipe the dish does not hold answers 404 in the API's shape", async () => {
-    expect(await recipeDetail("meatloaf", "no-such-recipe")).toMatchObject({ ok: false, status: 404 });
+  test("an id no dish holds answers 404 in the API's shape", async () => {
+    expect(await recipePage("no-such-recipe")).toMatchObject({ ok: false, status: 404 });
+  });
+});
+
+describe("corrections, end to end", () => {
+  const DISH = "zz-test-page";
+  const ID = "personal:zz-test-page:mine";
+  afterEach(async () => {
+    await rm(`data/recipes/${DISH}.json`, { force: true });
+    await rm(`data/corrections/${DISH}.json`, { force: true });
   });
 
-  test("a dish that is not a plain slug is refused before any file is opened", async () => {
-    expect(await recipeDetail("../meatloaf", "x")).toMatchObject({ ok: false, status: 404 });
+  const publish = () => Bun.write(`data/recipes/${DISH}.json`, JSON.stringify({
+    dish: DISH,
+    recipes: [{
+      id: ID, dish: DISH, ingredientLines: ["300 g bread flour", "Brown Butter (from above)"],
+      stepCount: null, servings: null, servingsRaw: null, totalTimeMinutes: null, prepTimeMinutes: null,
+      cookTimeMinutes: null, totalTimeRaw: null,
+      provenance: {
+        host: null, siteName: "Test Kitchen", sourceUrl: null, author: null, sourceTitle: "Bread",
+        capturedAt: "2026-09-28", method: "personal-collection", acquisitionAtCapture: "fetch", licence: null,
+      },
+    }],
+  }));
+
+  test("a saved correction reaches the page and the comparison; reverting restores the published recipe", async () => {
+    await publish();
+    const saved = await saveCorrection(ID, { sections: [{ name: null, lines: ["300 g bread flour", "45 g butter"] }] });
+    expect(saved.ok).toBe(true);
+    if (!saved.ok) return;
+    expect(saved.page.detail.sections[0]!.lines.map((l) => l.line)).toEqual(["300 g bread flour", "45 g butter"]);
+    expect(saved.page.published.sections[0]!.lines).toEqual(["300 g bread flour", "Brown Butter (from above)"]);
+    expect(saved.page.correction?.sections).toBeDefined();
+
+    const compared = await compareDish(DISH, null);
+    expect(compared.ok && compared.comparison.unmatched.map((u) => u.rawLine)).not.toContain("Brown Butter (from above)");
+
+    const reverted = await revertCorrection(ID);
+    expect(reverted.ok && reverted.page.correction).toBeNull();
+    expect(reverted.ok && reverted.page.detail.sections[0]!.lines.map((l) => l.line))
+      .toEqual(["300 g bread flour", "Brown Butter (from above)"]);
+  });
+
+  test("a correction that fails validation is refused with its reason, and nothing is written", async () => {
+    await publish();
+    const refused = await saveCorrection(ID, { sections: [] });
+    expect(refused).toMatchObject({ ok: false, status: 400 });
+    expect(await readCorrections(DISH)).toEqual({});
   });
 });

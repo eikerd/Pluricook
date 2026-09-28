@@ -1,11 +1,15 @@
 import { serve } from "bun";
 import index from "./index.html";
 import { DATASETS, overview, queryDataset } from "./lib/admin-queries";
-import { compareDish, listDishes, recipeDetail } from "./lib/compare-service";
+import { compareDish, listDishes, recipePage, revertCorrection, saveCorrection, type PageOutcome } from "./lib/compare-service";
 import { buildMatrix } from "./lib/visual-matrix";
 import { setTier, type Tier } from "./lib/curated-sources";
 
 const TIERS: Tier[] = ["required", "favorite", "normal", "blocked"];
+
+const recipeIdOf = (req: Request) => new URL(req.url).searchParams.get("id") ?? "";
+const pageResponse = (result: PageOutcome) =>
+  result.ok ? Response.json(result.page) : Response.json({ error: result.error }, { status: result.status });
 
 const server = serve({
   routes: {
@@ -54,17 +58,31 @@ const server = serve({
     },
 
     /**
-     * One recipe of a dish, line by line: what the recipe detail view shows.
-     * The id travels in the query — captured ids hold colons and dots.
+     * One recipe's page: the owner's version, the published one, and the
+     * correction between them. The id travels in the query — captured ids hold
+     * colons and dots.
      */
-    "/api/admin/recipe/:dish": {
-      GET: async (req) => {
-        const id = new URL(req.url).searchParams.get("id") ?? "";
-        const result = await recipeDetail(req.params.dish, id);
-        return result.ok
-          ? Response.json(result.detail)
-          : Response.json({ error: result.error }, { status: result.status });
+    "/api/admin/recipe": {
+      GET: async (req) => pageResponse(await recipePage(recipeIdOf(req))),
+    },
+
+    /**
+     * Save or undo the owner's correction to one recipe. Like starring a source,
+     * it writes a file in the repo — data/corrections/<dish>.json — so the
+     * change lands in version control with its diff. The published recipe is
+     * never touched.
+     */
+    "/api/admin/recipe/correction": {
+      PUT: async (req) => {
+        let body: unknown;
+        try {
+          body = await req.json();
+        } catch {
+          return Response.json({ error: "The correction must be JSON." }, { status: 400 });
+        }
+        return pageResponse(await saveCorrection(recipeIdOf(req), body));
       },
+      DELETE: async (req) => pageResponse(await revertCorrection(recipeIdOf(req))),
     },
 
     /**
