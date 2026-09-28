@@ -1,6 +1,6 @@
 import { serve } from "bun";
 import index from "./index.html";
-import { DATASETS, overview, queryDataset } from "./lib/admin-queries";
+import { DATASETS, overview, queryDataset, usdaFoodPage } from "./lib/admin-queries";
 import {
   cloneRecipe, compareDish, deleteClone, listDishes, recipePage, revertCorrection, saveCorrection, type PageOutcome,
 } from "./lib/compare-service";
@@ -124,6 +124,18 @@ const server = serve({
         }
         const site = await setTier(req.params.host, tier as Tier, { displayName });
         return Response.json({ host: req.params.host, ...site });
+      },
+    },
+
+    /** One USDA food, whole: its record, its category named and classed, its portions and nutrients. */
+    "/api/admin/usda/food": {
+      GET: (req) => {
+        const raw = new URL(req.url).searchParams.get("id") ?? "";
+        const id = /^\d+$/.test(raw) ? Number(raw) : NaN;
+        if (!Number.isSafeInteger(id)) return Response.json({ error: "id must be an FDC id" }, { status: 400 });
+        const page = usdaFoodPage(id);
+        if (page === "missing") return Response.json({ error: "usda.db has not been built yet." }, { status: 503 });
+        return page ? Response.json(page) : Response.json({ error: `USDA has no food ${id}.` }, { status: 404 });
       },
     },
 

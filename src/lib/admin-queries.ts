@@ -11,6 +11,8 @@ import { Glob } from "bun";
 import { DEFAULT_REGISTRY_PATH } from "./site-registry";
 import { curationFor, readCurated } from "./curated-sources";
 import { ownersView } from "./clones";
+import { installCategoryTable } from "./usda-categories";
+import { usdaFood, type UsdaFoodPage } from "./usda-food";
 import type { ExtractedRecipe } from "../types/provenance";
 
 const USDA_PATH = "usda.db";
@@ -20,13 +22,27 @@ const handles = new Map<string, Database | null>();
 
 function open(path: string): Database | null {
   if (!handles.has(path)) {
+    let db: Database | null = null;
     try {
-      handles.set(path, new Database(path, { readonly: true }));
+      db = new Database(path, { readonly: true });
     } catch {
-      handles.set(path, null);
+      // Not built yet: the table says so rather than failing.
     }
+    // The foods table sorts and searches by category, whose names live beside
+    // usda.db. Outside the try: a failure here is a bug to see, not a missing file.
+    if (db && path === USDA_PATH) installCategoryTable(db);
+    handles.set(path, db);
   }
   return handles.get(path) ?? null;
+}
+
+/**
+ * One USDA food's page, through the same cached handle as the tables.
+ * "missing" when usda.db has not been built; null when it holds no such food.
+ */
+export function usdaFoodPage(fdcId: number): UsdaFoodPage | null | "missing" {
+  const db = open(USDA_PATH);
+  return db ? usdaFood(db, fdcId) : "missing";
 }
 
 export interface Column {
@@ -172,12 +188,15 @@ export const DATASETS: DatasetDef[] = [
                WHERE fn.fdc_id = f.fdc_id AND n.name = 'Total lipid (fat)' LIMIT 1) AS fat,
              (SELECT ROUND(fn.amount, 1) FROM food_nutrients fn JOIN nutrients n ON n.id = fn.nutrient_id
                WHERE fn.fdc_id = f.fdc_id AND n.name = 'Carbohydrate, by difference' LIMIT 1) AS carbs,
-             (SELECT COUNT(*) FROM portions p WHERE p.fdc_id = f.fdc_id) AS portions`,
-    from: `FROM foods f`,
+             (SELECT COUNT(*) FROM portions p WHERE p.fdc_id = f.fdc_id) AS portions,
+             c.description AS category, c.klass AS klass`,
+    from: `FROM foods f LEFT JOIN temp.categories c ON c.id = f.category_id`,
     columns: [
       { key: "fdc_id", label: "FDC ID", numeric: true },
       { key: "dataset", label: "Dataset", badge: true },
       { key: "description", label: "Description", width: "34rem" },
+      { key: "category", label: "Category", width: "16rem" },
+      { key: "klass", label: "Class" },
       { key: "kcal", label: "kcal", numeric: true },
       { key: "protein", label: "Protein g", numeric: true },
       { key: "fat", label: "Fat g", numeric: true },
@@ -186,7 +205,12 @@ export const DATASETS: DatasetDef[] = [
     ],
     defaultSort: "description",
     defaultDir: "asc",
-    searchable: ["f.description"],
+    searchable: ["f.description", "c.description", "c.klass"],
+    sortMap: {
+      description: "f.description",
+      category: "c.description",
+      klass: "c.klass",
+    },
   },
   {
     id: "usda-portions",

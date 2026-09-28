@@ -621,3 +621,21 @@ tr.is-link:focus-visible { outline: 2px solid var(--saffron); outline-offset: -2
 .upset__label { font-size: 12px; text-anchor: end; fill: var(--ink); }
 .upset__setbar { fill: var(--saffron); }
 .upset__set.is-focus .upset__label { fill: var(--paprika); font-weight: 700; }
+
+/* ── USDA food page ──────────────────────────────────────── */
+
+.usda-food__cards { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+.usda-food__card {
+  flex: 1 1 22rem;
+  max-width: 36rem;
+  padding: 0.8rem 1rem;
+  background: #fff;
+  border: 1px solid var(--cream-line);
+  border-radius: 3px;
+}
+.usda-food__sheet { margin-top: 1.5rem; }
+
+.fields { display: grid; grid-template-columns: max-content 1fr; gap: 0.3rem 1.25rem; margin: 0; }
+.fields__row { display: contents; }
+.fields dt { color: var(--ink-soft); }
+.fields dd { margin: 0; overflow-wrap: anywhere; }

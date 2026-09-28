@@ -9,7 +9,8 @@ import { useEffect, useState } from "react";
 import { ComparisonView } from "./ComparisonView";
 import { DataTable } from "./DataTable";
 import { RecipePage } from "./RecipePage";
-import { navigate, recipeIdFromPath, recipePath, usePath } from "./route";
+import { navigate, recipeIdFromPath, recipePath, usdaFoodIdFromPath, usdaFoodPath, usePath } from "./route";
+import { UsdaFoodPage } from "./UsdaFoodPage";
 import { VisualizeView } from "./VisualizeView";
 import "../admin.css";
 
@@ -67,20 +68,30 @@ export function AdminApp() {
   const [datasets, setDatasets] = useState<DatasetMeta[]>([]);
   const path = usePath();
   const recipeId = recipeIdFromPath(path);
-  // Opened straight at a recipe's address, Back lands on the list it belongs to.
-  const [active, setActive] = useState<string>(() => (recipeIdFromPath(location.pathname) ? "recipes" : "overview"));
+  const fdcId = usdaFoodIdFromPath(path);
+  const onPage = recipeId !== null || fdcId !== null;
+  // Opened straight at a page's address, Back lands on the list it belongs to.
+  const [active, setActive] = useState<string>(() =>
+    recipeIdFromPath(location.pathname) ? "recipes" : usdaFoodIdFromPath(location.pathname) !== null ? "usda-foods" : "overview",
+  );
 
   useEffect(() => {
     fetch("/api/admin/datasets").then((r) => r.json()).then(setDatasets).catch(() => setDatasets([]));
   }, []);
 
   const current = datasets.find((d) => d.id === active);
-  /** A rail item always leaves a recipe page for the view it names. */
+  /** A rail item always leaves a page for the view it names. */
   const open = (view: string) => {
     setActive(view);
-    if (recipeId) navigate("/");
+    if (onPage) navigate("/");
   };
+  // A recipe can be opened from a chart as well as the list, so the rail marks
+  // Recipes; a food is opened from the table still underneath it.
   const isActive = (view: string) => (recipeId ? view === "recipes" : active === view);
+  const openRow = (row: Record<string, unknown>) =>
+    active === "recipes"
+      ? navigate(recipePath(String(row.id)), { from: active })
+      : navigate(usdaFoodPath(Number(row.fdc_id)), { from: active });
 
   return (
     <div className="shell">
@@ -167,9 +178,10 @@ export function AdminApp() {
 
       <main className="main">
         {recipeId && <RecipePage id={recipeId} onLeave={() => open("recipes")} />}
-        {/* Kept mounted under a recipe page, so Back returns to the same dish,
-            section and chart rather than to a fresh view. */}
-        <div style={{ display: recipeId ? "none" : "contents" }}>
+        {fdcId !== null && <UsdaFoodPage fdcId={fdcId} onLeave={() => open(active)} />}
+        {/* Kept mounted under a page, so Back returns to the same dish, section,
+            chart, sort and page of a table rather than to a fresh view. */}
+        <div style={{ display: onPage ? "none" : "contents" }}>
           {active === "overview" ? (
             <Overview />
           ) : active === "comparison" ? (
@@ -180,7 +192,7 @@ export function AdminApp() {
             <DataTable
               datasetId={active}
               searchable={current?.searchable ?? false}
-              onRowClick={active === "recipes" ? (row) => navigate(recipePath(String(row.id)), { from: "recipes" }) : undefined}
+              onRowClick={["recipes", "usda-foods", "usda-portions"].includes(active) ? openRow : undefined}
             />
           )}
         </div>

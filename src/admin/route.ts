@@ -1,24 +1,33 @@
 /**
- * The admin's addresses. Only a recipe has one of its own — /recipes/<id>, the
- * home provenance.ts names for every recipe — so a recipe can be linked to,
- * opened in a new tab, or opened from another computer. Everything else is
- * state inside the page.
+ * The admin's addresses. A recipe has one of its own — /recipes/<id>, the home
+ * provenance.ts names for every recipe — and so does a USDA food, at
+ * /usda/<fdc id>, so either can be linked to, opened in a new tab, or opened
+ * from another computer. Everything else is state inside the page.
  */
 
 import { useEffect, useState } from "react";
 
-const PREFIX = "/recipes/";
+const RECIPE = "/recipes/";
+const USDA_FOOD = "/usda/";
 
-export const recipePath = (id: string) => `${PREFIX}${encodeURIComponent(id)}`;
+export const recipePath = (id: string) => `${RECIPE}${encodeURIComponent(id)}`;
+export const usdaFoodPath = (fdcId: number) => `${USDA_FOOD}${fdcId}`;
 
 /** The recipe the address names, or null. */
 export function recipeIdFromPath(path: string): string | null {
-  if (!path.startsWith(PREFIX)) return null;
+  if (!path.startsWith(RECIPE)) return null;
   try {
-    return decodeURIComponent(path.slice(PREFIX.length)) || null;
+    return decodeURIComponent(path.slice(RECIPE.length)) || null;
   } catch {
     return null;   // a malformed escape names no recipe
   }
+}
+
+/** The USDA food the address names, or null. FDC ids are whole numbers. */
+export function usdaFoodIdFromPath(path: string): number | null {
+  if (!path.startsWith(USDA_FOOD)) return null;
+  const rest = path.slice(USDA_FOOD.length);
+  return /^\d{1,15}$/.test(rest) ? Number(rest) : null;
 }
 
 /** Go to an address, carrying anything the page there should know. */
