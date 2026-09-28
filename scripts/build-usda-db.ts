@@ -5,7 +5,9 @@
  * Run scripts/fetch-usda.ts first. The result, usda.db, is gitignored and
  * rebuildable; nothing queries FoodData Central at request time.
  *
- *   bun scripts/build-usda-db.ts [--db usda.db]
+ *   bun scripts/build-usda-db.ts [--db usda.db] [--from data/usda]
+ *
+ * --from reads the downloads from elsewhere — a worktree has none of its own.
  *
  * Only real food records are kept. The Foundation download ships ~88k rows in
  * food.csv, but all but ~469 are lab samples and market acquisitions — the
@@ -13,17 +15,19 @@
  */
 
 import { Database } from "bun:sqlite";
-import { findTable, readCsv } from "../src/lib/usda-csv";
+import { findTable, nutrientIdResolver, readCsv } from "../src/lib/usda-csv";
+
+const arg = (flag: string, fallback: string) =>
+  process.argv.includes(flag) ? process.argv[process.argv.indexOf(flag) + 1]! : fallback;
+
+const dbPath = arg("--db", "usda.db");
+const from = arg("--from", "data/usda");
 
 const DATASETS = [
-  { key: "foundation", dir: "data/usda/foundation", dataType: "foundation_food" },
-  { key: "sr-legacy", dir: "data/usda/sr-legacy", dataType: "sr_legacy_food" },
-  { key: "survey-fndds", dir: "data/usda/survey-fndds", dataType: "survey_fndds_food" },
+  { key: "foundation", dir: `${from}/foundation`, dataType: "foundation_food" },
+  { key: "sr-legacy", dir: `${from}/sr-legacy`, dataType: "sr_legacy_food" },
+  { key: "survey-fndds", dir: `${from}/survey-fndds`, dataType: "survey_fndds_food" },
 ] as const;
-
-const dbPath = process.argv.includes("--db")
-  ? process.argv[process.argv.indexOf("--db") + 1]!
-  : "usda.db";
 
 
 const num = (s: string): number | null => {
@@ -122,6 +126,10 @@ for (const ds of DATASETS) {
 
   const nutrientPath = await findTable(ds.dir, "nutrient.csv");
   const nutrientRows = nutrientPath ? await readCsv(nutrientPath) : [];
+  // Survey rows name nutrients by their old number; see nutrientIdResolver.
+  const nutrientIdOf = nutrientIdResolver(nutrientRows);
+  let renumbered = 0;
+  let unknown = 0;
 
   const fnPath = await findTable(ds.dir, "food_nutrient.csv");
   const fnRows = fnPath
@@ -143,7 +151,12 @@ for (const ds of DATASETS) {
       insertNutrient.run(Number(n.id), n.name!, n.unit_name!, num(n.rank!));
     }
     for (const r of fnRows) {
-      insertFoodNutrient.run(Number(r.fdc_id), Number(r.nutrient_id), num(r.amount!));
+      const raw = Number(r.nutrient_id);
+      const id = nutrientIdOf(raw);
+      if (id === null) unknown++;
+      else if (id !== raw) renumbered++;
+      // An unknown id is kept as given: the food page shows it unnamed.
+      insertFoodNutrient.run(Number(r.fdc_id), id ?? raw, num(r.amount!));
     }
     for (const p of portionRows) {
       const gram = num(p.gram_weight!);
@@ -163,7 +176,9 @@ for (const ds of DATASETS) {
   console.log(
     `✓ ${ds.key.padEnd(14)} ${String(foods.length).padStart(6)} foods · ` +
       `${String(fnRows.length).padStart(7)} nutrient values · ` +
-      `${String(portionRows.length).padStart(6)} portions`,
+      `${String(portionRows.length).padStart(6)} portions` +
+      (renumbered ? ` · ${renumbered} nutrient numbers read as ids` : "") +
+      (unknown ? ` · ${unknown} values name a nutrient the download does not define` : ""),
   );
 }
 

@@ -30,13 +30,19 @@ withDb("usdaFood", () => {
   });
 
   test("it lists every nutrient row the food has, even one whose nutrient is not defined", () => {
-    // Survey foods' rows carry USDA's old nutrient numbers, which the nutrients
-    // table does not hold; an inner join dropped them all and Abalone read as
-    // having no nutrients.
-    const abalone = 2706337;
-    const rows = db!.query<{ n: number }, [number]>("SELECT COUNT(*) AS n FROM food_nutrients WHERE fdc_id = ?1").get(abalone)!;
-    expect(rows.n).toBeGreaterThan(0);
-    expect(usdaFood(db!, abalone)!.nutrients).toHaveLength(rows.n);
+    // Foundation's grape tomatoes carry nutrient 2066, which no download
+    // defines. An inner join dropped rows like it without a word.
+    const grapeTomatoes = 321360;
+    const rows = db!.query<{ n: number }, [number]>("SELECT COUNT(*) AS n FROM food_nutrients WHERE fdc_id = ?1").get(grapeTomatoes)!;
+    const page = usdaFood(db!, grapeTomatoes)!;
+    expect(page.nutrients).toHaveLength(rows.n);
+    expect(page.nutrients.find((n) => n.id === 2066)).toMatchObject({ name: null, unit: null });
+  });
+
+  test("a survey food's nutrients are named — the download's old numbers are read as ids", () => {
+    const abalone = usdaFood(db!, 2706337)!;
+    expect(abalone.nutrients.every((n) => n.name !== null)).toBe(true);
+    expect(abalone.nutrients.find((n) => n.name === "Energy" && n.unit === "KCAL")?.amount).toBe(177);
   });
 
   test("an id USDA does not have is null", () => {

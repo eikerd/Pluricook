@@ -179,6 +179,10 @@
       "fdcId": 174036,
       "note": "Same cut for our purposes."
     },
+    "ground meat": {
+      "fdcId": 174036,
+      "note": "'Ground meat, such as beef, pork, veal…': raw ground beef, the usual choice. Heuristics reached the survey food 'Meat, ground, NFS', which is cooked and salted (382 mg sodium per 100 g against 66)."
+    },
     "bread crumb": {
       "fdcId": 174928,
       "note": "Bread, crumbs, dry, grated, plain. Covers breadcrumb, bread crumbs, Italian bread crumbs."

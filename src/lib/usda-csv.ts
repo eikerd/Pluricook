@@ -47,6 +47,32 @@ export async function readCsv(path: string): Promise<Record<string, string>[]> {
   });
 }
 
+/**
+ * How to read food_nutrient.csv's nutrient_id column, from the dataset's own
+ * nutrient.csv.
+ *
+ * SR Legacy and Foundation put the FDC nutrient id there (1008 for kcal). The
+ * survey (FNDDS) download puts the old SR nutrient number (208) in the same
+ * column, so read as an id not one of its 353,015 values joined to anything.
+ * nutrient.csv carries both: a value the dataset defines as an id is kept, one
+ * it defines as a number becomes that nutrient's id, and anything else — or a
+ * number two nutrients share — is null, for the build to count rather than
+ * guess. The two never meet: ids run 1001–2069 and numbers 200–961.
+ */
+export function nutrientIdResolver(
+  nutrients: ReadonlyArray<{ id?: string; nutrient_nbr?: string }>,
+): (raw: number) => number | null {
+  const ids = new Set(nutrients.filter((n) => n.id).map((n) => Number(n.id)));
+  const byNumber = new Map<number, number | null>();
+  for (const n of nutrients) {
+    if (!n.id || !n.nutrient_nbr) continue;
+    const nbr = Number(n.nutrient_nbr);
+    const id = Number(n.id);
+    byNumber.set(nbr, byNumber.has(nbr) && byNumber.get(nbr) !== id ? null : id);
+  }
+  return (raw) => (ids.has(raw) ? raw : byNumber.get(raw) ?? null);
+}
+
 /** Locate a table inside a dataset dir; the archives unzip one level deeper. */
 export async function findTable(dir: string, name: string): Promise<string | null> {
   const hits = [...new Glob(`${dir}/**/${name}`).scanSync(".")];
