@@ -1,7 +1,9 @@
 import { serve } from "bun";
 import index from "./index.html";
 import { DATASETS, overview, queryDataset } from "./lib/admin-queries";
-import { compareDish, listDishes, recipePage, revertCorrection, saveCorrection, type PageOutcome } from "./lib/compare-service";
+import {
+  cloneRecipe, compareDish, deleteClone, listDishes, recipePage, revertCorrection, saveCorrection, type PageOutcome,
+} from "./lib/compare-service";
 import { buildMatrix } from "./lib/visual-matrix";
 import { setTier, type Tier } from "./lib/curated-sources";
 
@@ -83,6 +85,23 @@ const server = serve({
         return pageResponse(await saveCorrection(recipeIdOf(req), body));
       },
       DELETE: async (req) => pageResponse(await revertCorrection(recipeIdOf(req))),
+    },
+
+    /**
+     * The owner's own copy of a recipe, to develop: POST makes one (answering
+     * with its id), DELETE removes one. Written to data/clones/<dish>.json.
+     */
+    "/api/admin/recipe/clone": {
+      POST: async (req) => {
+        const result = await cloneRecipe(recipeIdOf(req));
+        return result.ok
+          ? Response.json({ id: result.id }, { status: 201 })
+          : Response.json({ error: result.error }, { status: result.status });
+      },
+      DELETE: async (req) => {
+        const result = await deleteClone(recipeIdOf(req));
+        return result.ok ? Response.json({ ok: true }) : Response.json({ error: result.error }, { status: result.status });
+      },
     },
 
     /**

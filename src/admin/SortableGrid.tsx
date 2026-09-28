@@ -39,6 +39,8 @@ interface SortableGridProps<T> {
    * Open rows are remembered by key, so they stay open through a re-sort.
    */
   detail?: (row: T) => ReactNode;
+  /** A class for a row, to mark one — the line clicked on a chart. */
+  rowClass?: (row: T) => string | undefined;
 }
 
 /** Nulls sink to the bottom in both directions: "no value" is never the top answer. */
@@ -53,7 +55,7 @@ function compare(a: SortValue, b: SortValue, dir: SortDir): number {
   return dir === "asc" ? order : -order;
 }
 
-export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, detail }: SortableGridProps<T>) {
+export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, detail, rowClass }: SortableGridProps<T>) {
   const [sort, setSort] = useState(initialSort);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
@@ -107,7 +109,7 @@ export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, det
             const isOpen = open.has(key);
             return (
               <Fragment key={key}>
-                <tr className={isOpen ? "is-open" : undefined}>
+                <tr className={[isOpen ? "is-open" : "", rowClass?.(row) ?? ""].join(" ").trim() || undefined}>
                   {columns.map((c, i) => {
                     const content = c.render ? c.render(row) : (c.value(row) ?? "—");
                     return (

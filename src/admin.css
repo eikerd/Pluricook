@@ -500,37 +500,17 @@ h1, h2, h3, .brand__name {
 /* ── Recipe page ─────────────────────────────────────────── */
 
 .recipe__crumb { margin: 0 0 0.4rem; font-size: 0.9rem; }
-.recipe__section { max-width: 60rem; margin-top: 1.25rem; }
+.recipe__actions { display: flex; gap: 0.5rem; }
+.recipe__lines { margin-top: 1.25rem; }
+/* A recipe's lines are long text: they wrap, so the sheet fits the page
+   instead of scrolling its first columns out of view. Figures stay on one line. */
+.recipe__lines .grid tbody td:not(.num) { min-width: 5rem; white-space: normal; }
+.grid tr.is-highlighted td { background: #fdf3de; }
 .recipe__section-name {
   margin: 0 0 0.35rem;
   font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.recipe-lines { width: 100%; border-collapse: collapse; font-size: 0.92rem; background: #fff; border: 1px solid var(--cream-line); }
-.recipe-lines th {
-  padding: 0.45rem 0.6rem;
-  text-align: left;
-  font-size: 0.72rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  background: var(--parchment-warm);
-  border-bottom: 1px solid var(--cream-line);
-}
-.recipe-lines td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--cream-line); vertical-align: top; }
-.recipe-lines tr.is-highlighted td { background: #fdf3de; }
-.recipe-lines .recipe-lines__num { width: 6.5rem; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.recipe-lines__grams { font-weight: 600; }
-.recipe-lines__line { display: block; }
-.recipe-lines__food { display: block; margin-top: 0.15rem; font-size: 0.8rem; color: var(--ink-soft); }
-.recipe-lines__read {
-  display: block;
-  margin-top: 0.1rem;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.75rem;
   color: var(--ink-soft);
 }
 

@@ -10,6 +10,7 @@ import type { RecipePageData } from "../lib/compare-service";
 import type { RecipeFacts } from "../lib/recipe-detail";
 import { RecipeEditor } from "./RecipeEditor";
 import { RecipeLines } from "./RecipeLines";
+import { navigate, recipePath } from "./route";
 
 interface RecipePageProps {
   id: string;
@@ -48,7 +49,10 @@ export function RecipePage({ id, onLeave }: RecipePageProps) {
       .then(async (r) => {
         const body = (await r.json()) as RecipePageData | { error: string };
         if (!r.ok) throw new Error("error" in body ? body.error : `HTTP ${r.status}`);
-        if (!stale) setLoad({ id, page: body as RecipePageData });
+        if (stale) return;
+        setLoad({ id, page: body as RecipePageData });
+        // A copy made a moment ago opens ready to edit.
+        if ((history.state as { edit?: boolean } | null)?.edit) setEditing(true);
       })
       .catch((e: unknown) => { if (!stale) setLoad({ id, error: e instanceof Error ? e.message : "Could not load the recipe" }); });
     return () => { stale = true; };
@@ -93,6 +97,36 @@ export function RecipePage({ id, onLeave }: RecipePageProps) {
 
   const back = () => ((history.state as { from?: string } | null)?.from ? history.back() : onLeave());
 
+  /** Make the owner their own copy, and open it ready to edit. */
+  const clone = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const r = await fetch(`/api/admin/recipe/clone?id=${encodeURIComponent(id)}`, { method: "POST" });
+      const body = (await r.json()) as { id?: string; error?: string };
+      if (!r.ok || !body.id) throw new Error(body.error ?? `HTTP ${r.status}`);
+      navigate(recipePath(body.id), { from: "recipe", edit: true });
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "The copy could not be made");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteCopy = async () => {
+    if (!window.confirm("Delete your copy? The recipe it began as stays.")) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const r = await fetch(`/api/admin/recipe/clone?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (!r.ok) throw new Error(((await r.json()) as { error?: string }).error ?? `HTTP ${r.status}`);
+      onLeave();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "The copy could not be deleted");
+      setSaving(false);
+    }
+  };
+
   if (current && "error" in current) {
     return (
       <div className="pane">
@@ -103,7 +137,7 @@ export function RecipePage({ id, onLeave }: RecipePageProps) {
   }
   if (!page) return <div className="pane"><p className="muted">Loading…</p></div>;
 
-  const { detail, correction } = page;
+  const { detail, correction, copy } = page;
   const facts = factsLine(detail.facts);
 
   return (
@@ -119,8 +153,30 @@ export function RecipePage({ id, onLeave }: RecipePageProps) {
           {detail.sourceUrl && <a href={detail.sourceUrl} target="_blank" rel="noreferrer noopener">Open the source</a>}
           {facts && <p className="pane__note">{facts}</p>}
         </div>
-        {!editing && <button type="button" className="button" onClick={() => { setSaveError(null); setEditing(true); }}>Edit</button>}
+        {!editing && (
+          <div className="recipe__actions">
+            {copy ? (
+              <button type="button" className="button button--quiet" disabled={saving} onClick={() => void deleteCopy()}>Delete this copy</button>
+            ) : (
+              <button type="button" className="button button--quiet" disabled={saving} onClick={() => void clone()}>Clone</button>
+            )}
+            <button type="button" className="button" disabled={saving} onClick={() => { setSaveError(null); setEditing(true); }}>Edit</button>
+          </div>
+        )}
       </header>
+
+      {copy && (
+        <div className="notice">
+          <span>
+            Your own copy{copy.originalSiteName ? ` of ${copy.originalSiteName}'s recipe` : ""}. Edits change this copy only.
+          </span>
+          {copy.clonedFrom && copy.originalSiteName && (
+            <button type="button" className="link" onClick={() => navigate(recipePath(copy.clonedFrom!), { from: "recipe" })}>
+              Open the original
+            </button>
+          )}
+        </div>
+      )}
 
       {correction && !editing && (
         <div className="notice">

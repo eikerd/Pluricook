@@ -16,7 +16,7 @@ import { Database } from "bun:sqlite";
 import { Glob } from "bun";
 import { conversionInput, parseLine } from "../src/lib/ingredient-line";
 import { readAliases } from "../src/lib/ingredient-aliases";
-import { applyCorrections, readCorrections } from "../src/lib/corrections";
+import { ownersView } from "../src/lib/clones";
 import { foodTerms, toGrams } from "../src/lib/to-grams";
 import type { ExtractedRecipe } from "../src/types/provenance";
 
@@ -31,7 +31,7 @@ for await (const path of new Glob("data/recipes/*.json").scan(".")) {
   const { dish, recipes: published } = (await Bun.file(path).json()) as { dish: string; recipes: ExtractedRecipe[] };
   // A line the owner has already corrected is not a miss to chase.
   const slug = path.slice(path.lastIndexOf("/") + 1).replace(/\.json$/, "");
-  const recipes = applyCorrections(published, await readCorrections(slug));
+  const recipes = await ownersView(slug, published);
   for (const recipe of recipes) {
     for (const line of recipe.ingredientLines) {
       lines++;

@@ -1,10 +1,14 @@
 /**
- * A recipe's lines as the comparison reads them, grouped by section: each line
- * as written, the USDA food it matched, how the parser read it, the grams it
- * came to and its share of the recipe.
+ * A recipe's lines as a spreadsheet: one column per field, every column
+ * sortable. Each line as written, how the parser read it (quantity, unit,
+ * name, stated grams), the grams it came to, its share of the recipe and the
+ * USDA food it matched. # is the recipe's own order, so sorting by it puts the
+ * lines back as the recipe lists them.
  */
 
+import { useMemo } from "react";
 import type { DetailLine, RecipeDetail } from "../lib/recipe-detail";
+import { SortableGrid, type GridColumn } from "./SortableGrid";
 
 interface RecipeLinesProps {
   detail: RecipeDetail;
@@ -14,49 +18,54 @@ interface RecipeLinesProps {
   published: Set<string> | null;
 }
 
+type Row = DetailLine & { n: number; section: string | null };
+
+const figure = new Intl.NumberFormat("en-US", { maximumFractionDigits: 3 });
 const grams = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
 const sectionName = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-/** "3 cups · AP Flour · stated 360 g", the parser's reading, the way probe-lines prints it. */
-function readAs(read: DetailLine["read"]): string {
-  const quantity = read.quantity === null || Number.isNaN(read.quantity) ? "—" : String(read.quantity);
-  const stated = read.statedGrams === null ? "" : ` · stated ${grams.format(read.statedGrams)} g`;
-  return `${quantity} ${read.unit} · ${read.name}${stated}`;
-}
+const quantityOf = (r: Row) => (r.read.quantity === null || Number.isNaN(r.read.quantity) ? null : r.read.quantity);
 
 export function RecipeLines({ detail, highlight, published }: RecipeLinesProps) {
+  const rows = useMemo(() => {
+    let n = 0;
+    return detail.sections.flatMap((s) => s.lines.map((l): Row => ({ ...l, n: ++n, section: s.name })));
+  }, [detail]);
+
+  const columns = useMemo(() => {
+    const named = detail.sections.some((s) => s.name !== null);
+    const all: Array<GridColumn<Row> | false> = [
+      { key: "n", label: "#", numeric: true, value: (r) => r.n },
+      named && { key: "section", label: "Section", value: (r) => r.section, render: (r) => (r.section ? sectionName(r.section) : "—") },
+      {
+        key: "line", label: "Line", value: (r) => r.line,
+        render: (r) => (
+          <>
+            {r.line}
+            {published && !published.has(r.line) && <span className="tag">edited</span>}
+          </>
+        ),
+      },
+      { key: "qty", label: "Qty", numeric: true, value: quantityOf, render: (r) => { const q = quantityOf(r); return q === null ? "—" : figure.format(q); } },
+      { key: "unit", label: "Unit", value: (r) => r.read.unit },
+      { key: "name", label: "Name", value: (r) => r.read.name },
+      { key: "stated", label: "Stated", numeric: true, value: (r) => r.read.statedGrams, render: (r) => (r.read.statedGrams === null ? "—" : grams.format(r.read.statedGrams)) },
+      { key: "grams", label: "Grams", numeric: true, value: (r) => r.grams, render: (r) => (r.grams === null ? "—" : <strong>{grams.format(r.grams)}</strong>) },
+      { key: "share", label: "Share", numeric: true, value: (r) => r.share, render: (r) => (r.share === null ? "—" : `${r.share.toFixed(1)}%`) },
+      { key: "food", label: "USDA food", value: (r) => r.food, render: (r) => r.food ?? <span className="muted">not resolved</span> },
+    ];
+    return all.filter((c): c is GridColumn<Row> => c !== false);
+  }, [detail, published]);
+
   return (
-    <>
-      {detail.sections.map((section, k) => (
-        <section key={section.name ?? k} className="recipe__section">
-          {section.name && <h3 className="recipe__section-name">{sectionName(section.name)}</h3>}
-          <table className="recipe-lines">
-            <thead>
-              <tr>
-                <th scope="col">Ingredient</th>
-                <th scope="col" className="recipe-lines__num">Grams</th>
-                <th scope="col" className="recipe-lines__num">Share</th>
-              </tr>
-            </thead>
-            <tbody>
-              {section.lines.map((l, i) => (
-                <tr key={i} className={l.line === highlight ? "is-highlighted" : undefined}>
-                  <td>
-                    <span className="recipe-lines__line">
-                      {l.line}
-                      {published && !published.has(l.line) && <span className="tag">edited</span>}
-                    </span>
-                    <span className="recipe-lines__food">{l.food ?? "not resolved"}</span>
-                    <span className="recipe-lines__read">read as {readAs(l.read)}</span>
-                  </td>
-                  <td className="recipe-lines__num recipe-lines__grams">{l.grams === null ? "—" : `${grams.format(l.grams)} g`}</td>
-                  <td className="recipe-lines__num muted">{l.share === null ? "—" : `${l.share.toFixed(1)}%`}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      ))}
-    </>
+    <div className="recipe__lines">
+      <SortableGrid
+        label={`Lines of ${detail.siteName}'s recipe`}
+        columns={columns}
+        rows={rows}
+        rowKey={(r) => String(r.n)}
+        initialSort={{ key: "n", dir: "asc" }}
+        rowClass={(r) => (r.line === highlight ? "is-highlighted" : undefined)}
+      />
+    </div>
   );
 }

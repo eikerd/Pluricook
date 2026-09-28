@@ -10,7 +10,7 @@ import { Database, } from "bun:sqlite";
 import { Glob } from "bun";
 import { DEFAULT_REGISTRY_PATH } from "./site-registry";
 import { curationFor, readCurated } from "./curated-sources";
-import { applyCorrections, readCorrections } from "./corrections";
+import { ownersView } from "./clones";
 import type { ExtractedRecipe } from "../types/provenance";
 
 const USDA_PATH = "usda.db";
@@ -284,7 +284,7 @@ async function readRecipeFiles(glob: string): Promise<Record<string, unknown>[]>
     };
     // As the owner has them: the table shows a corrected title, not the captured one.
     const dish = path.slice(path.lastIndexOf("/") + 1).replace(/\.json$/, "");
-    for (const r of applyCorrections(file.recipes ?? [], await readCorrections(dish))) {
+    for (const r of await ownersView(dish, file.recipes ?? [])) {
       rows.push({
         id: r.id,
         dish: r.dish,

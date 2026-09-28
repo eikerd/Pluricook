@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { rm } from "node:fs/promises";
-import { compareDish, listDishes, recipePage, revertCorrection, saveCorrection } from "./compare-service";
+import { cloneRecipe, compareDish, deleteClone, listDishes, recipePage, revertCorrection, saveCorrection } from "./compare-service";
 import { readCorrections } from "./corrections";
 
 const BROKEN = "data/recipes/zz-test-broken.json";
@@ -142,5 +142,45 @@ describe("corrections, end to end", () => {
     const refused = await saveCorrection(ID, { sections: [] });
     expect(refused).toMatchObject({ ok: false, status: 400 });
     expect(await readCorrections(DISH)).toEqual({});
+  });
+
+  describe("the owner's own copies", () => {
+    afterEach(async () => { await rm(`data/clones/${DISH}.json`, { force: true }); });
+
+    test("a copy joins its dish beside the original, and its page says what it began as", async () => {
+      await publish();
+      const made = await cloneRecipe(ID);
+      expect(made).toEqual({ ok: true, id: `mine:${DISH}:test-kitchen` });
+      if (!made.ok) return;
+
+      const page = await recipePage(made.id);
+      expect(page.ok && page.page.copy).toEqual({ clonedFrom: ID, originalSiteName: "Test Kitchen" });
+      expect(page.ok && page.page.detail.siteName).toBe("Mine · Test Kitchen");
+
+      const compared = await compareDish(DISH, null);
+      expect(compared.ok && compared.comparison.recipes.map((r) => r.siteName).sort()).toEqual(["Mine · Test Kitchen", "Test Kitchen"]);
+    });
+
+    test("editing a copy rewrites the copy; the original and the corrections stay as they were", async () => {
+      await publish();
+      const made = await cloneRecipe(ID);
+      if (!made.ok) throw new Error("no copy");
+      const saved = await saveCorrection(made.id, { sections: [{ name: null, lines: ["350 g bread flour", "45 g butter"] }] });
+      expect(saved.ok && saved.page.detail.sections[0]!.lines.map((l) => l.line)).toEqual(["350 g bread flour", "45 g butter"]);
+      expect(await readCorrections(DISH)).toEqual({});
+      const original = await recipePage(ID);
+      expect(original.ok && original.page.detail.sections[0]!.lines.map((l) => l.line))
+        .toEqual(["300 g bread flour", "Brown Butter (from above)"]);
+    });
+
+    test("a copy has no published version to revert to, and can be deleted; a captured recipe cannot", async () => {
+      await publish();
+      const made = await cloneRecipe(ID);
+      if (!made.ok) throw new Error("no copy");
+      expect(await revertCorrection(made.id)).toMatchObject({ ok: false, status: 400 });
+      expect(await deleteClone(ID)).toMatchObject({ ok: false, status: 400 });
+      expect(await deleteClone(made.id)).toEqual({ ok: true });
+      expect(await recipePage(made.id)).toMatchObject({ ok: false, status: 404 });
+    });
   });
 });
