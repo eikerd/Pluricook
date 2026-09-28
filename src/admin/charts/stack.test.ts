@@ -33,20 +33,20 @@ describe("stackComposition", () => {
     const s = stackComposition(pizzas, 2);
     expect(s.segments.map((x) => x.label)).toEqual(["flour", "water"]);
     expect(s.hasOther).toBe(true);
-    const b = s.columns.find((c) => c.recipe === 1)!;
+    const b = s.bars.find((c) => c.recipe === 1)!;
     expect(b.other).toBe(348);
     expect(b.otherItems).toEqual([{ label: "cheese", grams: 340 }, { label: "salt", grams: 8 }]);
   });
 
   test("a recipe's total is everything it lists, coloured or not", () => {
-    const b = stackComposition(pizzas, 2).columns.find((c) => c.recipe === 1)!;
+    const b = stackComposition(pizzas, 2).bars.find((c) => c.recipe === 1)!;
     expect(b.total).toBe(998);
     expect(b.grams).toEqual([400, 250]);
   });
 
-  test("columns run from the largest share of the most shared ingredient down", () => {
+  test("bars run from the largest share of the most shared ingredient down", () => {
     // Flour's share: a 300/506, b 400/998, c 350/567.
-    expect(stackComposition(pizzas).columns.map((c) => c.recipe)).toEqual([2, 0, 1]);
+    expect(stackComposition(pizzas).bars.map((c) => c.recipe)).toEqual([2, 0, 1]);
   });
 
   test("an ingredient no recipe weighs is not a segment", () => {
@@ -60,7 +60,7 @@ describe("stackComposition", () => {
 
   test("a recipe that lists nothing weighed totals zero rather than NaN", () => {
     const m = matrix(["a", "b"], [{ label: "flour", grams: [100, null] }]);
-    const empty = stackComposition(m).columns.find((c) => c.recipe === 1)!;
+    const empty = stackComposition(m).bars.find((c) => c.recipe === 1)!;
     expect(empty.total).toBe(0);
     expect(empty.grams).toEqual([0]);
   });

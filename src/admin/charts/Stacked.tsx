@@ -1,10 +1,12 @@
 /**
- * One column per recipe, stacked by ingredient: what each recipe is made of.
+ * One bar per recipe, stacked by ingredient: what each recipe is made of.
  *
- * Shares of each recipe by default, grams on a switch. The most shared
- * ingredients sit on the baseline, where columns compare directly; everything
- * rarer is one hatched Other band on top, which hovering itemizes. The order
- * and the folding are in stack.ts, where they are tested.
+ * Recipes run down the left and the ingredients across the top, as the owner
+ * laid it out on 2026-09-28 — d3's normalized stacked bar, horizontal. Shares
+ * of each recipe by default, grams on a switch. The most shared ingredients sit
+ * at the left edge, where bars compare directly; everything rarer is one
+ * hatched Other band at the right end, which hovering itemizes. The order and
+ * the folding are in stack.ts, where they are tested.
  */
 
 import { useMemo, useState } from "react";
@@ -23,6 +25,8 @@ const OTHER_FILL = { color: "#e6dfd3", pattern: { shape: "/", fgcolor: "#9c9184"
 const GAP = { color: "#fff", width: 2 };
 /** Items listed in the Other tooltip before it says how many more there are. */
 const OTHER_LISTED = 8;
+/** Vertical room per recipe, in px: a bar plus its share of the gap. */
+const ROW = 44;
 
 const grams = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const share = (part: number, total: number) => (total > 0 ? (part / total) * 100 : 0);
@@ -36,60 +40,63 @@ export function Stacked({ m, focus, onPick }: ViewProps) {
 
   const { data, layout } = useMemo(() => {
     const labels = rowLabels(m);
-    const x = s.columns.map((c) => labels[c.recipe]!);
-    const height = (g: number, total: number) => (scale === "share" ? share(g, total) : g);
+    const y = s.bars.map((b) => labels[b.recipe]!);
+    const length = (g: number, total: number) => (scale === "share" ? share(g, total) : g);
 
     const traces: Array<Record<string, unknown>> = s.segments.map((seg, k) => ({
       type: "bar",
+      orientation: "h",
       name: `${seg.label} · ${seg.recipeCount}/${m.recipes.length}`,
-      x,
-      y: s.columns.map((c) => height(c.grams[k]!, c.total)),
-      customdata: s.columns.map((c) => [c.recipe, seg.ingredient]),
-      text: s.columns.map((c) => amount(c.grams[k]!, c.total)),
+      y,
+      x: s.bars.map((b) => length(b.grams[k]!, b.total)),
+      customdata: s.bars.map((b) => [b.recipe, seg.ingredient]),
+      text: s.bars.map((b) => amount(b.grams[k]!, b.total)),
       textposition: "none",
-      hovertemplate: `%{x}<br>${seg.label}: %{text}<extra></extra>`,
+      hovertemplate: `%{y}<br>${seg.label}: %{text}<extra></extra>`,
       marker: { color: SEGMENT_COLORS[k], line: GAP },
     }));
 
     if (s.hasOther) {
       traces.push({
         type: "bar",
+        orientation: "h",
         name: "Other",
-        x,
-        y: s.columns.map((c) => height(c.other, c.total)),
-        customdata: s.columns.map((c) => [c.recipe, -1]),
-        text: s.columns.map((c) => {
-          const items = c.otherItems.slice(0, OTHER_LISTED).map((o) => `${o.label} ${grams.format(o.grams)} g`);
-          const more = c.otherItems.length - OTHER_LISTED;
-          return [amount(c.other, c.total), ...items, ...(more > 0 ? [`and ${more} more`] : [])].join("<br>");
+        y,
+        x: s.bars.map((b) => length(b.other, b.total)),
+        customdata: s.bars.map((b) => [b.recipe, -1]),
+        text: s.bars.map((b) => {
+          const items = b.otherItems.slice(0, OTHER_LISTED).map((o) => `${o.label} ${grams.format(o.grams)} g`);
+          const more = b.otherItems.length - OTHER_LISTED;
+          return [amount(b.other, b.total), ...items, ...(more > 0 ? [`and ${more} more`] : [])].join("<br>");
         }),
         textposition: "none",
-        hovertemplate: "%{x}<br>Other: %{text}<extra></extra>",
+        hovertemplate: "%{y}<br>Other: %{text}<extra></extra>",
         marker: { ...OTHER_FILL, line: GAP },
       });
     }
 
-    const tallest = Math.max(...s.columns.map((c) => c.total), 1);
+    const longest = Math.max(...s.bars.map((b) => b.total), 1);
     return {
       data: traces,
       layout: {
         barmode: "stack",
         bargap: 0.3,
         barcornerradius: 4,
-        margin: { l: 70, r: 20, t: 20, b: 150 },
-        legend: { orientation: "h", x: 0, xanchor: "left", y: 1.02, yanchor: "bottom", traceorder: "normal" },
+        // Room on the right for each bar's weight, written past its end.
+        margin: { l: 20, r: 80, t: 20, b: 50 },
+        legend: { orientation: "h", x: 0, xanchor: "left", y: 1, yanchor: "bottom", traceorder: "normal" },
         hoverlabel: { align: "left" },
-        xaxis: {
-          tickangle: -40, categoryorder: "array", categoryarray: x, tickvals: x,
-          ticktext: s.columns.map((c) => (c.recipe === focus ? `<b>${labels[c.recipe]}</b>` : labels[c.recipe]!)),
+        yaxis: {
+          automargin: true, autorange: "reversed", categoryorder: "array", categoryarray: y, tickvals: y,
+          ticktext: s.bars.map((b) => (b.recipe === focus ? `<b>${labels[b.recipe]}</b>` : labels[b.recipe]!)),
         },
-        yaxis: scale === "share"
-          ? { title: { text: "Share of recipe" }, range: [0, 108], tickvals: [0, 25, 50, 75, 100], ticksuffix: "%", gridcolor: LINE }
-          : { title: { text: "Grams" }, range: [0, tallest * 1.08], gridcolor: LINE },
-        // Each column's weight, above it, in text ink rather than a series colour.
-        annotations: s.columns.map((c) => ({
-          x: labels[c.recipe], y: scale === "share" ? 100 : c.total, yanchor: "bottom", yshift: 2,
-          text: `${grams.format(c.total)} g`, showarrow: false, font: { size: 11, color: INK },
+        xaxis: scale === "share"
+          ? { title: { text: "Share of recipe" }, range: [0, 100], tickvals: [0, 25, 50, 75, 100], ticksuffix: "%", gridcolor: LINE }
+          : { title: { text: "Grams" }, range: [0, longest], gridcolor: LINE },
+        // Each bar's weight, past its end, in text ink rather than a series colour.
+        annotations: s.bars.map((b) => ({
+          y: labels[b.recipe], x: scale === "share" ? 100 : b.total, xanchor: "left", xshift: 6,
+          text: `${grams.format(b.total)} g`, showarrow: false, font: { size: 11, color: INK },
         })),
       },
     };
@@ -110,7 +117,8 @@ export function Stacked({ m, focus, onPick }: ViewProps) {
           <option value="grams">Grams</option>
         </select>
       </div>
-      <Plot label="Stacked columns, one per recipe, by ingredient" data={data} layout={layout} height={540} onPointClick={click} />
+      <Plot label="Stacked bars, one per recipe, by ingredient" data={data} layout={layout}
+        height={160 + ROW * s.bars.length} onPointClick={click} />
     </>
   );
 }

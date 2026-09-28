@@ -1,9 +1,9 @@
 /**
- * What each recipe is made of, as stacked columns — the arithmetic, kept apart
+ * What each recipe is made of, as stacked bars — the arithmetic, kept apart
  * from the drawing so it can be tested on its own.
  *
  * Ingredients are ordered by how many recipes list them, heaviest first among
- * equals, so the most shared sit on the baseline where columns compare
+ * equals, so the most shared sit on the baseline where bars compare
  * directly. The first `colored` get a colour of their own; everything rarer
  * folds into one Other band, itemized per recipe so hovering it can say what
  * is inside.
@@ -18,7 +18,7 @@ export interface StackSegment {
   recipeCount: number;
 }
 
-export interface StackColumn {
+export interface StackBar {
   /** Index into VisualMatrix.recipes. */
   recipe: number;
   /** Grams per segment, in segment order; 0 where the recipe does not list it. */
@@ -32,7 +32,7 @@ export interface StackColumn {
 
 export interface StackComposition {
   segments: StackSegment[];
-  columns: StackColumn[];
+  bars: StackBar[];
   hasOther: boolean;
 }
 
@@ -53,7 +53,7 @@ export function stackComposition(m: VisualMatrix, colored = COLORED_SEGMENTS): S
   const shown = order.slice(0, colored);
   const folded = order.slice(colored);
 
-  const columns = m.recipes.map((_, i): StackColumn => {
+  const bars = m.recipes.map((_, i): StackBar => {
     const otherItems = folded
       .filter((j) => gramsOf(i, j) > 0)
       .map((j) => ({ label: m.ingredients[j]!.label, grams: gramsOf(i, j) }))
@@ -63,14 +63,14 @@ export function stackComposition(m: VisualMatrix, colored = COLORED_SEGMENTS): S
     return { recipe: i, grams, other, otherItems, total: round(grams.reduce((s, g) => s + g, 0) + other) };
   });
 
-  // Largest share of the baseline ingredient first: the columns then read as a
+  // Largest share of the baseline ingredient first: the bars then read as a
   // staircase, and the same order holds whether the chart shows grams or shares.
-  const share = (c: StackColumn) => (c.total > 0 ? (c.grams[0] ?? 0) / c.total : 0);
-  columns.sort((a, b) => share(b) - share(a));
+  const share = (c: StackBar) => (c.total > 0 ? (c.grams[0] ?? 0) / c.total : 0);
+  bars.sort((a, b) => share(b) - share(a));
 
   return {
     segments: shown.map((j) => ({ ingredient: j, label: m.ingredients[j]!.label, recipeCount: m.ingredients[j]!.recipeCount })),
-    columns,
+    bars,
     hasOther: folded.length > 0,
   };
 }
