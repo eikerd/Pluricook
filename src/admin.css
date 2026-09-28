@@ -497,6 +497,43 @@ h1, h2, h3, .brand__name {
   cursor: pointer;
 }
 
+/* A recipe opened from a chart: a panel over the right of the page. */
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  width: min(30rem, 92vw);
+  overflow-y: auto;
+  padding: 1.25rem 1.25rem 2rem;
+  background: var(--parchment);
+  border-left: 4px solid var(--saffron);
+  box-shadow: -8px 0 24px rgba(43, 33, 28, 0.18);
+}
+.drawer__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem; }
+.drawer__head h3 { margin: 0; font-family: "Fraunces", Georgia, serif; font-size: 1.35rem; }
+.drawer__head p { margin: 0.2rem 0 0.4rem; }
+.drawer__close { border: 0; background: none; font-size: 1.6rem; line-height: 1; color: var(--ink-soft); cursor: pointer; }
+.drawer__close:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+.drawer__section h4 {
+  margin: 1.1rem 0 0.3rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.drawer__lines { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.drawer__lines td { padding: 0.45rem 0.35rem; border-bottom: 1px solid var(--cream-line); vertical-align: top; }
+.drawer__lines tr.is-highlighted td { background: var(--parchment-warm); }
+.drawer__grams { text-align: right; white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+.drawer__food { display: block; margin-top: 0.15rem; font-size: 0.78rem; color: var(--ink-soft); }
+
+/* Recipe names on a chart that opens them. Plotly's SVG passes clicks through
+   (pointer-events: none, inherited); the names take them back. */
+.plot--ticks .ytick text { cursor: pointer; pointer-events: all; }
+.plot--ticks .ytick:hover text { text-decoration: underline; }
+
 /* UpSet: a wide SVG scrolls inside its own box, never the page. */
 .upset { overflow-x: auto; }
 .upset svg { display: block; font-family: Inter, sans-serif; }

@@ -4,9 +4,10 @@
  * disagree about a number — and a click on any mark shows the line behind it.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DishSummary } from "../lib/compare-service";
 import type { VisualMatrix } from "../lib/visual-matrix";
+import { RecipeDrawer } from "./RecipeDrawer";
 import { Network } from "./charts/Network";
 import { Stacked } from "./charts/Stacked";
 import { UpSet } from "./charts/UpSet";
@@ -41,6 +42,8 @@ export function VisualizeView() {
   const [view, setView] = useState("heatmap");
   const [focus, setFocus] = useState<number | null>(null);
   const [picked, setPicked] = useState<Picked | null>(null);
+  /** The recipe open in the detail drawer, and the published line to mark in it. */
+  const [opened, setOpened] = useState<{ recipeId: string; line: string | null } | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [listError, setListError] = useState<string | null>(null);
 
@@ -76,7 +79,16 @@ export function VisualizeView() {
   }, [dish, section, question]);
 
   // A new question invalidates anything that pointed into the old matrix.
-  useEffect(() => { setFocus(null); setPicked(null); }, [question]);
+  useEffect(() => { setFocus(null); setPicked(null); setOpened(null); }, [question]);
+
+  const openRecipe = useCallback((recipe: number, ingredient: number | null) => {
+    if (!m) return;
+    setOpened({
+      recipeId: m.recipes[recipe]!.recipeId,
+      line: ingredient === null ? null : (m.lines[recipe]?.[ingredient] ?? null),
+    });
+  }, [m]);
+  const closeRecipe = useCallback(() => setOpened(null), []);
 
   const sections = useMemo(() => dishes?.find((d) => d.dish === dish)?.sections ?? [], [dishes, dish]);
   const Active = VIEWS.find((v) => v.id === view)!.View;
@@ -134,7 +146,7 @@ export function VisualizeView() {
             <p className="muted legend">⚠ n — n lines of this recipe never resolved to grams, so it may hold ingredients shown here as absent.</p>
           )}
           <section className="viz" key={`${question}\n${view}`}>
-            <Active m={m} focus={focus} onPick={setPicked} />
+            <Active m={m} focus={focus} onPick={setPicked} onRecipe={openRecipe} />
           </section>
           {picked && m.values[picked.recipe] && (
             <aside className="checked" aria-live="polite">
@@ -148,6 +160,7 @@ export function VisualizeView() {
           )}
         </>
       )}
+      {opened && dish && <RecipeDrawer dish={dish} recipeId={opened.recipeId} highlight={opened.line} onClose={closeRecipe} />}
     </div>
   );
 }

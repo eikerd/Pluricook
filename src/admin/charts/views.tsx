@@ -17,6 +17,8 @@ export interface ViewProps {
   /** The recipe held up for comparison, or null for the corpus median. */
   focus: number | null;
   onPick: (p: Picked) => void;
+  /** Open one recipe's detail; the ingredient, when a mark on it was clicked. */
+  onRecipe?: (recipe: number, ingredient: number | null) => void;
 }
 
 export const recipeLabel = (m: VisualMatrix, i: number) =>

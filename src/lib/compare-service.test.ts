@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { rm } from "node:fs/promises";
-import { compareDish, listDishes } from "./compare-service";
+import { compareDish, listDishes, recipeDetail } from "./compare-service";
 
 const BROKEN = "data/recipes/zz-test-broken.json";
 const MISLABELLED = "data/recipes/zz-test-mislabelled.json";
@@ -80,5 +80,23 @@ describe("compareDish", () => {
     await Bun.write(BROKEN, "{ not json");
     const outcome = await compareDish("zz-test-broken", null);
     expect(outcome).toMatchObject({ ok: false, status: 500 });
+  });
+});
+
+describe("recipeDetail", () => {
+  test("a captured recipe is described, credit and lines", async () => {
+    const result = await recipeDetail("meatloaf", "natashaskitchen.com:meatloaf:2026-09-21");
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.detail.siteName).toBeTruthy();
+    expect(result.detail.sections.flatMap((s) => s.lines).length).toBeGreaterThan(0);
+  });
+
+  test("a recipe the dish does not hold answers 404 in the API's shape", async () => {
+    expect(await recipeDetail("meatloaf", "no-such-recipe")).toMatchObject({ ok: false, status: 404 });
+  });
+
+  test("a dish that is not a plain slug is refused before any file is opened", async () => {
+    expect(await recipeDetail("../meatloaf", "x")).toMatchObject({ ok: false, status: 404 });
   });
 });

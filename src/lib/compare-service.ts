@@ -10,6 +10,7 @@ import { Database } from "bun:sqlite";
 import { Glob } from "bun";
 import { compareRecipes, type Comparison } from "./compare";
 import { readAliases } from "./ingredient-aliases";
+import { describeRecipe, type RecipeDetail } from "./recipe-detail";
 import type { ExtractedRecipe } from "../types/provenance";
 
 export interface DishSummary {
@@ -136,6 +137,45 @@ export async function compareDish(dish: string, section: string | null): Promise
     // Answer in the API's own shape; an uncaught throw becomes Bun's plain-text 500.
     console.error(`[compare-service] comparison failed for "${dish}":`, error);
     return { ok: false, status: 500, error: `Comparing "${dish}" failed. See the server log.` };
+  } finally {
+    db.close();
+  }
+}
+
+export type DetailOutcome =
+  | { ok: true; detail: RecipeDetail }
+  | { ok: false; status: number; error: string };
+
+/**
+ * One recipe of a dish, line by line. The id only selects among the dish's own
+ * recipes — it never reaches a path — so it may hold the colons and dots every
+ * captured id has.
+ */
+export async function recipeDetail(dish: string, recipeId: string): Promise<DetailOutcome> {
+  let recipes: ExtractedRecipe[] | null;
+  try {
+    recipes = await readDish(dish);
+  } catch (error) {
+    console.error(`[compare-service] could not read "${dish}":`, error);
+    return { ok: false, status: 500, error: `The recipe file for "${dish}" could not be read. See the server log.` };
+  }
+  if (recipes === null) return { ok: false, status: 404, error: `No recipes captured for "${dish}".` };
+
+  const recipe = recipes.find((r) => r.id === recipeId);
+  if (!recipe) return { ok: false, status: 404, error: `"${dish}" holds no recipe "${recipeId}".` };
+
+  let db: Database;
+  try {
+    db = new Database("usda.db", { readonly: true });
+  } catch {
+    return { ok: false, status: 503, error: "usda.db has not been built — run bun scripts/build-usda-db.ts" };
+  }
+
+  try {
+    return { ok: true, detail: describeRecipe(recipe, db, await readAliases()) };
+  } catch (error) {
+    console.error(`[compare-service] describing "${recipeId}" failed:`, error);
+    return { ok: false, status: 500, error: `Reading "${recipeId}" failed. See the server log.` };
   } finally {
     db.close();
   }

@@ -34,9 +34,11 @@ const amount = (g: number, total: number) => `${grams.format(g)} g · ${share(g,
 
 type Scale = "share" | "grams";
 
-export function Stacked({ m, focus, onPick }: ViewProps) {
+export function Stacked({ m, focus, onRecipe }: ViewProps) {
   const [scale, setScale] = useState<Scale>("share");
   const s = useMemo(() => stackComposition(m), [m]);
+  // rowLabels are unique, so a recipe's name is enough to find it again.
+  const byLabel = useMemo(() => new Map(rowLabels(m).map((label, i) => [label, i])), [m]);
 
   const { data, layout } = useMemo(() => {
     const labels = rowLabels(m);
@@ -102,10 +104,15 @@ export function Stacked({ m, focus, onPick }: ViewProps) {
     };
   }, [m, s, scale, focus]);
 
+  // A click anywhere on a bar opens that recipe, with the clicked ingredient
+  // marked. The Other band holds several ingredients, so it marks none.
   const click = (p: PlotClick) => {
     const c = p.customdata as [number, number] | undefined;
-    // The Other band holds several ingredients, so it has no single line to show.
-    if (c && c[1] >= 0) onPick({ recipe: c[0], ingredient: c[1] });
+    if (c) onRecipe?.(c[0], c[1] >= 0 ? c[1] : null);
+  };
+  const clickName = (label: string) => {
+    const recipe = byLabel.get(label);
+    if (recipe !== undefined) onRecipe?.(recipe, null);
   };
 
   if (s.segments.length === 0) return <p className="empty">No recipe here lists an ingredient in grams.</p>;
@@ -118,7 +125,7 @@ export function Stacked({ m, focus, onPick }: ViewProps) {
         </select>
       </div>
       <Plot label="Stacked bars, one per recipe, by ingredient" data={data} layout={layout}
-        height={160 + ROW * s.bars.length} onPointClick={click} />
+        height={160 + ROW * s.bars.length} onPointClick={click} onTickClick={clickName} />
     </>
   );
 }

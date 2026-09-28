@@ -1,7 +1,7 @@
 import { serve } from "bun";
 import index from "./index.html";
 import { DATASETS, overview, queryDataset } from "./lib/admin-queries";
-import { compareDish, listDishes } from "./lib/compare-service";
+import { compareDish, listDishes, recipeDetail } from "./lib/compare-service";
 import { buildMatrix } from "./lib/visual-matrix";
 import { setTier, type Tier } from "./lib/curated-sources";
 
@@ -49,6 +49,20 @@ const server = serve({
         const result = await compareDish(req.params.dish, section || null);
         return result.ok
           ? Response.json(buildMatrix(result.comparison))
+          : Response.json({ error: result.error }, { status: result.status });
+      },
+    },
+
+    /**
+     * One recipe of a dish, line by line: what the recipe detail view shows.
+     * The id travels in the query — captured ids hold colons and dots.
+     */
+    "/api/admin/recipe/:dish": {
+      GET: async (req) => {
+        const id = new URL(req.url).searchParams.get("id") ?? "";
+        const result = await recipeDetail(req.params.dish, id);
+        return result.ok
+          ? Response.json(result.detail)
           : Response.json({ error: result.error }, { status: result.status });
       },
     },
