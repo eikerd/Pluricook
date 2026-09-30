@@ -85,7 +85,8 @@ describe("compareDish", () => {
 });
 
 describe("recipePage", () => {
-  test("a recipe's page is found by its id alone, whichever dish holds it", async () => {
+  // A page is described through usda.db; a fresh checkout has none, and answers 503.
+  test.skipIf(!hasUsda)("a recipe's page is found by its id alone, whichever dish holds it", async () => {
     const result = await recipePage("natashaskitchen.com:meatloaf:2026-09-21");
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -98,7 +99,8 @@ describe("recipePage", () => {
   });
 });
 
-describe("corrections, end to end", () => {
+// Every successful write answers with the recipe's page, which needs usda.db.
+describe.skipIf(!hasUsda)("corrections, end to end", () => {
   const DISH = "zz-test-page";
   const ID = "personal:zz-test-page:mine";
   afterEach(async () => {
