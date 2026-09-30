@@ -165,7 +165,12 @@ type Outcome =
   | { kind: "answer"; question: string; comparison: Comparison }
   | { kind: "failure"; question: string; message: string };
 
-export function ComparisonView() {
+interface ComparisonViewProps {
+  /** Bumped when a recipe changes, so the comparison kept under a page is read again. */
+  revision?: number;
+}
+
+export function ComparisonView({ revision = 0 }: ComparisonViewProps) {
   const [dishes, setDishes] = useState<DishSummary[] | null>(null);
   const [dish, setDish] = useState<string | null>(null);
   const [section, setSection] = useState(WHOLE_RECIPE);
@@ -194,7 +199,7 @@ export function ComparisonView() {
         setDish((current) => current ?? list[0]?.dish ?? null);
       })
       .catch((e: unknown) => setListError(e instanceof Error ? e.message : "Could not list dishes"));
-  }, []);
+  }, [revision]);
 
   useEffect(() => {
     if (!dish) return;
@@ -215,7 +220,7 @@ export function ComparisonView() {
 
     // A slow answer for the previous dish must not overwrite the current one.
     return () => { stale = true; };
-  }, [dish, section, question]);
+  }, [dish, section, question, revision]);
 
   // Built once per answer. Rebuilt on every render, fresh column arrays would
   // make each open row's nested grid re-sort whenever the outer grid changed.

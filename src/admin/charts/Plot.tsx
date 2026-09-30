@@ -24,13 +24,31 @@ interface PlotProps {
   height?: number;
   label: string;
   onPointClick?: (p: PlotClick) => void;
+  /** A click on a y-axis label, with the label's text. */
+  onTickClick?: (label: string) => void;
 }
 
-export function Plot({ data, layout, height = 460, label, onPointClick }: PlotProps) {
+export function Plot({ data, layout, height = 460, label, onPointClick, onTickClick }: PlotProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const clickRef = useRef(onPointClick);
   clickRef.current = onPointClick;
+  const tickRef = useRef(onTickClick);
+  tickRef.current = onTickClick;
+  const ticksClickable = Boolean(onTickClick);
+
+  // Plotly redraws its axes on every resize, so a listener on a label itself
+  // would be lost; one on the container catches whichever label is there now.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !ticksClickable) return;
+    const handler = (e: MouseEvent) => {
+      const tick = (e.target as Element | null)?.closest(".ytick");
+      if (tick?.textContent) tickRef.current?.(tick.textContent);
+    };
+    el.addEventListener("click", handler);
+    return () => el.removeEventListener("click", handler);
+  }, [ticksClickable]);
 
   useEffect(() => {
     const el = ref.current;
@@ -72,5 +90,5 @@ export function Plot({ data, layout, height = 460, label, onPointClick }: PlotPr
   }, []);
 
   if (failure) return <p className="failure" role="alert">{failure}</p>;
-  return <div ref={ref} className="plot" role="img" aria-label={label} />;
+  return <div ref={ref} className={ticksClickable ? "plot plot--ticks" : "plot"} role="img" aria-label={label} />;
 }

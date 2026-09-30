@@ -497,6 +497,117 @@ h1, h2, h3, .brand__name {
   cursor: pointer;
 }
 
+/* ── Recipe page ─────────────────────────────────────────── */
+
+.recipe__crumb { margin: 0 0 0.4rem; font-size: 0.9rem; }
+.recipe__actions { display: flex; gap: 0.5rem; }
+.recipe__lines { margin-top: 1.25rem; }
+/* A recipe's lines are long text: they wrap, so the sheet fits the page
+   instead of scrolling its first columns out of view. Figures stay on one line. */
+.recipe__lines .grid tbody td:not(.num) { min-width: 5rem; white-space: normal; }
+.grid tr.is-highlighted td { background: #fdf3de; }
+.recipe__section-name {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  background: #f6e3b8;
+  color: var(--paprika-deep);
+  vertical-align: 1px;
+}
+
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  max-width: 60rem;
+  margin-top: 1rem;
+  padding: 0.6rem 0.9rem;
+  background: #fff;
+  border: 1px solid var(--cream-line);
+  border-left: 4px solid var(--saffron);
+  border-radius: 3px;
+}
+
+.recipe__published { max-width: 60rem; margin-top: 1.5rem; padding: 0.9rem 1rem; border: 1px dashed var(--cream-line); border-radius: 3px; }
+.recipe__published-name { margin: 0.8rem 0 0.2rem; font-size: 0.85rem; }
+.recipe__published-lines { margin: 0; padding-left: 1.2rem; }
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--paprika);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.link:disabled { opacity: 0.5; cursor: default; }
+.link:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+
+.button {
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--paprika);
+  border-radius: 3px;
+  background: var(--paprika);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.button:hover:not(:disabled) { background: var(--paprika-deep); }
+.button:disabled { opacity: 0.5; cursor: default; }
+.button:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+.button--quiet { background: #fff; color: var(--paprika); }
+.button--quiet:hover:not(:disabled) { background: var(--parchment-warm); }
+
+.recipe-editor { display: grid; gap: 1.25rem; max-width: 46rem; margin-top: 1.25rem; }
+.recipe-editor fieldset {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--cream-line);
+  border-radius: 3px;
+  background: #fff;
+}
+.recipe-editor legend { padding: 0 0.3rem; font-weight: 600; color: var(--espresso-soft); }
+.field { display: grid; gap: 0.25rem; }
+.field > span { font-size: 0.8rem; color: var(--ink-soft); }
+.recipe-editor__figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 0.7rem; }
+.recipe-editor__section { display: grid; justify-items: start; gap: 0.5rem; padding-bottom: 0.9rem; border-bottom: 1px solid var(--cream-line); }
+.recipe-editor__section > .field { width: 100%; }
+.recipe-editor__lines {
+  width: 100%;
+  resize: vertical;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.recipe-editor__actions { display: flex; gap: 0.6rem; }
+
+/* Table rows that open a page of their own. */
+tr.is-link { cursor: pointer; }
+tr.is-link:hover td,
+tr.is-link:focus-visible td { background: var(--parchment-warm); }
+tr.is-link:focus-visible { outline: 2px solid var(--saffron); outline-offset: -2px; }
+
+/* Recipe names on a chart that opens them. Plotly's SVG passes clicks through
+   (pointer-events: none, inherited); the names take them back. */
+.plot--ticks .ytick text { cursor: pointer; pointer-events: all; }
+.plot--ticks .ytick:hover text { text-decoration: underline; }
+
 /* UpSet: a wide SVG scrolls inside its own box, never the page. */
 .upset { overflow-x: auto; }
 .upset svg { display: block; font-family: Inter, sans-serif; }
@@ -510,3 +621,21 @@ h1, h2, h3, .brand__name {
 .upset__label { font-size: 12px; text-anchor: end; fill: var(--ink); }
 .upset__setbar { fill: var(--saffron); }
 .upset__set.is-focus .upset__label { fill: var(--paprika); font-weight: 700; }
+
+/* ── Detail pages: a USDA food, a search term ────────────── */
+
+.detail__cards { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+.detail__card {
+  flex: 1 1 22rem;
+  max-width: 36rem;
+  padding: 0.8rem 1rem;
+  background: #fff;
+  border: 1px solid var(--cream-line);
+  border-radius: 3px;
+}
+.detail__sheet { margin-top: 1.5rem; }
+
+.fields { display: grid; grid-template-columns: max-content 1fr; gap: 0.3rem 1.25rem; margin: 0; }
+.fields__row { display: contents; }
+.fields dt { color: var(--ink-soft); }
+.fields dd { margin: 0; overflow-wrap: anywhere; }

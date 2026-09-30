@@ -1,0 +1,646 @@
+{
+  "_comment": [
+    "Search terms: what people type to find a dish, each the landing page its recipes attach to.",
+    "A term's slug is the dish key a recipe carries (its file is data/recipes/<slug>.json), so",
+    "attaching a recipe to a term is naming its dish.",
+    "",
+    "Seeded 2026-09-28 by scripts/seed-search-terms.ts from data/fixtures/top-100-searched-recipes.txt.",
+    "This file is the record now: edit it here.",
+    "",
+    "rank  — place on that list; null for a dish of ours it lacks. Two terms share #28: the list",
+    "        named two dishes on one line.",
+    "group — the list's band.",
+    "aliases — other names the same page answers to."
+  ],
+  "terms": [
+    {
+      "slug": "pancake",
+      "term": "Pancake Recipe",
+      "rank": 1,
+      "group": "The Global Staples",
+      "note": "consistently #1 worldwide"
+    },
+    {
+      "slug": "banana-bread",
+      "term": "Banana Bread Recipe",
+      "rank": 2,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "pizza-dough",
+      "term": "Pizza Dough Recipe",
+      "rank": 3,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "chicken-breast",
+      "term": "Chicken Breast Recipes",
+      "rank": 4,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "chocolate-chip-cookies",
+      "term": "Chocolate Chip Cookies",
+      "rank": 5,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "french-toast",
+      "term": "French Toast Recipe",
+      "rank": 6,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "chili",
+      "term": "Chili Recipe",
+      "rank": 7,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "meatloaf",
+      "term": "Meatloaf Recipe",
+      "rank": 8,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "waffle",
+      "term": "Waffle Recipe",
+      "rank": 9,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "lasagna",
+      "term": "Lasagna Recipe",
+      "rank": 10,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "crepe",
+      "term": "Crepe Recipe",
+      "rank": 11,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "brownies",
+      "term": "Brownies Recipe",
+      "rank": 12,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "guacamole",
+      "term": "Guacamole Recipe",
+      "rank": 13,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "mac-and-cheese",
+      "term": "Mac and Cheese Recipe",
+      "rank": 14,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "apple-pie",
+      "term": "Apple Pie Recipe",
+      "rank": 15,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "coleslaw",
+      "term": "Coleslaw Recipe",
+      "rank": 16,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "sugar-cookie",
+      "term": "Sugar Cookie Recipe",
+      "rank": 17,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "pot-roast",
+      "term": "Pot Roast Recipe",
+      "rank": 18,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "beef-stew",
+      "term": "Beef Stew Recipe",
+      "rank": 19,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "cheesecake",
+      "term": "Cheesecake Recipe",
+      "rank": 20,
+      "group": "The Global Staples"
+    },
+    {
+      "slug": "chicken-noodle-soup",
+      "term": "Chicken Noodle Soup",
+      "rank": 21,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "carrot-cake",
+      "term": "Carrot Cake Recipe",
+      "rank": 22,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "mashed-potatoes",
+      "term": "Mashed Potatoes Recipe",
+      "rank": 23,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "salsa",
+      "term": "Salsa Recipe",
+      "rank": 24,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "pound-cake",
+      "term": "Pound Cake Recipe",
+      "rank": 25,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "shepherds-pie",
+      "term": "Shepherd’s Pie Recipe",
+      "rank": 26,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "cornbread",
+      "term": "Cornbread Recipe",
+      "rank": 27,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "guinness-stew",
+      "term": "Guinness Stew",
+      "rank": 28,
+      "group": "Comfort Mains & Baking Favorites",
+      "note": "Listed as “Guinness Stew / Beef Stroganoff”. Different dishes, so a term each."
+    },
+    {
+      "slug": "beef-stroganoff",
+      "term": "Beef Stroganoff",
+      "rank": 28,
+      "group": "Comfort Mains & Baking Favorites",
+      "note": "Listed as “Guinness Stew / Beef Stroganoff”. Different dishes, so a term each."
+    },
+    {
+      "slug": "butter-chicken",
+      "term": "Butter Chicken Recipe",
+      "rank": 29,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "pad-thai",
+      "term": "Pad Thai Recipe",
+      "rank": 30,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "fried-rice",
+      "term": "Fried Rice Recipe",
+      "rank": 31,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "fajita",
+      "term": "Fajita Recipe",
+      "rank": 32,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "potato-soup",
+      "term": "Potato Soup Recipe",
+      "rank": 33,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "chicken-parmesan",
+      "term": "Chicken Parmesan Recipe",
+      "rank": 34,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "pork-chop",
+      "term": "Pork Chop Recipes",
+      "rank": 35,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "taco-seasoning",
+      "term": "Taco Seasoning Recipe",
+      "rank": 36,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "deviled-eggs",
+      "term": "Deviled Eggs Recipe",
+      "rank": 37,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "cinnamon-roll",
+      "term": "Cinnamon Roll Recipe",
+      "rank": 38,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "salmon",
+      "term": "Salmon Recipes",
+      "rank": 39,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "enchilada",
+      "term": "Enchilada Recipe",
+      "rank": 40,
+      "group": "Comfort Mains & Baking Favorites"
+    },
+    {
+      "slug": "alfredo-sauce",
+      "term": "Alfredo Sauce Recipe",
+      "rank": 41,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "french-onion-soup",
+      "term": "French Onion Soup",
+      "rank": 42,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "sourdough-bread",
+      "term": "Sourdough Bread Recipe",
+      "rank": 43,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "hummus",
+      "term": "Hummus Recipe",
+      "rank": 44,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "stir-fry",
+      "term": "Stir Fry Recipe",
+      "rank": 45,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "egg-salad",
+      "term": "Egg Salad Recipe",
+      "rank": 46,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "tuna-salad",
+      "term": "Tuna Salad Recipe",
+      "rank": 47,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "chicken-salad",
+      "term": "Chicken Salad Recipe",
+      "rank": 48,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "carbonara",
+      "term": "Carbonara Recipe",
+      "rank": 49,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "marinara-sauce",
+      "term": "Marinara Sauce Recipe",
+      "rank": 50,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "stuffed-bell-peppers",
+      "term": "Stuffed Bell Peppers",
+      "rank": 51,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "shrimp-scampi",
+      "term": "Shrimp Scampi Recipe",
+      "rank": 52,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "quiche",
+      "term": "Quiche Recipe",
+      "rank": 53,
+      "group": "Soups, Sauces, & Italian-American Classics",
+      "aliases": [
+        "Crustless Quiche Recipe",
+        "Classic Quiche Recipe"
+      ],
+      "note": "Listed as “Crustless / Classic Quiche Recipe”. One dish; the variants are aliases."
+    },
+    {
+      "slug": "scones",
+      "term": "Scones Recipe",
+      "rank": 54,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "baked-ziti",
+      "term": "Baked Ziti Recipe",
+      "rank": 55,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "garlic-bread",
+      "term": "Garlic Bread Recipe",
+      "rank": 56,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "pumpkin-pie",
+      "term": "Pumpkin Pie Recipe",
+      "rank": 57,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "pesto",
+      "term": "Pesto Recipe",
+      "rank": 58,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "shortbread-cookie",
+      "term": "Shortbread Cookie Recipe",
+      "rank": 59,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "chicken-pot-pie",
+      "term": "Chicken Pot Pie",
+      "rank": 60,
+      "group": "Soups, Sauces, & Italian-American Classics"
+    },
+    {
+      "slug": "pulled-pork",
+      "term": "Pulled Pork Recipe",
+      "rank": 61,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "ribs",
+      "term": "Ribs Recipe",
+      "rank": 62,
+      "group": "Side Dishes, Grilling, & Quick Dinners",
+      "aliases": [
+        "BBQ Ribs Recipe"
+      ],
+      "note": "Listed as “Ribs / BBQ Ribs Recipe”. One dish; the variants are aliases."
+    },
+    {
+      "slug": "chicken-thigh",
+      "term": "Chicken Thigh Recipes",
+      "rank": 63,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "beef-bourguignon",
+      "term": "Beef Bourguignon Recipe",
+      "rank": 64,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "minestrone-soup",
+      "term": "Minestrone Soup Recipe",
+      "rank": 65,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "tiramisu",
+      "term": "Tiramisu Recipe",
+      "rank": 66,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "corn-chowder",
+      "term": "Corn Chowder Recipe",
+      "rank": 67,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "snickerdoodle-cookie",
+      "term": "Snickerdoodle Cookie Recipe",
+      "rank": 68,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "lemon-bar",
+      "term": "Lemon Bar Recipe",
+      "rank": 69,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "cabbage-soup",
+      "term": "Cabbage Soup Recipe",
+      "rank": 70,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "biscuits-and-gravy",
+      "term": "Biscuits and Gravy Recipe",
+      "rank": 71,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "bechamel-sauce",
+      "term": "Béchamel Sauce Recipe",
+      "rank": 72,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "clam-chowder",
+      "term": "Clam Chowder Recipe",
+      "rank": 73,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "falafel",
+      "term": "Falafel Recipe",
+      "rank": 74,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "bolognese-sauce",
+      "term": "Bolognese Sauce Recipe",
+      "rank": 75,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "stuffed-shells",
+      "term": "Stuffed Shells Recipe",
+      "rank": 76,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "oatmeal-chocolate-chip-cookies",
+      "term": "Oatmeal Chocolate Chip Cookies",
+      "rank": 77,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "birria-tacos",
+      "term": "Birria Tacos Recipe",
+      "rank": 78,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "lentil-soup",
+      "term": "Lentil Soup Recipe",
+      "rank": 79,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "green-bean-casserole",
+      "term": "Green Bean Casserole",
+      "rank": 80,
+      "group": "Side Dishes, Grilling, & Quick Dinners"
+    },
+    {
+      "slug": "shakshuka",
+      "term": "Shakshuka Recipe",
+      "rank": 81,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "general-tsos-chicken",
+      "term": "General Tso’s Chicken",
+      "rank": 82,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "key-lime-pie",
+      "term": "Key Lime Pie Recipe",
+      "rank": 83,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "creme-brulee",
+      "term": "Crème Brûlée Recipe",
+      "rank": 84,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "tzatziki",
+      "term": "Tzatziki Recipe",
+      "rank": 85,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "sweet-potato-casserole",
+      "term": "Sweet Potato Casserole",
+      "rank": 86,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "brussels-sprouts",
+      "term": "Brussels Sprouts Recipe",
+      "rank": 87,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "paella",
+      "term": "Paella Recipe",
+      "rank": 88,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "ceviche",
+      "term": "Ceviche Recipe",
+      "rank": 89,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "ramen",
+      "term": "Ramen Recipe",
+      "rank": 90,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "crab-cakes",
+      "term": "Crab Cakes Recipe",
+      "rank": 91,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "hollandaise-sauce",
+      "term": "Hollandaise Sauce Recipe",
+      "rank": 92,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "gnocchi",
+      "term": "Gnocchi Recipe",
+      "rank": 93,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "buttermilk-biscuit",
+      "term": "Buttermilk Biscuit Recipe",
+      "rank": 94,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "beef-tenderloin",
+      "term": "Beef Tenderloin Recipe",
+      "rank": 95,
+      "group": "Trending Dishes, Sweets, & Classics",
+      "aliases": [
+        "Filet Mignon Recipe"
+      ],
+      "note": "Listed as “Beef Tenderloin / Filet Mignon Recipe”. One dish; the variants are aliases."
+    },
+    {
+      "slug": "churros",
+      "term": "Churros Recipe",
+      "rank": 96,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "peach-cobbler",
+      "term": "Peach Cobbler Recipe",
+      "rank": 97,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "fondue",
+      "term": "Fondue Recipe",
+      "rank": 98,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "chicken-fajitas",
+      "term": "Chicken Fajitas Recipe",
+      "rank": 99,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "chimichurri",
+      "term": "Chimichurri Recipe",
+      "rank": 100,
+      "group": "Trending Dishes, Sweets, & Classics"
+    },
+    {
+      "slug": "detroit-pizza",
+      "term": "Detroit Pizza Recipe",
+      "rank": null,
+      "group": null,
+      "note": "In the library, not on the list."
+    }
+  ]
+}

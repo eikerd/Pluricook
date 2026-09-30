@@ -86,7 +86,35 @@ export interface ParsedLine {
   /** What the food is, with the unit and the count noun taken out. */
   name: string;
   preparation: string | null;
+  /**
+   * The mass the line states beside its measure — "3 cups (360g)" — in grams.
+   * The recipe's own weighing, and so the best figure the line has.
+   */
+  statedGrams: number | null;
   rawLine: string;
+}
+
+/**
+ * Metric masses only. "(8 oz)" is as often fluid ounces as weight, so an
+ * ounce in brackets is left to the measure beside it rather than trusted.
+ */
+const STATED_MASS: Record<string, number> = {
+  g: 1, gm: 1, gram: 1, grams: 1, kg: 1000, kilogram: 1000, kilograms: 1000,
+};
+
+function statedGramsOf(alt: { quantity: number; unit: string } | undefined): number | null {
+  const factor = alt ? STATED_MASS[alt.unit.toLowerCase()] : undefined;
+  if (!alt || factor === undefined || !Number.isFinite(alt.quantity) || alt.quantity <= 0) return null;
+  return Math.round(alt.quantity * factor * 1000) / 1000;
+}
+
+/**
+ * What to convert: the stated mass when the line has one, its own measure
+ * otherwise. Every caller of toGrams goes through here, so the pipeline and
+ * the scripts that report on it cannot disagree (docs/recipe-gotchas.md G11).
+ */
+export function conversionInput(p: ParsedLine): { quantity: number; unit: string } {
+  return p.statedGrams !== null ? { quantity: p.statedGrams, unit: "g" } : { quantity: p.quantity, unit: p.unit };
 }
 
 export function parseLine(rawLine: string): ParsedLine {
@@ -138,6 +166,7 @@ export function parseLine(rawLine: string): ParsedLine {
     // From the whole line, since the word may sit before the food ("ground
     // oregano"), after a comma ("onion, chopped") or in brackets.
     preparation: p.preparation ?? extractPreparation(rawLine),
+    statedGrams: statedGramsOf(p.alternateQuantity),
     rawLine,
   };
 }

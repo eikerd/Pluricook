@@ -46,7 +46,13 @@ export type CaptureMethod =
    * review, so these enter PRIVATE and become public only once they have a link
    * to credit and the curated list allows that source.
    */
-  | "personal-collection";
+  | "personal-collection"
+  /**
+   * The owner's own copy of another recipe, to develop (src/lib/clones.ts).
+   * Private; `clonedFrom` names the recipe it began as, whose credit it keeps
+   * in its title. It has no page of its own to link to.
+   */
+  | "owner-copy";
 
 export interface Provenance {
   /** Canonical host, matching the source registry. Null only for a
@@ -101,6 +107,8 @@ export interface ExtractedRecipe {
   visibility?: Visibility;
   /** Why a recipe is private, so the path to publishing it is visible. */
   visibilityReason?: string;
+  /** For the owner's copy of a recipe: the id of the recipe it began as. */
+  clonedFrom?: string;
   /**
    * Ingredient lines grouped as the source grouped them — dough and sauce,
    * marinade and glaze. `ingredientLines` stays the flat union so everything
@@ -139,10 +147,11 @@ export interface ExtractedRecipe {
  */
 export function assertProvenance(p: Provenance): void {
   // A personal-collection recipe may arrive before its page has been looked up:
-  // the owner's notes say "Chef John", not a URL. It must still name its source.
-  // Every other method has a page by construction, so there the link is required.
+  // the owner's notes say "Chef John", not a URL. The owner's own copy has no
+  // page at all. Both must still name their source. Every other method has a
+  // page by construction, so there the link is required.
   const required =
-    p.method === "personal-collection"
+    p.method === "personal-collection" || p.method === "owner-copy"
       ? (["siteName", "sourceTitle", "capturedAt"] as const)
       : (["host", "siteName", "sourceUrl", "sourceTitle", "capturedAt"] as const);
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { extractPreparation, parseLine, singular } from "./ingredient-line";
+import { conversionInput, extractPreparation, parseLine, singular } from "./ingredient-line";
 
 describe("singular", () => {
   test("folds the plurals a recipe uses", () => {
@@ -95,5 +95,79 @@ describe("stray punctuation before the name", () => {
 
   test("a leading decimal point belongs to the quantity and survives", () => {
     expect(parseLine(".5 cup milk").quantity).toBe(0.5);
+  });
+});
+
+// Each case below is an entry in docs/recipe-gotchas.md; the G-number is the link.
+describe("recipe gotchas — docs/recipe-gotchas.md", () => {
+  // G6: "½-⅞" was a code-point range (U+00BD–U+215E), not a list of fractions,
+  // and it swallowed bullets and dashes into the number.
+  test.each(["• 3 cups AP flour", "∙ 3 cups AP flour", "· 3 cups AP flour", "▪ 3 cups AP flour", "* 3 cups AP flour", "- 3 cups AP flour"])(
+    "G6: the bullet in %p is not part of the number",
+    (line) => {
+      expect(parseLine(line)).toMatchObject({ quantity: 3, unit: "cups", name: "AP flour" });
+    },
+  );
+
+  test("G6: an en-dash range reads as its first figure, as a hyphen range does", () => {
+    expect(parseLine("2–3 cloves garlic")).toMatchObject({ quantity: 2, unit: "clove", name: "garlic" });
+    expect(parseLine("2-3 cloves garlic")).toMatchObject({ quantity: 2, unit: "clove", name: "garlic" });
+  });
+
+  // G7: ¼ is U+00BC, one code point before ½, so the old range left it out.
+  test.each([
+    ["¼ tsp salt", 0.25, "tsp", "salt"],
+    ["¼ cup ketchup", 0.25, "cup", "ketchup"],
+    ["2¼ cups flour", 2.25, "cups", "flour"],
+    ["1 ¼ cups flour", 1.25, "cups", "flour"],
+  ])("G7: %p", (line, quantity, unit, name) => {
+    expect(parseLine(line)).toMatchObject({ quantity, unit, name });
+  });
+
+  // G11: the mass a line states is the best figure it has. G12: decimals too.
+  test.each([
+    ["3 cups (360g) AP Flour", 360, "AP Flour"],
+    ["1 cup (240 g) whole milk", 240, "whole milk"],
+    ["⅛ tsp (0.25g) Nutmeg", 0.25, "Nutmeg"],
+    ["1 tbsp (0.015 kg) honey", 15, "honey"],
+  ])("G11: %p states %p g", (line, grams, name) => {
+    const p = parseLine(line);
+    expect(p.statedGrams).toBe(grams);
+    expect(p.name).toBe(name);
+  });
+
+  test("G11: stated grams outrank the volume when converting", () => {
+    expect(conversionInput(parseLine("3 cups (360g) AP Flour"))).toEqual({ quantity: 360, unit: "g" });
+    expect(conversionInput(parseLine("3 cups AP flour"))).toEqual({ quantity: 3, unit: "cups" });
+  });
+
+  test("G11: ounces in brackets are not taken as mass — '(8 oz)' is as often fluid", () => {
+    expect(parseLine("1 cup (8 oz) milk").statedGrams).toBeNull();
+  });
+
+  test("G11: a length in brackets is not a mass", () => {
+    expect(parseLine("2 cups (6mm dice) apples").statedGrams).toBeNull();
+  });
+
+  // G18: the same amount in a second system, after a slash — RecipeTin Eats' style.
+  test.each([
+    ["2 cups / 400g dried lentils", 400, "dried lentils"],
+    ["1 kg / 2 lb ground beef (mince)", null, "ground beef (mince)"],
+    ["400g / 14 oz crushed tomato", null, "crushed tomato"],
+  ])("G18: %p states %p g, and the alternate leaves the name", (line, grams, name) => {
+    const p = parseLine(line);
+    expect(p.statedGrams).toBe(grams);
+    expect(p.name).toBe(name);
+  });
+
+  test("G18: the metric side converts, whichever side of the slash it is on", () => {
+    expect(conversionInput(parseLine("2 cups / 400g dried lentils"))).toEqual({ quantity: 400, unit: "g" });
+    expect(conversionInput(parseLine("1 kg / 2 lb ground beef"))).toEqual({ quantity: 1, unit: "kg" });
+  });
+
+  test("G18: a slash with no measure after it is left to the name", () => {
+    expect(parseLine("2 cups / sliced peaches").name).toBe("sliced peaches");
+    expect(parseLine("1 cup half/half").name).toBe("half/half");
+    expect(parseLine("2 cups / 2 large eggs").statedGrams).toBeNull();
   });
 });

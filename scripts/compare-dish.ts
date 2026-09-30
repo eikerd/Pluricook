@@ -8,6 +8,7 @@
 
 import { Database } from "bun:sqlite";
 import { compareRecipes } from "../src/lib/compare";
+import { ownersView } from "../src/lib/clones";
 import { readAliases } from "../src/lib/ingredient-aliases";
 import type { ExtractedRecipe } from "../src/types/provenance";
 
@@ -21,7 +22,9 @@ if (!(await file.exists())) {
   process.exit(1);
 }
 
-const { recipes } = (await file.json()) as { recipes: ExtractedRecipe[] };
+const { recipes: published } = (await file.json()) as { recipes: ExtractedRecipe[] };
+// As the admin reads it — corrections applied, the owner's copies added — so the two cannot disagree.
+const recipes = await ownersView(slug, published);
 const db = new Database("usda.db", { readonly: true });
 const cmp = compareRecipes({ recipes, db, aliases: await readAliases() });
 const unit = cmp.anchor.unitLabel;

@@ -1,11 +1,18 @@
 import { serve } from "bun";
 import index from "./index.html";
-import { DATASETS, overview, queryDataset } from "./lib/admin-queries";
-import { compareDish, listDishes } from "./lib/compare-service";
+import { DATASETS, overview, queryDataset, termPage, usdaFoodPage } from "./lib/admin-queries";
+import { SLUG } from "./lib/search-terms";
+import {
+  cloneRecipe, compareDish, deleteClone, listDishes, recipePage, revertCorrection, saveCorrection, type PageOutcome,
+} from "./lib/compare-service";
 import { buildMatrix } from "./lib/visual-matrix";
 import { setTier, type Tier } from "./lib/curated-sources";
 
 const TIERS: Tier[] = ["required", "favorite", "normal", "blocked"];
+
+const recipeIdOf = (req: Request) => new URL(req.url).searchParams.get("id") ?? "";
+const pageResponse = (result: PageOutcome) =>
+  result.ok ? Response.json(result.page) : Response.json({ error: result.error }, { status: result.status });
 
 const server = serve({
   routes: {
@@ -54,6 +61,51 @@ const server = serve({
     },
 
     /**
+     * One recipe's page: the owner's version, the published one, and the
+     * correction between them. The id travels in the query — captured ids hold
+     * colons and dots.
+     */
+    "/api/admin/recipe": {
+      GET: async (req) => pageResponse(await recipePage(recipeIdOf(req))),
+    },
+
+    /**
+     * Save or undo the owner's correction to one recipe. Like starring a source,
+     * it writes a file in the repo — data/corrections/<dish>.json — so the
+     * change lands in version control with its diff. The published recipe is
+     * never touched.
+     */
+    "/api/admin/recipe/correction": {
+      PUT: async (req) => {
+        let body: unknown;
+        try {
+          body = await req.json();
+        } catch {
+          return Response.json({ error: "The correction must be JSON." }, { status: 400 });
+        }
+        return pageResponse(await saveCorrection(recipeIdOf(req), body));
+      },
+      DELETE: async (req) => pageResponse(await revertCorrection(recipeIdOf(req))),
+    },
+
+    /**
+     * The owner's own copy of a recipe, to develop: POST makes one (answering
+     * with its id), DELETE removes one. Written to data/clones/<dish>.json.
+     */
+    "/api/admin/recipe/clone": {
+      POST: async (req) => {
+        const result = await cloneRecipe(recipeIdOf(req));
+        return result.ok
+          ? Response.json({ id: result.id }, { status: 201 })
+          : Response.json({ error: result.error }, { status: result.status });
+      },
+      DELETE: async (req) => {
+        const result = await deleteClone(recipeIdOf(req));
+        return result.ok ? Response.json({ ok: true }) : Response.json({ error: result.error }, { status: result.status });
+      },
+    },
+
+    /**
      * Star a site, or clear its star.
      *
      * The only write in the admin. It edits data/sources/curated.json rather than
@@ -73,6 +125,28 @@ const server = serve({
         }
         const site = await setTier(req.params.host, tier as Tier, { displayName });
         return Response.json({ host: req.params.host, ...site });
+      },
+    },
+
+    /** One search term's landing page: the term, and the recipes attached to it. */
+    "/api/admin/term": {
+      GET: async (req) => {
+        const slug = new URL(req.url).searchParams.get("slug") ?? "";
+        if (!SLUG.test(slug)) return Response.json({ error: "slug must be a dish key" }, { status: 400 });
+        const page = await termPage(slug);
+        return page ? Response.json(page) : Response.json({ error: `No search term "${slug}".` }, { status: 404 });
+      },
+    },
+
+    /** One USDA food, whole: its record, its category named and classed, its portions and nutrients. */
+    "/api/admin/usda/food": {
+      GET: (req) => {
+        const raw = new URL(req.url).searchParams.get("id") ?? "";
+        const id = /^\d+$/.test(raw) ? Number(raw) : NaN;
+        if (!Number.isSafeInteger(id)) return Response.json({ error: "id must be an FDC id" }, { status: 400 });
+        const page = usdaFoodPage(id);
+        if (page === "missing") return Response.json({ error: "usda.db has not been built yet." }, { status: 503 });
+        return page ? Response.json(page) : Response.json({ error: `USDA has no food ${id}.` }, { status: 404 });
       },
     },
 

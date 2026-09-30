@@ -1,13 +1,15 @@
 /**
- * Seven ways of looking at one dish, side by side until one proves the most
+ * Eight ways of looking at one dish, side by side until one proves the most
  * useful. All of them read the same payload, /api/admin/matrix, so no two can
  * disagree about a number — and a click on any mark shows the line behind it.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DishSummary } from "../lib/compare-service";
 import type { VisualMatrix } from "../lib/visual-matrix";
+import { navigate, recipePath } from "./route";
 import { Network } from "./charts/Network";
+import { Stacked } from "./charts/Stacked";
 import { UpSet } from "./charts/UpSet";
 import { Distribution, Heatmap, Map3D, Parallel, recipeLabel, Ternary, type Picked, type ViewProps } from "./charts/views";
 
@@ -21,6 +23,7 @@ const VIEWS: Array<{ id: string; label: string; View: (p: ViewProps) => React.Re
   { id: "map3d", label: "3D map", View: Map3D },
   { id: "network", label: "3D network", View: Network },
   { id: "ternary", label: "Ternary", View: Ternary },
+  { id: "stacked", label: "Stacked", View: Stacked },
 ];
 
 const dishName = (slug: string) => {
@@ -32,7 +35,12 @@ type Outcome =
   | { kind: "answer"; question: string; m: VisualMatrix }
   | { kind: "failure"; question: string; message: string };
 
-export function VisualizeView() {
+interface VisualizeViewProps {
+  /** Bumped when a recipe changes, so the charts kept under a page are drawn from fresh data. */
+  revision?: number;
+}
+
+export function VisualizeView({ revision = 0 }: VisualizeViewProps) {
   const [dishes, setDishes] = useState<DishSummary[] | null>(null);
   const [dish, setDish] = useState<string | null>(null);
   const [section, setSection] = useState(WHOLE_RECIPE);
@@ -55,7 +63,7 @@ export function VisualizeView() {
         setDish((d) => d ?? list[0]?.dish ?? null);
       })
       .catch((e: unknown) => setListError(e instanceof Error ? e.message : "Could not list dishes"));
-  }, []);
+  }, [revision]);
 
   useEffect(() => {
     if (!dish) return;
@@ -71,10 +79,17 @@ export function VisualizeView() {
         if (!stale) setOutcome({ kind: "failure", question, message: e instanceof Error ? e.message : "Could not load" });
       });
     return () => { stale = true; };
-  }, [dish, section, question]);
+  }, [dish, section, question, revision]);
 
   // A new question invalidates anything that pointed into the old matrix.
   useEffect(() => { setFocus(null); setPicked(null); }, [question]);
+
+  // A recipe clicked on a chart opens its page; the line clicked travels with it, to be marked there.
+  const openRecipe = useCallback((recipe: number, ingredient: number | null) => {
+    if (!m) return;
+    const line = ingredient === null ? null : (m.lines[recipe]?.[ingredient] ?? null);
+    navigate(recipePath(m.recipes[recipe]!.recipeId), { from: "visualize", line });
+  }, [m]);
 
   const sections = useMemo(() => dishes?.find((d) => d.dish === dish)?.sections ?? [], [dishes, dish]);
   const Active = VIEWS.find((v) => v.id === view)!.View;
@@ -132,7 +147,7 @@ export function VisualizeView() {
             <p className="muted legend">⚠ n — n lines of this recipe never resolved to grams, so it may hold ingredients shown here as absent.</p>
           )}
           <section className="viz" key={`${question}\n${view}`}>
-            <Active m={m} focus={focus} onPick={setPicked} />
+            <Active m={m} focus={focus} onPick={setPicked} onRecipe={openRecipe} />
           </section>
           {picked && m.values[picked.recipe] && (
             <aside className="checked" aria-live="polite">

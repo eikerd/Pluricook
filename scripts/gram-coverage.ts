@@ -10,9 +10,10 @@
  */
 
 import { Database } from "bun:sqlite";
-import { parseLine } from "../src/lib/ingredient-line";
+import { conversionInput, parseLine } from "../src/lib/ingredient-line";
 import { toGrams, type Basis } from "../src/lib/to-grams";
 import { readAliases } from "../src/lib/ingredient-aliases";
+import { ownersView } from "../src/lib/clones";
 import type { ExtractedRecipe } from "../src/types/provenance";
 
 const dish = process.argv[2] ?? "meatloaf";
@@ -26,7 +27,9 @@ if (!(await file.exists())) {
 
 const db = new Database("usda.db", { readonly: true });
 const aliases = await readAliases();
-const { recipes } = (await file.json()) as { recipes: ExtractedRecipe[] };
+const { recipes: published } = (await file.json()) as { recipes: ExtractedRecipe[] };
+// Coverage of what the comparison actually reads: corrections applied, the owner's copies added.
+const recipes = await ownersView(dish, published);
 
 const byBasis = new Map<Basis, number>();
 const unconverted: Array<{ site: string; line: string; basis: Basis; note: string | null }> = [];
@@ -41,8 +44,7 @@ for (const recipe of recipes) {
   for (const line of recipe.ingredientLines) {
     const parsed = parseLine(line);
     const result = toGrams({
-      quantity: parsed.quantity,
-      unit: parsed.unit,
+      ...conversionInput(parsed),
       name: parsed.name,
       condition: parsed.preparation,
       db,

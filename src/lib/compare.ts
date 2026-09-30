@@ -29,7 +29,7 @@ import {
   type Composition,
   type FoodClass,
 } from "./anchor";
-import { parseLine } from "./ingredient-line";
+import { conversionInput, parseLine } from "./ingredient-line";
 import { EMPTY_TABLE, type AliasTable } from "./ingredient-aliases";
 import { toGrams, type Basis } from "./to-grams";
 import type { ExtractedRecipe } from "../types/provenance";
@@ -202,8 +202,7 @@ export function compareRecipes(opts: CompareOptions): Comparison {
     for (const rawLine of lines) {
       const parsed = parseLine(rawLine);
       const result = toGrams({
-        quantity: parsed.quantity,
-        unit: parsed.unit,
+        ...conversionInput(parsed),
         name: parsed.name,
         condition: parsed.preparation,
         db: opts.db,

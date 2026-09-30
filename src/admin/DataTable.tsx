@@ -6,7 +6,8 @@
  * tables behave the same at 13,000 rows as the registry does at 27.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { rowLinkHandlers } from "./row-link";
 
 export interface Column {
   key: string;
@@ -23,6 +24,9 @@ interface PageResult {
   pageSize: number;
   columns: Column[];
   label: string;
+  /** What the server sorted by — the table's default when no header has been clicked. */
+  sort?: string;
+  dir?: "asc" | "desc";
   missing?: string;
 }
 
@@ -97,39 +101,49 @@ function StarCell({
   );
 }
 
-function Cell({ column, value }: { column: Column; value: unknown }) {
-  if (value === null || value === undefined || value === "") {
-    return <td className={column.numeric ? "num muted" : "muted"}>—</td>;
-  }
+const isEmpty = (value: unknown) => value === null || value === undefined || value === "";
 
+/**
+ * What a cell shows, apart from its <td>. Shared with grids that draw their own
+ * cells — a term's recipes — so a value reads the same in every table.
+ */
+export function cellContent(column: Column, value: unknown): ReactNode {
+  if (isEmpty(value)) return "—";
   if (column.badge) {
-    const tone = BADGE_TONE[String(value)] ?? "badge--mute";
-    return (
-      <td>
-        <span className={`badge ${tone}`}>{String(value)}</span>
-      </td>
-    );
+    return <span className={`badge ${BADGE_TONE[String(value)] ?? "badge--mute"}`}>{String(value)}</span>;
   }
-
   if (column.key === "url") {
     const href = String(value);
+    // In a clickable row, the row leaves the link to open the source alone (row-link.ts).
     return (
-      <td className="url">
-        <a href={href} target="_blank" rel="noreferrer noopener">
-          {href.replace(/^https?:\/\/(www\.)?/, "")}
-        </a>
-      </td>
+      <a href={href} target="_blank" rel="noreferrer noopener">
+        {href.replace(/^https?:\/\/(www\.)?/, "")}
+      </a>
     );
   }
-
-  if (column.numeric) {
-    return <td className="num">{typeof value === "number" ? value.toLocaleString() : String(value)}</td>;
-  }
-
-  return <td title={String(value)}>{String(value)}</td>;
+  if (column.numeric && typeof value === "number") return value.toLocaleString();
+  return String(value);
 }
 
-export function DataTable({ datasetId, searchable }: { datasetId: string; searchable: boolean }) {
+function Cell({ column, value }: { column: Column; value: unknown }) {
+  const content = cellContent(column, value);
+  if (isEmpty(value)) return <td className={column.numeric ? "num muted" : "muted"}>{content}</td>;
+  if (column.badge) return <td>{content}</td>;
+  if (column.key === "url") return <td className="url">{content}</td>;
+  if (column.numeric) return <td className="num">{content}</td>;
+  return <td title={String(value)}>{content}</td>;
+}
+
+interface DataTableProps {
+  datasetId: string;
+  searchable: boolean;
+  /** Open a row's own page. Rows become clickable, and reachable by keyboard. */
+  onRowClick?: (row: Record<string, unknown>) => void;
+  /** Bumped when a recipe changes, so a table kept under a page reloads its rows. */
+  revision?: number;
+}
+
+export function DataTable({ datasetId, searchable, onRowClick, revision = 0 }: DataTableProps) {
   const [data, setData] = useState<PageResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sort, setSort] = useState<string | null>(null);
@@ -179,7 +193,7 @@ export function DataTable({ datasetId, searchable }: { datasetId: string; search
     }, query ? 250 : 0);
 
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [datasetId, sort, dir, page, query, refresh]);
+  }, [datasetId, sort, dir, page, query, refresh, revision]);
 
   /**
    * Star a site. The write goes to data/sources/curated.json, so the change is a
@@ -198,9 +212,14 @@ export function DataTable({ datasetId, searchable }: { datasetId: string; search
     setRefresh((n) => n + 1);
   }
 
+  // The header says what the rows are sorted by: the column clicked, or else
+  // the table's own default, as the server reports it.
+  const shownSort = sort ?? data?.sort ?? null;
+  const shownDir = sort ? dir : (data?.dir ?? "asc");
+
   function toggleSort(key: string) {
-    if (sort === key) setDir(dir === "asc" ? "desc" : "asc");
-    else { setSort(key); setDir("asc"); }
+    setSort(key);
+    setDir(shownSort === key && shownDir === "asc" ? "desc" : "asc");
     setPage(1);
   }
 
@@ -246,7 +265,7 @@ export function DataTable({ datasetId, searchable }: { datasetId: string; search
             <thead>
               <tr>
                 {data.columns.map((c) => {
-                  const active = sort === c.key;
+                  const active = shownSort === c.key;
                   return (
                     <th
                       key={c.key}
@@ -256,7 +275,7 @@ export function DataTable({ datasetId, searchable }: { datasetId: string; search
                       title={`Sort by ${c.label}`}
                     >
                       {c.label}
-                      <span className="arrow">{active ? (dir === "asc" ? "▲" : "▼") : "↕"}</span>
+                      <span className="arrow">{active ? (shownDir === "asc" ? "▲" : "▼") : "↕"}</span>
                     </th>
                   );
                 })}
@@ -264,7 +283,10 @@ export function DataTable({ datasetId, searchable }: { datasetId: string; search
             </thead>
             <tbody>
               {data.rows.map((row, i) => (
-                <tr key={i}>
+                <tr
+                  key={i}
+                  {...(onRowClick && { className: "is-link", ...rowLinkHandlers(() => onRowClick(row)) })}
+                >
                   {data.columns.map((c) =>
                     c.key === "tier" ? (
                       <StarCell key={c.key} row={row} onChange={setStar} />

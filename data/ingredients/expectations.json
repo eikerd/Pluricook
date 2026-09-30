@@ -177,6 +177,12 @@
       "expect": "vegetable broth, ready to serve",
       "reject": "swanson",
       "found": "lentil soup corpus — 'qt.' left '. vegetable broth', which no exact alias can match"
+    },
+    {
+      "line": "2 pounds ground meat, such as beef, pork, veal, lamb, or a mix",
+      "expect": "beef, ground",
+      "reject": "NFS",
+      "found": "The Kitchn meatloaf — matched the survey food 'Meat, ground, NFS', cooked and salted at 382 mg sodium per 100 g against raw beef's 66. Hidden until survey nutrients joined; then it read the meatloaf at 1.92× salt."
     }
   ],
   "rejections": [
