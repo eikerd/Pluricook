@@ -323,7 +323,13 @@ function withStance(row: Record<string, unknown>): Record<string, unknown> {
  * is directly visible and sortable — the source is not something you have to
  * expand a row to see.
  */
-async function readRecipeFiles(glob: string): Promise<Record<string, unknown>[]> {
+/**
+ * The library's recipes as table rows, as the owner has them. A recipe's dish is
+ * its file's name — the one identifier the routes and the comparison use — not
+ * the `dish` written inside it, so a search term finds exactly the recipes the
+ * comparison does.
+ */
+export async function readRecipeFiles(glob: string): Promise<Record<string, unknown>[]> {
   const rows: Record<string, unknown>[] = [];
 
   for await (const path of new Glob(glob).scan(".")) {
@@ -336,7 +342,7 @@ async function readRecipeFiles(glob: string): Promise<Record<string, unknown>[]>
     for (const r of await ownersView(dish, file.recipes ?? [])) {
       rows.push({
         id: r.id,
-        dish: r.dish,
+        dish,
         site: r.provenance.siteName,
         author: r.provenance.author,
         title: r.provenance.sourceTitle,

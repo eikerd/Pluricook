@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { Glob } from "bun";
-import { queryDataset, termPage } from "./admin-queries";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { queryDataset, readRecipeFiles, termPage } from "./admin-queries";
 import {
   parseRankedList, readSearchTerms, slugOf, splitNote, termsFromList, validateTerms, type SearchTerm,
 } from "./search-terms";
@@ -143,6 +146,28 @@ describe("the Search terms table", () => {
   test("the filter finds a term by its aliases", async () => {
     const page = (await queryDataset("search-terms", { q: "filet mignon" }))!;
     expect(page.rows.map((r) => r.slug)).toEqual(["beef-tenderloin"]);
+  });
+});
+
+describe("which term a recipe attaches to", () => {
+  // Codex, PR #3 round 1: the comparison takes a dish from its file's name
+  // (the one identifier the routes use), so the terms must too.
+  test("is its file's name, whatever dish the JSON inside says", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "pluricook-terms-"));
+    const recipe = {
+      id: "example.com:meat-loaf:2026-09-29",
+      dish: "meat-loaf",
+      provenance: {
+        host: "example.com", siteName: "Example", sourceUrl: "https://example.com/loaf", author: null,
+        sourceTitle: "Loaf", capturedAt: "2026-09-29", method: "structured-data", acquisitionAtCapture: "fetch", licence: null,
+      },
+      ingredientLines: ["1 lb ground beef"],
+      servings: 4, servingsRaw: "4", totalTimeMinutes: 60, prepTimeMinutes: null, cookTimeMinutes: null,
+      totalTimeRaw: "PT1H", stepCount: 3,
+    };
+    await Bun.write(join(dir, "meatloaf.json"), JSON.stringify({ dish: "meat-loaf", recipes: [recipe] }));
+    const rows = await readRecipeFiles(`${dir}/*.json`);
+    expect(rows.find((r) => r.id === recipe.id)?.dish).toBe("meatloaf");
   });
 });
 
