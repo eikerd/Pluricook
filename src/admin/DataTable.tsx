@@ -139,9 +139,11 @@ interface DataTableProps {
   searchable: boolean;
   /** Open a row's own page. Rows become clickable, and reachable by keyboard. */
   onRowClick?: (row: Record<string, unknown>) => void;
+  /** Bumped when a recipe changes, so a table kept under a page reloads its rows. */
+  revision?: number;
 }
 
-export function DataTable({ datasetId, searchable, onRowClick }: DataTableProps) {
+export function DataTable({ datasetId, searchable, onRowClick, revision = 0 }: DataTableProps) {
   const [data, setData] = useState<PageResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sort, setSort] = useState<string | null>(null);
@@ -191,7 +193,7 @@ export function DataTable({ datasetId, searchable, onRowClick }: DataTableProps)
     }, query ? 250 : 0);
 
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [datasetId, sort, dir, page, query, refresh]);
+  }, [datasetId, sort, dir, page, query, refresh, revision]);
 
   /**
    * Star a site. The write goes to data/sources/curated.json, so the change is a

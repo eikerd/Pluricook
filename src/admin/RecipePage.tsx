@@ -16,6 +16,11 @@ interface RecipePageProps {
   id: string;
   /** Where Back goes when the page was opened by its address rather than from the admin. */
   onLeave: () => void;
+  /**
+   * Called once the server holds a change — a correction saved or reverted, a
+   * copy made or deleted — so the views kept under this page read it again.
+   */
+  onChanged: () => void;
 }
 
 type Load = { id: string; page: RecipePageData } | { id: string; error: string };
@@ -32,7 +37,7 @@ function factsLine(f: RecipeFacts): string {
   return parts.join(" · ");
 }
 
-export function RecipePage({ id, onLeave }: RecipePageProps) {
+export function RecipePage({ id, onLeave, onChanged }: RecipePageProps) {
   const [load, setLoad] = useState<Load | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -78,6 +83,7 @@ export function RecipePage({ id, onLeave }: RecipePageProps) {
       if (!r.ok) throw new Error("error" in body ? body.error : `HTTP ${r.status}`);
       setLoad({ id, page: body as RecipePageData });
       setEditing(false);
+      onChanged();
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : "The change could not be saved");
     } finally {
@@ -105,6 +111,7 @@ export function RecipePage({ id, onLeave }: RecipePageProps) {
       const r = await fetch(`/api/admin/recipe/clone?id=${encodeURIComponent(id)}`, { method: "POST" });
       const body = (await r.json()) as { id?: string; error?: string };
       if (!r.ok || !body.id) throw new Error(body.error ?? `HTTP ${r.status}`);
+      onChanged();
       navigate(recipePath(body.id), { from: "recipe", edit: true });
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : "The copy could not be made");
@@ -120,6 +127,7 @@ export function RecipePage({ id, onLeave }: RecipePageProps) {
     try {
       const r = await fetch(`/api/admin/recipe/clone?id=${encodeURIComponent(id)}`, { method: "DELETE" });
       if (!r.ok) throw new Error(((await r.json()) as { error?: string }).error ?? `HTTP ${r.status}`);
+      onChanged();
       onLeave();
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : "The copy could not be deleted");

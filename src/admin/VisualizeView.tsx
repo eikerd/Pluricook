@@ -35,7 +35,12 @@ type Outcome =
   | { kind: "answer"; question: string; m: VisualMatrix }
   | { kind: "failure"; question: string; message: string };
 
-export function VisualizeView() {
+interface VisualizeViewProps {
+  /** Bumped when a recipe changes, so the charts kept under a page are drawn from fresh data. */
+  revision?: number;
+}
+
+export function VisualizeView({ revision = 0 }: VisualizeViewProps) {
   const [dishes, setDishes] = useState<DishSummary[] | null>(null);
   const [dish, setDish] = useState<string | null>(null);
   const [section, setSection] = useState(WHOLE_RECIPE);
@@ -58,7 +63,7 @@ export function VisualizeView() {
         setDish((d) => d ?? list[0]?.dish ?? null);
       })
       .catch((e: unknown) => setListError(e instanceof Error ? e.message : "Could not list dishes"));
-  }, []);
+  }, [revision]);
 
   useEffect(() => {
     if (!dish) return;
@@ -74,7 +79,7 @@ export function VisualizeView() {
         if (!stale) setOutcome({ kind: "failure", question, message: e instanceof Error ? e.message : "Could not load" });
       });
     return () => { stale = true; };
-  }, [dish, section, question]);
+  }, [dish, section, question, revision]);
 
   // A new question invalidates anything that pointed into the old matrix.
   useEffect(() => { setFocus(null); setPicked(null); }, [question]);

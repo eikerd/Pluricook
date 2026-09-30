@@ -44,12 +44,12 @@ interface OverviewStat {
   value: number | string;
 }
 
-function Overview() {
+function Overview({ revision }: { revision: number }) {
   const [data, setData] = useState<{ stats: OverviewStat[]; warnings: string[] } | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/overview").then((r) => r.json()).then(setData).catch(() => setData(null));
-  }, []);
+  }, [revision]);
 
   if (!data) return <div className="pane"><p className="muted">Loading…</p></div>;
 
@@ -91,6 +91,10 @@ export function AdminApp() {
   const fdcId = usdaFoodIdFromPath(path);
   const onPage = recipeId !== null || termSlug !== null || fdcId !== null;
   const [active, setActive] = useState<string>(() => listOf(location.pathname));
+  // Counts the recipe changes saved from a page. The views kept mounted under it
+  // read their data again on each, so Back never shows what was there before.
+  const [revision, setRevision] = useState(0);
+  const changed = () => setRevision((r) => r + 1);
 
   useEffect(() => {
     fetch("/api/admin/datasets").then((r) => r.json()).then(setDatasets).catch(() => setDatasets([]));
@@ -191,23 +195,24 @@ export function AdminApp() {
       </aside>
 
       <main className="main">
-        {recipeId && <RecipePage id={recipeId} onLeave={() => open("recipes")} />}
+        {recipeId && <RecipePage id={recipeId} onLeave={() => open("recipes")} onChanged={changed} />}
         {termSlug !== null && <TermPage slug={termSlug} onLeave={() => open("search-terms")} />}
         {fdcId !== null && <UsdaFoodPage fdcId={fdcId} onLeave={() => open(active)} />}
         {/* Kept mounted under a page, so Back returns to the same dish, section,
             chart, sort and page of a table rather than to a fresh view. */}
         <div style={{ display: onPage ? "none" : "contents" }}>
           {active === "overview" ? (
-            <Overview />
+            <Overview revision={revision} />
           ) : active === "comparison" ? (
-            <ComparisonView />
+            <ComparisonView revision={revision} />
           ) : active === "visualize" ? (
-            <VisualizeView />
+            <VisualizeView revision={revision} />
           ) : (
             <DataTable
               datasetId={active}
               searchable={current?.searchable ?? false}
               onRowClick={rowPage ? (row) => navigate(rowPage(row), { from: active }) : undefined}
+              revision={revision}
             />
           )}
         </div>
