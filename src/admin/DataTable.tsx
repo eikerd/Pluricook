@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useState, type ReactNode } from "react";
+import { rowLinkHandlers } from "./row-link";
 
 export interface Column {
   key: string;
@@ -113,9 +114,9 @@ export function cellContent(column: Column, value: unknown): ReactNode {
   }
   if (column.key === "url") {
     const href = String(value);
+    // In a clickable row, the row leaves the link to open the source alone (row-link.ts).
     return (
-      // Opens the source in its own tab without also opening the row it sits in.
-      <a href={href} target="_blank" rel="noreferrer noopener" onClick={(e) => e.stopPropagation()}>
+      <a href={href} target="_blank" rel="noreferrer noopener">
         {href.replace(/^https?:\/\/(www\.)?/, "")}
       </a>
     );
@@ -282,12 +283,7 @@ export function DataTable({ datasetId, searchable, onRowClick }: DataTableProps)
               {data.rows.map((row, i) => (
                 <tr
                   key={i}
-                  {...(onRowClick && {
-                    className: "is-link",
-                    tabIndex: 0,
-                    onClick: () => onRowClick(row),
-                    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter") onRowClick(row); },
-                  })}
+                  {...(onRowClick && { className: "is-link", ...rowLinkHandlers(() => onRowClick(row)) })}
                 >
                   {data.columns.map((c) =>
                     c.key === "tier" ? (

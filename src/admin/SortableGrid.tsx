@@ -8,6 +8,7 @@
  */
 
 import { Fragment, useMemo, useState, type ReactNode } from "react";
+import { rowLinkHandlers } from "./row-link";
 
 export type SortValue = string | number | null;
 export type SortDir = "asc" | "desc";
@@ -113,11 +114,7 @@ export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, det
               <Fragment key={key}>
                 <tr
                   className={[isOpen ? "is-open" : "", onRowClick ? "is-link" : "", rowClass?.(row) ?? ""].join(" ").trim() || undefined}
-                  {...(onRowClick && {
-                    tabIndex: 0,
-                    onClick: () => onRowClick(row),
-                    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter") onRowClick(row); },
-                  })}
+                  {...(onRowClick && rowLinkHandlers(() => onRowClick(row)))}
                 >
                   {columns.map((c, i) => {
                     const content = c.render ? c.render(row) : (c.value(row) ?? "—");
