@@ -43,6 +43,18 @@ const BRACKETED_AMOUNT = new RegExp(`^([\\d\\s\\/\\-–.${VULGAR}]+)\\s*([a-zA-Z
 /** "Quantity Unit Ingredient". */
 const QUANTITY_UNIT_NAME = new RegExp(`^([\\d\\s\\/\\-–${VULGAR}\\."]+)\\s*([a-zA-Z]+|")?\\s*(.*)$`);
 
+/**
+ * "2 cups / 400g dried lentils", "1 kg / 2 lb ground beef": the same amount in a
+ * second system, after a slash. Only a measure counts — "/ 2 large eggs" is not
+ * one — and longer units come first so "grams" is not read as "g". See G18.
+ */
+const SLASH_ALTERNATE = new RegExp(
+  `^\\/\\s*([\\d${VULGAR}][\\d\\s.${VULGAR}]*?)\\s*` +
+    `(kilograms?|grams?|kg|gm|g|pounds?|lbs?|ounces?|oz|millilit(?:er|re)s?|ml|lit(?:er|re)s?|l|cups?|tablespoons?|tbsp|teaspoons?|tsp)` +
+    `\\b\\.?\\s*(.*)$`,
+  "i",
+);
+
 function parseQuantity(text: string): number {
   text = text.trim();
 
@@ -125,6 +137,14 @@ export function parseIngredientLine(line: string): ParsedIngredient {
   }
 
   const quantity = parseQuantity(quantityStr);
+
+  // A second system's measure after a slash is an alternate, as a bracketed one
+  // is: it leaves the name, and a metric mass becomes the line's stated grams.
+  const slash = alternateQuantity ? null : SLASH_ALTERNATE.exec(name);
+  if (slash) {
+    alternateQuantity = { quantity: parseQuantity(slash[1]!), unit: slash[2]!.toLowerCase() };
+    name = slash[3]!.trim();
+  }
 
   if (!name && unit) {
     name = unit;

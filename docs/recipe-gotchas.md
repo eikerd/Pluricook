@@ -319,6 +319,28 @@ stated grams through.
 
 ## Food matching
 
+### G18 · A second measure after a slash
+
+**Seen in** RecipeTin Eats: `2 cups / 400g dried lentils` and
+`400g / 14 oz crushed tomato` (lentil soup), `1 kg / 2 lb ground beef (mince)`
+(meatloaf), in `data/recipes/`.
+
+**Goes wrong.** Only a bracketed alternate was recognised, so the measure after
+the slash stayed in the name (`400g dried lentils`, `2 lb ground beef`), and a
+metric mass there was never used: the two cups of lentils converted through
+USDA's cup, to 384 g, instead of the stated 400 g.
+
+**Should.** Read a measure after the slash as the line's alternate, as a
+bracketed one is: it leaves the name, and a metric mass becomes the line's
+stated weight (G11). A slash with no measure after it is left alone.
+
+**Fixed 2026-09-29**, found by Codex in the first review round of PR #3. The
+lentils convert at the stated 400 g and match *Lentils, dry*, which puts
+RecipeTin Eats' lentil soup at 56 mg of sodium where it read 79. The beef and
+tomato lines lose the second measure from their names and match as before.
+
+Tests: "G18: …" in `ingredient-line.test.ts`.
+
 ### G15 · Plain foods match the wrong USDA record
 
 **Seen in** apple fritters. First seen 2026-09-26; updated 2026-09-27, after G11:

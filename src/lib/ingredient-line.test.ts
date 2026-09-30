@@ -148,4 +148,26 @@ describe("recipe gotchas — docs/recipe-gotchas.md", () => {
   test("G11: a length in brackets is not a mass", () => {
     expect(parseLine("2 cups (6mm dice) apples").statedGrams).toBeNull();
   });
+
+  // G18: the same amount in a second system, after a slash — RecipeTin Eats' style.
+  test.each([
+    ["2 cups / 400g dried lentils", 400, "dried lentils"],
+    ["1 kg / 2 lb ground beef (mince)", null, "ground beef (mince)"],
+    ["400g / 14 oz crushed tomato", null, "crushed tomato"],
+  ])("G18: %p states %p g, and the alternate leaves the name", (line, grams, name) => {
+    const p = parseLine(line);
+    expect(p.statedGrams).toBe(grams);
+    expect(p.name).toBe(name);
+  });
+
+  test("G18: the metric side converts, whichever side of the slash it is on", () => {
+    expect(conversionInput(parseLine("2 cups / 400g dried lentils"))).toEqual({ quantity: 400, unit: "g" });
+    expect(conversionInput(parseLine("1 kg / 2 lb ground beef"))).toEqual({ quantity: 1, unit: "kg" });
+  });
+
+  test("G18: a slash with no measure after it is left to the name", () => {
+    expect(parseLine("2 cups / sliced peaches").name).toBe("sliced peaches");
+    expect(parseLine("1 cup half/half").name).toBe("half/half");
+    expect(parseLine("2 cups / 2 large eggs").statedGrams).toBeNull();
+  });
 });
