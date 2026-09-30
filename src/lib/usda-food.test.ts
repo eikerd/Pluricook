@@ -58,6 +58,11 @@ withDb("the USDA foods table", () => {
     expect(page!.rows[0]).toMatchObject({ category: "Dairy and Egg Products", klass: "dairy" });
   });
 
+  test("says which column it is sorted by, the default included", async () => {
+    expect(await queryDataset("usda-foods", { pageSize: 1 })).toMatchObject({ sort: "description", dir: "asc" });
+    expect(await queryDataset("usda-foods", { sort: "klass", dir: "desc", pageSize: 1 })).toMatchObject({ sort: "klass", dir: "desc" });
+  });
+
   test("every column still sorts once the categories are joined in — both tables have a description", async () => {
     const page = await queryDataset("usda-foods", { pageSize: 1 });
     for (const { key } of page!.columns) {

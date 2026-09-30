@@ -41,6 +41,8 @@ interface SortableGridProps<T> {
   detail?: (row: T) => ReactNode;
   /** A class for a row, to mark one — the line clicked on a chart. */
   rowClass?: (row: T) => string | undefined;
+  /** Open a row's own page, as DataTable does: rows become clickable, and reachable by keyboard. */
+  onRowClick?: (row: T) => void;
 }
 
 /** Nulls sink to the bottom in both directions: "no value" is never the top answer. */
@@ -55,7 +57,7 @@ function compare(a: SortValue, b: SortValue, dir: SortDir): number {
   return dir === "asc" ? order : -order;
 }
 
-export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, detail, rowClass }: SortableGridProps<T>) {
+export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, detail, rowClass, onRowClick }: SortableGridProps<T>) {
   const [sort, setSort] = useState(initialSort);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
@@ -109,7 +111,14 @@ export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, det
             const isOpen = open.has(key);
             return (
               <Fragment key={key}>
-                <tr className={[isOpen ? "is-open" : "", rowClass?.(row) ?? ""].join(" ").trim() || undefined}>
+                <tr
+                  className={[isOpen ? "is-open" : "", onRowClick ? "is-link" : "", rowClass?.(row) ?? ""].join(" ").trim() || undefined}
+                  {...(onRowClick && {
+                    tabIndex: 0,
+                    onClick: () => onRowClick(row),
+                    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter") onRowClick(row); },
+                  })}
+                >
                   {columns.map((c, i) => {
                     const content = c.render ? c.render(row) : (c.value(row) ?? "—");
                     return (

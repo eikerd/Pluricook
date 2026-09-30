@@ -1,6 +1,7 @@
 import { serve } from "bun";
 import index from "./index.html";
-import { DATASETS, overview, queryDataset, usdaFoodPage } from "./lib/admin-queries";
+import { DATASETS, overview, queryDataset, termPage, usdaFoodPage } from "./lib/admin-queries";
+import { SLUG } from "./lib/search-terms";
 import {
   cloneRecipe, compareDish, deleteClone, listDishes, recipePage, revertCorrection, saveCorrection, type PageOutcome,
 } from "./lib/compare-service";
@@ -124,6 +125,16 @@ const server = serve({
         }
         const site = await setTier(req.params.host, tier as Tier, { displayName });
         return Response.json({ host: req.params.host, ...site });
+      },
+    },
+
+    /** One search term's landing page: the term, and the recipes attached to it. */
+    "/api/admin/term": {
+      GET: async (req) => {
+        const slug = new URL(req.url).searchParams.get("slug") ?? "";
+        if (!SLUG.test(slug)) return Response.json({ error: "slug must be a dish key" }, { status: 400 });
+        const page = await termPage(slug);
+        return page ? Response.json(page) : Response.json({ error: `No search term "${slug}".` }, { status: 404 });
       },
     },
 

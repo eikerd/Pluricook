@@ -1,17 +1,29 @@
 /**
  * The admin's addresses. A recipe has one of its own — /recipes/<id>, the home
- * provenance.ts names for every recipe — and so does a USDA food, at
- * /usda/<fdc id>, so either can be linked to, opened in a new tab, or opened
- * from another computer. Everything else is state inside the page.
+ * provenance.ts names for every recipe — and so do a search term, at
+ * /terms/<slug>, and a USDA food, at /usda/<fdc id>, so each can be linked to,
+ * opened in a new tab, or opened from another computer. Everything else is
+ * state inside the page.
  */
 
 import { useEffect, useState } from "react";
 
 const RECIPE = "/recipes/";
+const TERM = "/terms/";
 const USDA_FOOD = "/usda/";
+/** A dish key, as SLUG in search-terms.ts holds it; kept here so the page bundle needs no server module. */
+const DISH_KEY = /^[a-z0-9][a-z0-9-]*$/;
 
 export const recipePath = (id: string) => `${RECIPE}${encodeURIComponent(id)}`;
+export const termPath = (slug: string) => `${TERM}${slug}`;
 export const usdaFoodPath = (fdcId: number) => `${USDA_FOOD}${fdcId}`;
+
+/** The search term the address names, or null. */
+export function termSlugFromPath(path: string): string | null {
+  if (!path.startsWith(TERM)) return null;
+  const rest = path.slice(TERM.length);
+  return DISH_KEY.test(rest) ? rest : null;
+}
 
 /** The recipe the address names, or null. */
 export function recipeIdFromPath(path: string): string | null {

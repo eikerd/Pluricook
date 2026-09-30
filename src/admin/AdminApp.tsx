@@ -9,10 +9,29 @@ import { useEffect, useState } from "react";
 import { ComparisonView } from "./ComparisonView";
 import { DataTable } from "./DataTable";
 import { RecipePage } from "./RecipePage";
-import { navigate, recipeIdFromPath, recipePath, usdaFoodIdFromPath, usdaFoodPath, usePath } from "./route";
+import {
+  navigate, recipeIdFromPath, recipePath, termPath, termSlugFromPath, usdaFoodIdFromPath, usdaFoodPath, usePath,
+} from "./route";
+import { TermPage } from "./TermPage";
 import { UsdaFoodPage } from "./UsdaFoodPage";
 import { VisualizeView } from "./VisualizeView";
 import "../admin.css";
+
+/** The page a table's row opens, by table. */
+const ROW_PAGE: Record<string, (row: Record<string, unknown>) => string> = {
+  "search-terms": (row) => termPath(String(row.slug)),
+  recipes: (row) => recipePath(String(row.id)),
+  "usda-foods": (row) => usdaFoodPath(Number(row.fdc_id)),
+  "usda-portions": (row) => usdaFoodPath(Number(row.fdc_id)),
+};
+
+/** The table a page's address belongs to, so Back from a page opened by its address lands there. */
+function listOf(path: string): string {
+  if (recipeIdFromPath(path)) return "recipes";
+  if (termSlugFromPath(path) !== null) return "search-terms";
+  if (usdaFoodIdFromPath(path) !== null) return "usda-foods";
+  return "overview";
+}
 
 interface DatasetMeta {
   id: string;
@@ -68,12 +87,10 @@ export function AdminApp() {
   const [datasets, setDatasets] = useState<DatasetMeta[]>([]);
   const path = usePath();
   const recipeId = recipeIdFromPath(path);
+  const termSlug = termSlugFromPath(path);
   const fdcId = usdaFoodIdFromPath(path);
-  const onPage = recipeId !== null || fdcId !== null;
-  // Opened straight at a page's address, Back lands on the list it belongs to.
-  const [active, setActive] = useState<string>(() =>
-    recipeIdFromPath(location.pathname) ? "recipes" : usdaFoodIdFromPath(location.pathname) !== null ? "usda-foods" : "overview",
-  );
+  const onPage = recipeId !== null || termSlug !== null || fdcId !== null;
+  const [active, setActive] = useState<string>(() => listOf(location.pathname));
 
   useEffect(() => {
     fetch("/api/admin/datasets").then((r) => r.json()).then(setDatasets).catch(() => setDatasets([]));
@@ -85,13 +102,10 @@ export function AdminApp() {
     setActive(view);
     if (onPage) navigate("/");
   };
-  // A recipe can be opened from a chart as well as the list, so the rail marks
-  // Recipes; a food is opened from the table still underneath it.
+  // A recipe can be opened from a chart or a term as well as the list, so the
+  // rail marks Recipes; a term or a food is opened from the table still under it.
   const isActive = (view: string) => (recipeId ? view === "recipes" : active === view);
-  const openRow = (row: Record<string, unknown>) =>
-    active === "recipes"
-      ? navigate(recipePath(String(row.id)), { from: active })
-      : navigate(usdaFoodPath(Number(row.fdc_id)), { from: active });
+  const rowPage = ROW_PAGE[active];
 
   return (
     <div className="shell">
@@ -142,7 +156,7 @@ export function AdminApp() {
 
           <p className="rail__group">Output</p>
           {datasets
-            .filter((d) => d.id === "recipes")
+            .filter((d) => d.id === "search-terms" || d.id === "recipes")
             .map((d) => (
               <button
                 type="button"
@@ -178,6 +192,7 @@ export function AdminApp() {
 
       <main className="main">
         {recipeId && <RecipePage id={recipeId} onLeave={() => open("recipes")} />}
+        {termSlug !== null && <TermPage slug={termSlug} onLeave={() => open("search-terms")} />}
         {fdcId !== null && <UsdaFoodPage fdcId={fdcId} onLeave={() => open(active)} />}
         {/* Kept mounted under a page, so Back returns to the same dish, section,
             chart, sort and page of a table rather than to a fresh view. */}
@@ -192,7 +207,7 @@ export function AdminApp() {
             <DataTable
               datasetId={active}
               searchable={current?.searchable ?? false}
-              onRowClick={["recipes", "usda-foods", "usda-portions"].includes(active) ? openRow : undefined}
+              onRowClick={rowPage ? (row) => navigate(rowPage(row), { from: active }) : undefined}
             />
           )}
         </div>

@@ -6,6 +6,7 @@
 
 import { useEffect, useState } from "react";
 import type { UsdaFoodPage as FoodPage } from "../lib/usda-food";
+import { Fields } from "./Fields";
 import { SortableGrid, type GridColumn } from "./SortableGrid";
 
 type Portion = FoodPage["portions"][number];
@@ -40,19 +41,6 @@ const NUTRIENT_COLUMNS: GridColumn<Nutrient>[] = [
   { key: "unit", label: "Unit", value: (n) => n.unit },
   { key: "id", label: "ID", numeric: true, value: (n) => n.id },
 ];
-
-function Fields({ rows }: { rows: Array<[string, string | number | null]> }) {
-  return (
-    <dl className="fields">
-      {rows.map(([label, value]) => (
-        <div className="fields__row" key={label}>
-          <dt>{label}</dt>
-          <dd className={value === null || value === "" ? "muted" : undefined}>{value === null || value === "" ? "—" : value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
 
 export function UsdaFoodPage({ fdcId, onLeave }: UsdaFoodPageProps) {
   const [load, setLoad] = useState<Load | null>(null);
@@ -95,8 +83,8 @@ export function UsdaFoodPage({ fdcId, onLeave }: UsdaFoodPageProps) {
         </div>
       </header>
 
-      <div className="usda-food__cards">
-        <section className="usda-food__card">
+      <div className="detail__cards">
+        <section className="detail__card">
           <h3 className="recipe__section-name">Record</h3>
           <Fields rows={[
             ["FDC ID", food.fdcId],
@@ -106,7 +94,7 @@ export function UsdaFoodPage({ fdcId, onLeave }: UsdaFoodPageProps) {
             ["Category ID", food.categoryId],
           ]} />
         </section>
-        <section className="usda-food__card">
+        <section className="detail__card">
           <h3 className="recipe__section-name">Category</h3>
           {category ? (
             <Fields rows={[
@@ -121,7 +109,7 @@ export function UsdaFoodPage({ fdcId, onLeave }: UsdaFoodPageProps) {
         </section>
       </div>
 
-      <section className="usda-food__sheet">
+      <section className="detail__sheet">
         <h3 className="recipe__section-name">Portions</h3>
         {portions.length ? (
           <SortableGrid label="Portions" columns={PORTION_COLUMNS} rows={portions}
@@ -131,7 +119,7 @@ export function UsdaFoodPage({ fdcId, onLeave }: UsdaFoodPageProps) {
         )}
       </section>
 
-      <section className="usda-food__sheet">
+      <section className="detail__sheet">
         <h3 className="recipe__section-name">Nutrients</h3>
         {nutrients.length ? (
           <SortableGrid label="Nutrients" columns={NUTRIENT_COLUMNS} rows={nutrients}

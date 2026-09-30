@@ -13,6 +13,7 @@ import { curationFor, readCurated } from "./curated-sources";
 import { ownersView } from "./clones";
 import { installCategoryTable } from "./usda-categories";
 import { usdaFood, type UsdaFoodPage } from "./usda-food";
+import { readSearchTerms, type SearchTerm } from "./search-terms";
 import type { ExtractedRecipe } from "../types/provenance";
 
 const USDA_PATH = "usda.db";
@@ -83,9 +84,11 @@ export interface DatasetDef {
    * so reading it whole costs nothing; the USDA tables must never do this.
    */
   curated?: boolean;
-  /** Glob of JSON files backing this table instead of a database. */
-  files?: string;
+  /** Rows read from files instead of a database; sorted, searched and paged in memory. */
+  rows?: () => Promise<Record<string, unknown>[]>;
 }
+
+const RECIPE_FILES = "data/recipes/*.json";
 
 export const DATASETS: DatasetDef[] = [
   {
@@ -241,10 +244,29 @@ export const DATASETS: DatasetDef[] = [
     },
   },
   {
+    id: "search-terms",
+    label: "Search terms",
+    db: "",                    // file-backed: data/search-terms.json, not a database
+    rows: () => searchTermRows(),
+    select: "",
+    from: "",
+    columns: [
+      { key: "rank", label: "Rank", numeric: true },
+      { key: "term", label: "Term", width: "18rem" },
+      { key: "group", label: "Group", width: "20rem" },
+      { key: "slug", label: "Slug", width: "14rem" },
+      { key: "recipes", label: "Recipes", numeric: true },
+    ],
+    defaultSort: "rank",
+    defaultDir: "asc",
+    // Aliases are searched but not shown: "filet mignon" finds Beef Tenderloin.
+    searchable: ["term", "group", "slug", "aliases"],
+  },
+  {
     id: "recipes",
     label: "Recipes",
     db: "",                    // file-backed: data/recipes/*.json, not a database
-    files: "data/recipes/*.json",
+    rows: () => readRecipeFiles(RECIPE_FILES),
     select: "",
     from: "",
     columns: [
@@ -275,6 +297,9 @@ export interface PageResult {
   pageSize: number;
   columns: Column[];
   label: string;
+  /** The column the rows are sorted by and which way — the default too, so the header can say so. */
+  sort: string;
+  dir: "asc" | "desc";
   /** Set when the underlying database file has not been built yet. */
   missing?: string;
 }
@@ -330,6 +355,39 @@ async function readRecipeFiles(glob: string): Promise<Record<string, unknown>[]>
   return rows;
 }
 
+/** The search terms, each with how many of the library's recipes attach to it. */
+async function searchTermRows(): Promise<Record<string, unknown>[]> {
+  const [terms, recipes] = await Promise.all([readSearchTerms(), readRecipeFiles(RECIPE_FILES)]);
+  const attached = new Map<string, number>();
+  for (const r of recipes) attached.set(String(r.dish), (attached.get(String(r.dish)) ?? 0) + 1);
+  return terms.map((t) => ({
+    slug: t.slug,
+    term: t.term,
+    rank: t.rank,
+    group: t.group,
+    recipes: attached.get(t.slug) ?? 0,
+    aliases: t.aliases?.join(", ") ?? null,
+  }));
+}
+
+export interface TermPageData {
+  term: SearchTerm;
+  /** The Recipes table's columns, less Dish: every recipe here is this term's. */
+  columns: Column[];
+  recipes: Record<string, unknown>[];
+}
+
+/** One search term's landing page: the term, and the recipes attached to it. Null for a slug no term has. */
+export async function termPage(slug: string): Promise<TermPageData | null> {
+  const term = (await readSearchTerms()).find((t) => t.slug === slug);
+  if (!term) return null;
+  return {
+    term,
+    columns: DATASETS.find((d) => d.id === "recipes")!.columns.filter((c) => c.key !== "dish"),
+    recipes: (await readRecipeFiles(RECIPE_FILES)).filter((r) => r.dish === slug),
+  };
+}
+
 /** Star order, so sorting the ★ column puts required sites first. */
 const TIER_RANK: Record<string, number> = {
   required: 0, favorite: 1, normal: 2, blocked: 3,
@@ -342,17 +400,21 @@ export async function queryDataset(
   const def = DATASETS.find((d) => d.id === id);
   if (!def) return null;
 
+  // Sort key is matched against declared columns, never interpolated raw.
+  const sortKey = def.columns.some((c) => c.key === opts.sort) ? opts.sort! : def.defaultSort;
+  const dir = opts.dir === "asc" || opts.dir === "desc" ? opts.dir : def.defaultDir;
+
   const base: Omit<PageResult, "rows" | "total"> = {
     page: opts.page ?? 1,
     pageSize: opts.pageSize ?? 50,
     columns: def.columns,
     label: def.label,
+    sort: sortKey,
+    dir,
   };
 
-  if (def.files) {
-    const rows = await readRecipeFiles(def.files);
-    const sortKey = def.columns.some((c) => c.key === opts.sort) ? opts.sort! : def.defaultSort;
-    const dir = opts.dir === "asc" || opts.dir === "desc" ? opts.dir : def.defaultDir;
+  if (def.rows) {
+    const rows = await def.rows();
     const pageSize = Math.min(Math.max(base.pageSize, 1), 500);
     const offset = (Math.max(base.page, 1) - 1) * pageSize;
 
@@ -389,9 +451,6 @@ export async function queryDataset(
     };
   }
 
-  // Sort key is matched against declared columns, never interpolated raw.
-  const sortKey = def.columns.some((c) => c.key === opts.sort) ? opts.sort! : def.defaultSort;
-  const dir = opts.dir === "asc" || opts.dir === "desc" ? opts.dir : def.defaultDir;
   const pageSize = Math.min(Math.max(base.pageSize, 1), 500);
   const offset = (Math.max(base.page, 1) - 1) * pageSize;
 
@@ -475,7 +534,7 @@ export interface OverviewStat {
 }
 
 export async function overview(): Promise<{ stats: OverviewStat[]; warnings: string[] }> {
-  const recipeCount = (await readRecipeFiles("data/recipes/*.json")).length;
+  const recipeCount = (await readRecipeFiles(RECIPE_FILES)).length;
   const reg = open(DEFAULT_REGISTRY_PATH);
   const usda = open(USDA_PATH);
   const n = (db: Database | null, sql: string): number =>

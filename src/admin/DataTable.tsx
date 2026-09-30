@@ -6,7 +6,7 @@
  * tables behave the same at 13,000 rows as the registry does at 27.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 export interface Column {
   key: string;
@@ -23,6 +23,9 @@ interface PageResult {
   pageSize: number;
   columns: Column[];
   label: string;
+  /** What the server sorted by — the table's default when no header has been clicked. */
+  sort?: string;
+  dir?: "asc" | "desc";
   missing?: string;
 }
 
@@ -97,36 +100,37 @@ function StarCell({
   );
 }
 
-function Cell({ column, value }: { column: Column; value: unknown }) {
-  if (value === null || value === undefined || value === "") {
-    return <td className={column.numeric ? "num muted" : "muted"}>—</td>;
-  }
+const isEmpty = (value: unknown) => value === null || value === undefined || value === "";
 
+/**
+ * What a cell shows, apart from its <td>. Shared with grids that draw their own
+ * cells — a term's recipes — so a value reads the same in every table.
+ */
+export function cellContent(column: Column, value: unknown): ReactNode {
+  if (isEmpty(value)) return "—";
   if (column.badge) {
-    const tone = BADGE_TONE[String(value)] ?? "badge--mute";
-    return (
-      <td>
-        <span className={`badge ${tone}`}>{String(value)}</span>
-      </td>
-    );
+    return <span className={`badge ${BADGE_TONE[String(value)] ?? "badge--mute"}`}>{String(value)}</span>;
   }
-
   if (column.key === "url") {
     const href = String(value);
     return (
-      <td className="url">
-        <a href={href} target="_blank" rel="noreferrer noopener">
-          {href.replace(/^https?:\/\/(www\.)?/, "")}
-        </a>
-      </td>
+      // Opens the source in its own tab without also opening the row it sits in.
+      <a href={href} target="_blank" rel="noreferrer noopener" onClick={(e) => e.stopPropagation()}>
+        {href.replace(/^https?:\/\/(www\.)?/, "")}
+      </a>
     );
   }
+  if (column.numeric && typeof value === "number") return value.toLocaleString();
+  return String(value);
+}
 
-  if (column.numeric) {
-    return <td className="num">{typeof value === "number" ? value.toLocaleString() : String(value)}</td>;
-  }
-
-  return <td title={String(value)}>{String(value)}</td>;
+function Cell({ column, value }: { column: Column; value: unknown }) {
+  const content = cellContent(column, value);
+  if (isEmpty(value)) return <td className={column.numeric ? "num muted" : "muted"}>{content}</td>;
+  if (column.badge) return <td>{content}</td>;
+  if (column.key === "url") return <td className="url">{content}</td>;
+  if (column.numeric) return <td className="num">{content}</td>;
+  return <td title={String(value)}>{content}</td>;
 }
 
 interface DataTableProps {
@@ -205,9 +209,14 @@ export function DataTable({ datasetId, searchable, onRowClick }: DataTableProps)
     setRefresh((n) => n + 1);
   }
 
+  // The header says what the rows are sorted by: the column clicked, or else
+  // the table's own default, as the server reports it.
+  const shownSort = sort ?? data?.sort ?? null;
+  const shownDir = sort ? dir : (data?.dir ?? "asc");
+
   function toggleSort(key: string) {
-    if (sort === key) setDir(dir === "asc" ? "desc" : "asc");
-    else { setSort(key); setDir("asc"); }
+    setSort(key);
+    setDir(shownSort === key && shownDir === "asc" ? "desc" : "asc");
     setPage(1);
   }
 
@@ -253,7 +262,7 @@ export function DataTable({ datasetId, searchable, onRowClick }: DataTableProps)
             <thead>
               <tr>
                 {data.columns.map((c) => {
-                  const active = sort === c.key;
+                  const active = shownSort === c.key;
                   return (
                     <th
                       key={c.key}
@@ -263,7 +272,7 @@ export function DataTable({ datasetId, searchable, onRowClick }: DataTableProps)
                       title={`Sort by ${c.label}`}
                     >
                       {c.label}
-                      <span className="arrow">{active ? (dir === "asc" ? "▲" : "▼") : "↕"}</span>
+                      <span className="arrow">{active ? (shownDir === "asc" ? "▲" : "▼") : "↕"}</span>
                     </th>
                   );
                 })}

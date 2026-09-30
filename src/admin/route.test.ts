@@ -1,5 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { recipeIdFromPath, recipePath, usdaFoodIdFromPath, usdaFoodPath } from "./route";
+import { recipeIdFromPath, recipePath, termPath, termSlugFromPath, usdaFoodIdFromPath, usdaFoodPath } from "./route";
+
+describe("a search term's address", () => {
+  test("names the term by its slug, both ways", () => {
+    expect(termPath("meatloaf")).toBe("/terms/meatloaf");
+    expect(termSlugFromPath("/terms/lentil-soup")).toBe("lentil-soup");
+  });
+
+  test("anything but a dish key names no term", () => {
+    for (const path of ["/terms/", "/terms/Meatloaf", "/terms/-x", "/terms/a/b", "/terms/a%20b", "/recipes/meatloaf"]) {
+      expect(termSlugFromPath(path)).toBeNull();
+    }
+  });
+});
 
 describe("a USDA food's address", () => {
   test("names the food by its FDC id, both ways", () => {
