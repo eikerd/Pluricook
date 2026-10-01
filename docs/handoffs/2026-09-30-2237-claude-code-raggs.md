@@ -3,9 +3,9 @@ date: 2026-09-30 22:37 America/Chicago
 tool: claude-code
 model: claude-opus-5-5
 repo: eikerd/Pluricook
-branch: raggs (worktree ../compare-recipe-wt-raggs)
+branch: raggs, merged to main by PR #5 (worktree ../compare-recipe-wt-raggs kept while the owner looks at the preview)
 pr: https://github.com/eikerd/Pluricook/pull/5
-state: pr-open
+state: merged
 deployed: no
 loose_ends: 7 (listed below)
 supersedes: docs/handoffs/2026-09-29-2310-claude-code-search-terms-usda-viewer.md
@@ -52,9 +52,14 @@ recipes gathered for it. *"That needs to be the top of our application."*
 
 ## Where it is
 
-- Branch `raggs`, four commits on `origin/main` (12142d7): equivalents, RAGGs,
-  spreadsheet editing, the stacked chart — then this note.
-- Verified by: `bun test` 471 pass, 0 fail; `tsc --noEmit` at the 15
+- PR #5, merged: four feature commits on 12142d7 (equivalents, RAGGs,
+  spreadsheet editing, the stacked chart), this note, then four review fixes
+  (`8be422b` from a code-reviewer agent, `206bf6f` round 1, `3799350` round 2,
+  `1c3ff99` round 3) and the scorecard `reports/pr-5.html`.
+- Reviewers: Codex three rounds (3 findings), Copilot once (3 findings; it
+  cannot be re-requested through the API on this repo — PR #3 also had one
+  Copilot review), CodeRabbit summary only (Free plan, one review an hour).
+- Verified by: `bun test` 476 pass, 0 fail; `tsc --noEmit` at the 15
   pre-existing errors; every visual change rendered from this branch on port
   3002 and approved by the owner before commit. Editing was exercised in the
   browser (edit, add, delete a line) and the test correction removed.
@@ -65,9 +70,7 @@ Nothing. The project has no deploy target.
 
 ## What the next agent should do first
 
-1. Mark the PR ready, request Copilot, run the three review rounds, scorecard,
-   merge (docs/pr-workflow.md).
-2. PR #4 (garlic noodles) touches `data/search-terms.json` and
+1. PR #4 (garlic noodles) touches `data/search-terms.json` and
    `data/ingredients/aliases.json`. After both merge, garlic noodles appears as
    a RAGG on its own (the list is the files in `data/recipes/`).
 
@@ -97,8 +100,10 @@ Nothing. The project has no deploy target.
 5. PR #4 (`garlic-noodles`, draft) is another session's; untouched.
 6. The main checkout holds another session's untracked `AGENTS.md` and
    `data/clones/`; untouched.
-7. Dev server for this branch was left running on port 3002 for the owner;
-   another session's server holds 3001.
+7. Dev server for this branch was left running on port 3002 for the owner,
+   from the worktree `../compare-recipe-wt-raggs`. When the owner is done:
+   stop it, `git worktree remove ../compare-recipe-wt-raggs`, delete the local
+   `raggs` branch. Another session's server holds 3001.
 
 ## Proposed rule changes
 
