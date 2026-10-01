@@ -158,6 +158,20 @@ export function AdminApp() {
               </button>
             ))}
 
+          <p className="rail__group">Quality</p>
+          {datasets
+            .filter((d) => d.id === "rules" || d.id === "edge-cases")
+            .map((d) => (
+              <button
+                type="button"
+                key={d.id}
+                className={`rail__item ${isActive(d.id) ? "is-active" : ""}`}
+                onClick={() => open(d.id)}
+              >
+                {d.label}
+              </button>
+            ))}
+
           <p className="rail__group">Output</p>
           {datasets
             .filter((d) => d.id === "search-terms" || d.id === "recipes")
