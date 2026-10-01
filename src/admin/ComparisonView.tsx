@@ -168,11 +168,14 @@ type Outcome =
 interface ComparisonViewProps {
   /** Bumped when a recipe changes, so the comparison kept under a page is read again. */
   revision?: number;
+  /** Pin the view to one RAGG; without it the view offers every dish in a picker. */
+  dish?: string;
 }
 
-export function ComparisonView({ revision = 0 }: ComparisonViewProps) {
+export function ComparisonView({ revision = 0, dish: pinned }: ComparisonViewProps) {
   const [dishes, setDishes] = useState<DishSummary[] | null>(null);
-  const [dish, setDish] = useState<string | null>(null);
+  const [dish, setDish] = useState<string | null>(pinned ?? null);
+  useEffect(() => { if (pinned) setDish(pinned); }, [pinned]);
   const [section, setSection] = useState(WHOLE_RECIPE);
   // The latest outcome — an answer OR a failure, never both — kept with the
   // question it belongs to. As two separate states, one question could hold a
@@ -270,16 +273,18 @@ export function ComparisonView({ revision = 0 }: ComparisonViewProps) {
           )}
         </div>
         <div className="pickers">
-          <select
-            className="picker"
-            aria-label="Dish"
-            value={dish ?? ""}
-            onChange={(e) => pickDish(e.target.value)}
-          >
-            {(dishes ?? []).map((d) => (
-              <option key={d.dish} value={d.dish}>{dishName(d.dish)}</option>
-            ))}
-          </select>
+          {!pinned && (
+            <select
+              className="picker"
+              aria-label="Dish"
+              value={dish ?? ""}
+              onChange={(e) => pickDish(e.target.value)}
+            >
+              {(dishes ?? []).map((d) => (
+                <option key={d.dish} value={d.dish}>{dishName(d.dish)}</option>
+              ))}
+            </select>
+          )}
 
           {sections.length > 0 && (
             <select

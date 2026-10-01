@@ -38,13 +38,16 @@ type Outcome =
 interface VisualizeViewProps {
   /** Bumped when a recipe changes, so the charts kept under a page are drawn from fresh data. */
   revision?: number;
+  /** Pin the view to one RAGG; without it the view offers every dish in a picker. */
+  dish?: string;
 }
 
-export function VisualizeView({ revision = 0 }: VisualizeViewProps) {
+export function VisualizeView({ revision = 0, dish: pinned }: VisualizeViewProps) {
   const [dishes, setDishes] = useState<DishSummary[] | null>(null);
-  const [dish, setDish] = useState<string | null>(null);
+  const [dish, setDish] = useState<string | null>(pinned ?? null);
+  useEffect(() => { if (pinned) setDish(pinned); }, [pinned]);
   const [section, setSection] = useState(WHOLE_RECIPE);
-  const [view, setView] = useState("heatmap");
+  const [view, setView] = useState("stacked");
   const [focus, setFocus] = useState<number | null>(null);
   const [picked, setPicked] = useState<Picked | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
@@ -102,9 +105,11 @@ export function VisualizeView({ revision = 0 }: VisualizeViewProps) {
           {m && <p className="muted pane__note">{m.normalization.reason}</p>}
         </div>
         <div className="pickers">
-          <select className="picker" aria-label="Dish" value={dish ?? ""} onChange={(e) => { setDish(e.target.value); setSection(WHOLE_RECIPE); }}>
-            {(dishes ?? []).map((d) => <option key={d.dish} value={d.dish}>{dishName(d.dish)}</option>)}
-          </select>
+          {!pinned && (
+            <select className="picker" aria-label="Dish" value={dish ?? ""} onChange={(e) => { setDish(e.target.value); setSection(WHOLE_RECIPE); }}>
+              {(dishes ?? []).map((d) => <option key={d.dish} value={d.dish}>{dishName(d.dish)}</option>)}
+            </select>
+          )}
           {sections.length > 0 && (
             <select className="picker" aria-label="Section" value={section} onChange={(e) => setSection(e.target.value)}>
               <option value={WHOLE_RECIPE}>Whole recipe</option>
