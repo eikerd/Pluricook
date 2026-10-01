@@ -48,6 +48,8 @@ export interface RaggPage {
   recipes: RaggRecipe[];
 }
 
+export type RaggOutcome = { ok: true; page: RaggPage } | { ok: false; status: number; error: string };
+
 export const raggName = (slug: string) => {
   const words = slug.replace(/-/g, " ");
   return words.charAt(0).toUpperCase() + words.slice(1);
@@ -110,12 +112,23 @@ export async function listRaggs(): Promise<RaggSummary[]> {
   return out.sort((a, b) => (b.created ?? "").localeCompare(a.created ?? "") || a.name.localeCompare(b.name));
 }
 
-/** One RAGG and its constituent recipes, or null when there is no such RAGG. */
-export async function raggPage(slug: string): Promise<RaggPage | null> {
-  if (!SLUG.test(slug)) return null;
-  const built = await build(slug);
-  if (!built) return null;
-  return {
+/**
+ * One RAGG and its constituent recipes. A file edited by hand into something
+ * unreadable is a failure that names the RAGG, in the API's own shape, as
+ * compareDish answers — never a throw out of the route.
+ */
+export async function raggPage(slug: string): Promise<RaggOutcome> {
+  const notFound: RaggOutcome = { ok: false, status: 404, error: `No RAGG "${slug}".` };
+  if (!SLUG.test(slug)) return notFound;
+  let built: Built | null;
+  try {
+    built = await build(slug);
+  } catch (error) {
+    console.error(`[raggs] could not read "${slug}":`, error);
+    return { ok: false, status: 500, error: `The recipe file for "${slug}" could not be read. See the server log.` };
+  }
+  if (!built) return notFound;
+  return { ok: true, page: {
     summary: built.summary,
     recipes: built.recipes.map((r) => ({
       id: r.id,
@@ -129,5 +142,5 @@ export async function raggPage(slug: string): Promise<RaggPage | null> {
       lines: r.ingredientLines.length,
       capturedAt: r.provenance.capturedAt,
     })),
-  };
+  } };
 }

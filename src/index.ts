@@ -26,9 +26,8 @@ const server = serve({
     /** One RAGG: its figures, and its constituent recipes. */
     "/api/admin/ragg": {
       GET: async (req) => {
-        const slug = new URL(req.url).searchParams.get("slug") ?? "";
-        const page = await raggPage(slug);
-        return page ? Response.json(page) : Response.json({ error: `No RAGG "${slug}".` }, { status: 404 });
+        const result = await raggPage(new URL(req.url).searchParams.get("slug") ?? "");
+        return result.ok ? Response.json(result.page) : Response.json({ error: result.error }, { status: result.status });
       },
     },
 

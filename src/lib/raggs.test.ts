@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
+import { rm } from "node:fs/promises";
 import { Glob } from "bun";
 import { compareDish } from "./compare-service";
 import { listRaggs, raggName, raggPage } from "./raggs";
@@ -42,16 +43,30 @@ describe("the RAGG list", () => {
   });
 });
 
+const BROKEN = "data/recipes/zz-ragg-broken.json";
+afterEach(async () => { await rm(BROKEN, { force: true }); });
+
 describe("a RAGG's page", () => {
   test.skipIf(!hasUsda)("lists every constituent recipe with its site", async () => {
-    const page = (await raggPage("lentil-soup"))!;
+    const outcome = await raggPage("lentil-soup");
+    if (!outcome.ok) throw new Error(outcome.error);
+    const { page } = outcome;
     expect(page.summary.name).toBe("Lentil soup");
     expect(page.recipes).toHaveLength(page.summary.recipes);
     expect(page.recipes.every((r) => r.site !== "" && r.lines > 0)).toBe(true);
   });
 
-  test("a slug no RAGG has, or one that is not a slug, is null", async () => {
-    expect(await raggPage("no-such-dish")).toBeNull();
-    expect(await raggPage("../etc/passwd")).toBeNull();
+  test("a slug no RAGG has, or one that is not a slug, is not found", async () => {
+    expect(await raggPage("no-such-dish")).toMatchObject({ ok: false, status: 404 });
+    expect(await raggPage("../etc/passwd")).toMatchObject({ ok: false, status: 404 });
+  });
+
+  // Codex, PR #5 round 3: a hand-edited file that does not parse threw out of
+  // the route, and the page showed a JSON parse error instead of naming the file.
+  test("an unreadable recipe file is a failure that names the RAGG, not a throw", async () => {
+    await Bun.write(BROKEN, "{ not json");
+    const outcome = await raggPage("zz-ragg-broken");
+    expect(outcome).toMatchObject({ ok: false, status: 500 });
+    expect(outcome.ok ? "" : outcome.error).toContain("zz-ragg-broken");
   });
 });
