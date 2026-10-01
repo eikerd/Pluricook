@@ -70,3 +70,32 @@ export function correctionFrom(draft: Draft, published: RecipePageData["publishe
 
   return Object.keys(body).length > 0 ? body : null;
 }
+
+/** One line of the recipe as a spreadsheet row: the line, and the section it sits in. */
+export interface SheetRow {
+  section: string;
+  line: string;
+}
+
+/** The draft's lines, one row each, in the recipe's own order. */
+export function rowsOf(draft: Draft): SheetRow[] {
+  return draft.sections.flatMap((s) =>
+    s.text.split("\n").filter((l) => l.trim() !== "").map((line) => ({ section: s.name, line })));
+}
+
+/**
+ * The draft with its lines replaced by the rows. Sections are the rows'
+ * section names, in the order the rows first name them, so retyping a row's
+ * section moves its line and a new name starts a section. A row with no line
+ * is a deleted row, and a section left without lines is gone.
+ */
+export function withRows(draft: Draft, rows: SheetRow[]): Draft {
+  const sections = new Map<string, string[]>();
+  for (const row of rows) {
+    const line = row.line.trim();
+    if (line === "") continue;
+    const name = row.section.trim();
+    sections.set(name, [...(sections.get(name) ?? []), line]);
+  }
+  return { ...draft, sections: [...sections].map(([name, lines]) => ({ name, text: lines.join("\n") })) };
+}
