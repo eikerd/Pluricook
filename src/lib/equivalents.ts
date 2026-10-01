@@ -50,7 +50,7 @@ export function buildEquivalents(file: EquivalentsFile): Equivalents {
       if (groupOf.has(m)) throw new Error(`USDA food ${m} is in two equivalents groups: "${groupOf.get(m)}" and "${g.name}".`);
       if (heads.has(m)) throw new Error(`USDA food ${m} is the food of group "${heads.get(m)}" and a member of "${g.name}".`);
       groupOf.set(m, g.name);
-      if (m !== g.fdcId) map.set(m, g.fdcId);
+      map.set(m, g.fdcId);
     }
   }
   return map;

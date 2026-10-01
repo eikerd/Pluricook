@@ -110,7 +110,8 @@ export function AdminApp() {
       </aside>
 
       <main className="main">
-        {recipeId && <RecipePage id={recipeId} onLeave={() => open(HOME)} onChanged={changed} />}
+        {/* Keyed by the recipe, so a save still out for one recipe can never land on the next. */}
+        {recipeId && <RecipePage key={recipeId} id={recipeId} onLeave={() => open(HOME)} onChanged={changed} />}
         {fdcId !== null && <UsdaFoodPage fdcId={fdcId} onLeave={() => open(active)} />}
         {openRagg && (
           <div style={{ display: raggSlug ? "contents" : "none" }}>

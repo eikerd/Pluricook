@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RecipePageData } from "../lib/compare-service";
 import type { RecipeFacts } from "../lib/recipe-detail";
-import { correctionFrom, draftFrom, type Draft } from "./recipe-draft";
+import { correctionFrom, draftFrom, fullCorrection, type Draft } from "./recipe-draft";
 import { RecipeLines } from "./RecipeLines";
 import { navigate, raggPath, recipePath } from "./route";
 
@@ -111,11 +111,15 @@ export function RecipePage({ id, onLeave, onChanged }: RecipePageProps) {
   const commit = (next: Draft) => {
     if (!page) return;
     setDraft(next);
+    // The owner's copy is written whole: its stored self may be a save behind.
+    if (page.copy) {
+      send("PUT", fullCorrection(next));
+      return;
+    }
     const correction = correctionFrom(next, page.published);
     if (correction !== null) send("PUT", correction);
     // Back to exactly the published recipe: that is no correction, so drop it.
-    // A copy has no published version; its edits are written into it.
-    else if (corrected.current && !page.copy) send("DELETE");
+    else if (corrected.current) send("DELETE");
   };
 
   const back = () => ((history.state as { from?: string } | null)?.from ? history.back() : onLeave());

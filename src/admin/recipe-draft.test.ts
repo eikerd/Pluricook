@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { RecipePageData } from "../lib/compare-service";
 import type { RecipeDetail } from "../lib/recipe-detail";
-import { correctionFrom, draftFrom, rowsOf, withRows } from "./recipe-draft";
+import { correctionFrom, draftFrom, fullCorrection, pairParsed, rowsOf, withRows } from "./recipe-draft";
 
 const line = (text: string) => ({ line: text, grams: null, share: null, food: null, read: { quantity: 0, unit: "each", name: text, statedGrams: null } });
 
@@ -89,6 +89,38 @@ describe("the lines as spreadsheet rows", () => {
     const rows = rowsOf(draft).map((r) => (r.section === "glaze" ? { ...r, line: "  " } : r));
     expect(correctionFrom(withRows(draft, rows), published)).toEqual({
       sections: [{ name: "dough", lines: ["360 g flour", "6 g salt"] }],
+    });
+  });
+});
+
+describe("pairParsed", () => {
+  const read = [line("360 g flour"), line("6 g salt"), line("300 g sugar")];
+
+  // Review of PR #5: by position, a deleted line shifted every later row onto
+  // its neighbour's grams and USDA food — undimmed, once a save had failed.
+  test("each row takes the reading of its own line, not of the line in its place", () => {
+    const rows = [{ section: "", line: "360 g flour" }, { section: "", line: "300 g sugar" }];
+    expect(pairParsed(rows, read).map((p) => p?.line ?? null)).toEqual(["360 g flour", "300 g sugar"]);
+  });
+
+  test("a line not yet read has none, and a line listed twice takes one reading each", () => {
+    const twice = [...read, line("6 g salt")];
+    const rows = [{ section: "", line: "6 g salt" }, { section: "", line: "50 g egg" }, { section: "", line: "6 g salt" }];
+    const paired = pairParsed(rows, twice);
+    expect(paired.map((p) => p?.line ?? null)).toEqual(["6 g salt", null, "6 g salt"]);
+    expect(paired[0]).not.toBe(paired[2]);
+  });
+});
+
+describe("fullCorrection", () => {
+  // Review of PR #5: a copy edited and edited back before the first save
+  // returned diffed as "no change" against its stale stored self, and kept the edit.
+  test("carries every field, so it restores the recipe whatever the server holds", () => {
+    const full = fullCorrection(draftFrom(detail));
+    expect(full).toEqual({
+      credit: { sourceTitle: "Fritters", author: null, sourceUrl: null },
+      servings: 4, prepTimeMinutes: null, cookTimeMinutes: 20, totalTimeMinutes: null,
+      sections: [{ name: "dough", lines: ["360 g flour", "6 g salt"] }, { name: "glaze", lines: ["300 g sugar"] }],
     });
   });
 });

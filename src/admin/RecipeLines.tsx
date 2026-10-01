@@ -4,15 +4,15 @@
  * The details — title, author, source, servings and times — are one row; the
  * lines are one row each. Section and Line are typed into; the columns after
  * them are how the parser read the line (quantity, unit, name, stated grams),
- * the grams it came to, its share of the recipe and the USDA food it matched,
- * and refresh once the edit is saved. # is the recipe's own order, so sorting
+ * the grams it came to, its share of the recipe and the USDA food it matched;
+ * a line edited and not yet saved shows none until the server has read it. # is the recipe's own order, so sorting
  * by it puts the lines back as the recipe lists them. Every column sorts.
  */
 
 import { useMemo, useState } from "react";
 import type { DetailLine, RecipeDetail } from "../lib/recipe-detail";
 import { CellInput } from "./CellInput";
-import { rowsOf, withRows, type Draft, type SheetRow } from "./recipe-draft";
+import { pairParsed, rowsOf, withRows, type Draft, type SheetRow } from "./recipe-draft";
 import { SortableGrid, type GridColumn } from "./SortableGrid";
 
 interface RecipeLinesProps {
@@ -50,11 +50,10 @@ const DETAILS: Array<{ key: keyof Draft & string; label: string; numeric?: boole
 
 export function RecipeLines({ detail, draft, pending, onCommit, highlight, published }: RecipeLinesProps) {
   const sheet = useMemo(() => rowsOf(draft), [draft]);
-  const parsed = useMemo(() => detail.sections.flatMap((s) => s.lines), [detail]);
-  const rows = useMemo(
-    () => sheet.map((r, i): Row => ({ ...r, n: i + 1, parsed: parsed[i] ?? null })),
-    [sheet, parsed],
-  );
+  const rows = useMemo(() => {
+    const parsed = pairParsed(sheet, detail.sections.flatMap((s) => s.lines));
+    return sheet.map((r, i): Row => ({ ...r, n: i + 1, parsed: parsed[i] ?? null }));
+  }, [sheet, detail]);
 
   const setRow = (n: number, patch: Partial<SheetRow>) =>
     onCommit(withRows(draft, sheet.map((r, i) => (i === n - 1 ? { ...r, ...patch } : r))));

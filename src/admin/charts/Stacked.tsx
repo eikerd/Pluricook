@@ -46,8 +46,9 @@ export function Stacked({ m, focus, onRecipe }: ViewProps) {
   const [scale, setScale] = useState<Scale>(anchorClass ? "anchor" : "share");
   // Set by clicking an ingredient in the legend; again reverses it, as a column header does.
   const [sortBy, setSortBy] = useState<{ ingredient: number; dir: "asc" | "desc" } | null>(null);
-  // Ingredient indices belong to one matrix: another dish or section starts unsorted.
-  useEffect(() => setSortBy(null), [m]);
+  // Ingredient indices belong to one matrix, and the primary ingredient leaves
+  // the bars under one scale: another dish, section or scale starts unsorted.
+  useEffect(() => setSortBy(null), [m, scale]);
   // A dish with no primary ingredient has nothing to scale to.
   const active: Scale = scale === "anchor" && !anchorClass ? "share" : scale;
   const perAnchor = `per ${PER_ANCHOR_GRAMS} g of ${anchorClass ?? "the primary ingredient"}`;
