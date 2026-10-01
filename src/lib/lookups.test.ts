@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { denialForStatus, mergeLookups, type DeniedPage, type Lookup } from "./lookups";
+import { denialForExtractFailure, denialForStatus, mergeLookups, type DeniedPage, type Lookup } from "./lookups";
 
 const LEITE: DeniedPage = {
   url: "https://leitesculinaria.com/416811/garlic-noodles.html",
@@ -26,6 +26,16 @@ describe("denialForStatus", () => {
     expect(denialForStatus(500)).toBe("unreachable");
     expect(denialForStatus(404)).toBe("unreachable");
     expect(denialForStatus(0)).toBe("unreachable");
+  });
+});
+
+describe("denialForExtractFailure", () => {
+  // The owner, 2026-09-30: a page that answers but gives us no recipe counts as
+  // possible bot evasion, and a person checks it.
+  test("a page that answered with no usable recipe is suspected evasion", () => {
+    for (const reason of ["no-json-ld", "no-recipe-node", "no-ingredients", "unparseable-json-ld"] as const) {
+      expect(denialForExtractFailure(reason)).toBe("evasion-suspected");
+    }
   });
 });
 

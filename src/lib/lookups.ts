@@ -10,6 +10,7 @@
  */
 
 import type { Acquisition } from "./curated-sources";
+import type { ExtractFailure } from "./recipe-extract";
 import { canonicalUrl } from "./site-registry";
 
 /**
@@ -18,8 +19,15 @@ import { canonicalUrl } from "./site-registry";
  * blocked     — curated as blocked: a written prohibition; nothing is stored
  * refused     — the site said no (HTTP 401/403/429, a bot challenge)
  * unreachable — any other HTTP error, a timeout, a network failure
+ * evasion-suspected — the page answered but gave automation no recipe to read:
+ *               no structured data, no Recipe in it, or one with no ingredients.
+ *               The owner, 2026-09-30: count these as possible bot evasion, and
+ *               have a person check the page in a browser.
  */
-export type Denial = "not-cleared" | "policy" | "blocked" | "refused" | "unreachable";
+export type Denial = "not-cleared" | "policy" | "blocked" | "refused" | "unreachable" | "evasion-suspected";
+
+/** Where the person working the list finds what to do with each kind. */
+export const LOOKUPS_HOW_TO = "docs/manual-lookups.md";
 
 export interface DeniedPage {
   url: string;
@@ -42,6 +50,16 @@ export interface Lookup extends DeniedPage {
 /** Which kind of denial an HTTP status is. */
 export function denialForStatus(status: number): Denial {
   return status === 401 || status === 403 || status === 429 ? "refused" : "unreachable";
+}
+
+/**
+ * A page that answered without a usable recipe. Every extraction failure is
+ * treated alike on purpose: from outside, a page that hides its recipe from
+ * automation and one that never marked it up look the same, and telling them
+ * apart is exactly the check the person makes.
+ */
+export function denialForExtractFailure(_reason: ExtractFailure): Denial {
+  return "evasion-suspected";
 }
 
 /**

@@ -14,7 +14,7 @@
 import { Glob } from "bun";
 import { curationFor, isListed, mayFetch, readCurated } from "../src/lib/curated-sources";
 import { extractRecipe, type ExtractFailure } from "../src/lib/recipe-extract";
-import { denialForStatus, mergeLookups, type DeniedPage, type Lookup } from "../src/lib/lookups";
+import { denialForExtractFailure, denialForStatus, LOOKUPS_HOW_TO, mergeLookups, type DeniedPage, type Lookup } from "../src/lib/lookups";
 import { mergeRecipes } from "../src/lib/recipe-merge";
 import { evaluateRobots, verdictForStatus, type RobotsVerdict } from "../src/lib/robots";
 import { canonicalHost, canonicalUrl } from "../src/lib/site-registry";
@@ -173,6 +173,10 @@ for (const target of targets.sort((a, b) => a.rank - b.rank)) {
     });
 
     if (!result.ok) {
+      denied.push({
+        url: target.url, site: name, denial: denialForExtractFailure(result.reason),
+        detail: `page answered, no recipe for automation: ${result.reason}`, acquisition: site.acquisition,
+      });
       rows.push({
         site: name, outcome: "failed", detail: result.reason satisfies ExtractFailure,
         ingredients: "", steps: "", servings: "", minutes: "",
@@ -253,7 +257,7 @@ const heldLookups: Lookup[] = (await Bun.file(lookupsOut).exists())
 const lookups = mergeLookups(heldLookups, denied, recipes.map((r) => r.provenance.sourceUrl!), today);
 
 if (lookups.length > 0) {
-  console.log(`\nFor a person to look up — ${lookups.length} page(s) denied:`);
+  console.log(`\nFor a person to look up — ${lookups.length} page(s) automation could not take (see ${LOOKUPS_HOW_TO}):`);
   for (const l of lookups) {
     console.log(`  ${l.handledAt ? "✓" : "·"} ${l.site} (${l.denial}: ${l.detail}) ${l.url}`);
   }
@@ -272,6 +276,6 @@ if (dryRun) {
   console.log(`→ ${out}`);
 }
 if (!dryRun && lookups.length > 0) {
-  await Bun.write(lookupsOut, JSON.stringify({ dish, updatedAt: today, pages: lookups }, null, 2) + "\n");
+  await Bun.write(lookupsOut, JSON.stringify({ dish, updatedAt: today, howTo: LOOKUPS_HOW_TO, pages: lookups }, null, 2) + "\n");
   console.log(`→ ${lookupsOut}`);
 }

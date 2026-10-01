@@ -48,8 +48,8 @@ its number and says it is fixed.
 | G19 | A raw line break inside JSON-LD | text | fixed |
 | G20 | One recipe, several publishers | structure | not modelled |
 | G21 | Alternatives named in one line | matching | partly |
-| G22 | Fresh and dry noodles on one anchor | quantity | broken |
-| G23 | A brand name in place of the food | matching | partly |
+| G22 | Fresh and dry noodles on one anchor | quantity | worked around |
+| G23 | A brand name in place of the food | matching | worked around |
 
 ---
 
@@ -379,7 +379,23 @@ match *Noodles, chinese, chow mein*, which is fried at 1.6% water. Dry pasta is
 **Should.** Anchor on a dry-equivalent mass: convert a fresh or cooked form by
 its water content, from a record that states one.
 
-**Today.** Broken. Every noodle counts at its face mass.
+**Worked around 2026-09-30**, at the owner's word: "go ahead and change it to
+a dry noodle, but make a note that you had to do that." Fresh noodles are a
+*form* in `data/ingredients/not-in-usda.json`, counted as the dry record by dry
+matter: grams × (100 − 31.0) / (100 − 9.9) = 0.77, from *Pasta,
+fresh-refrigerated, plain, as purchased* and *Pasta, dry, enriched*. Fresh egg
+noodles count as *Noodles, egg, dry, enriched*. Each converted line carries
+basis `counted-as-dry` and says so. Only a stated mass converts; a cup of fresh
+noodles is refused.
+
+It is a workaround, not a fix. Steamed, pre-cooked noodles hold more water
+than raw fresh ones, so their dry figure is high. Sodium now follows the dry
+record, 6 mg per 100 g, so noodles salted in the dough read low. Before, the
+fried chow mein match at 866 mg per 100 g read far higher: Chef Tu's 20 oz of
+fresh ramen alone carried about 4,900 mg of sodium that is not in the recipe.
+
+Tests: "a form USDA lacks — fresh noodles counted as dry (G22)" in
+`not-in-usda.test.ts`.
 
 ## Food matching
 
@@ -502,8 +518,17 @@ Maggi Seasoning has no USDA record at all.
 counterpart, record the stand-in chosen and its reason, or leave the line
 unresolved rather than invent a match.
 
-**Today.** Partly. Fish sauce and Sun Noodle are aliased; Maggi still reaches
-the taco seasoning mix, awaiting the owner's choice.
+**Worked around 2026-09-30.** Fish sauce and Sun Noodle are aliased. Maggi is
+the first *food* in `data/ingredients/not-in-usda.json`, the owner's "own table
+of things that just apparently aren't in USDA".
+
+Maggi is in fact in USDA, in Branded Foods: fdc 2755366, the US 6.7 fl oz
+bottle, 8,600 mg of sodium per 100 mL. We do not load Branded Foods; we load
+Foundation, SR Legacy and FNDDS. The entry cites that record and takes soy
+sauce's density, which it says it assumed. A line with Maggi now converts with
+basis `not-in-usda`.
+
+Tests: "a food USDA lacks — Maggi Seasoning" in `not-in-usda.test.ts`.
 
 ---
 
