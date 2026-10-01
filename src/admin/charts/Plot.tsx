@@ -26,15 +26,19 @@ interface PlotProps {
   onPointClick?: (p: PlotClick) => void;
   /** A click on a y-axis label, with the label's text. */
   onTickClick?: (label: string) => void;
+  /** A click on a legend entry, with its trace's index. Given, it replaces Plotly's show/hide toggle. */
+  onLegendClick?: (curveNumber: number) => void;
 }
 
-export function Plot({ data, layout, height = 460, label, onPointClick, onTickClick }: PlotProps) {
+export function Plot({ data, layout, height = 460, label, onPointClick, onTickClick, onLegendClick }: PlotProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const clickRef = useRef(onPointClick);
   clickRef.current = onPointClick;
   const tickRef = useRef(onTickClick);
   tickRef.current = onTickClick;
+  const legendRef = useRef(onLegendClick);
+  legendRef.current = onLegendClick;
   const ticksClickable = Boolean(onTickClick);
 
   // Plotly redraws its axes on every resize, so a listener on a label itself
@@ -74,10 +78,19 @@ export function Plot({ data, layout, height = 460, label, onPointClick, onTickCl
         );
         const plot = el as unknown as {
           removeAllListeners?: (e: string) => void;
-          on?: (e: string, f: (ev: { points: PlotClick[] }) => void) => void;
+          on?: (e: string, f: (ev: { points: PlotClick[]; curveNumber: number }) => unknown) => void;
         };
         plot.removeAllListeners?.("plotly_click");
         plot.on?.("plotly_click", (ev) => { const p = ev.points[0]; if (p) clickRef.current?.(p); });
+        plot.removeAllListeners?.("plotly_legendclick");
+        plot.removeAllListeners?.("plotly_legenddoubleclick");
+        // Returning false stops Plotly hiding the trace; with no handler it toggles as usual.
+        plot.on?.("plotly_legendclick", (ev) => {
+          if (!legendRef.current) return true;
+          legendRef.current(ev.curveNumber);
+          return false;
+        });
+        plot.on?.("plotly_legenddoubleclick", () => !legendRef.current);
       })
       .catch((e: unknown) => setFailure(e instanceof Error ? e.message : "The chart library failed to load"));
 
