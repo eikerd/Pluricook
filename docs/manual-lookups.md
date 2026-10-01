@@ -34,7 +34,7 @@ Edit the entry in `data/lookups/<dish>.json`:
   in the admin's **Rules** tab (`gate:evasion-suspected` and the rest): how
   often each kind sent a person somewhere worth going.
 
-Re-runs keep both. An entry drops off by itself once a later run extracts the
+Re-runs keep all three. An entry drops off by itself once a later run extracts the
 page.
 
 ## Entering a recipe by hand
