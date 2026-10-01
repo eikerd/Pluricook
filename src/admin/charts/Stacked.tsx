@@ -53,7 +53,11 @@ export function Stacked({ m, focus, onRecipe }: ViewProps) {
   const active: Scale = scale === "anchor" && !anchorClass ? "share" : scale;
   const perAnchor = `per ${PER_ANCHOR_GRAMS} g of ${anchorClass ?? "the primary ingredient"}`;
   const s = useMemo(
-    () => stackComposition(m, { ...(active === "anchor" ? { perAnchor: PER_ANCHOR_GRAMS } : {}), ...(sortBy ? { sortBy } : {}) }),
+    () => stackComposition(m, {
+      ...(active === "anchor" ? { perAnchor: PER_ANCHOR_GRAMS } : {}),
+      ...(sortBy ? { sortBy } : {}),
+      byShare: active === "share",
+    }),
     [m, active, sortBy],
   );
   // rowLabels are unique, so a recipe's name is enough to find it again.

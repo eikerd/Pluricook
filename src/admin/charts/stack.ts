@@ -56,6 +56,8 @@ export interface StackOptions {
    * it orders line up there; Other stays at the right end.
    */
   sortBy?: { ingredient: number; dir: "asc" | "desc" };
+  /** The bars are drawn as shares of each recipe, so `sortBy` orders by share, not grams. */
+  byShare?: boolean;
 }
 
 /** More than eight colours cannot be told apart; the eighth slot is Other. */
@@ -70,7 +72,7 @@ function scaleFactors(m: VisualMatrix, perAnchor: number | undefined): Array<num
   return m.recipes.map((r) => (r.anchorGrams && r.anchorGrams > 0 ? perAnchor / r.anchorGrams : null));
 }
 
-export function stackComposition(m: VisualMatrix, { colored = COLORED_SEGMENTS, perAnchor, sortBy }: StackOptions = {}): StackComposition {
+export function stackComposition(m: VisualMatrix, { colored = COLORED_SEGMENTS, perAnchor, sortBy, byShare = false }: StackOptions = {}): StackComposition {
   const factor = scaleFactors(m, perAnchor);
   const scaled = perAnchor !== undefined;
   const drawn = m.recipes.map((_, i) => i).filter((i) => factor[i] !== null);
@@ -104,9 +106,10 @@ export function stackComposition(m: VisualMatrix, { colored = COLORED_SEGMENTS, 
   const lead = (c: StackBar) => (scaled ? (c.grams[0] ?? 0) : c.total > 0 ? (c.grams[0] ?? 0) / c.total : 0);
   bars.sort((a, b) => lead(b) - lead(a));
   if (sortBy) {
-    // Grams of the chosen ingredient, a recipe without it counting as none.
-    // Stable, so equals keep the staircase order above.
-    const of = (c: StackBar) => (sortBy.ingredient === -1 ? c.other : gramsOf(c.recipe, sortBy.ingredient));
+    // Grams of the chosen ingredient — or its share, when the bars are shares —
+    // a recipe without it counting as none. Stable, so equals keep the staircase order above.
+    const grams = (c: StackBar) => (sortBy.ingredient === -1 ? c.other : gramsOf(c.recipe, sortBy.ingredient));
+    const of = (c: StackBar) => (byShare ? (c.total > 0 ? grams(c) / c.total : 0) : grams(c));
     const sign = sortBy.dir === "desc" ? -1 : 1;
     bars.sort((a, b) => sign * (of(a) - of(b)));
   }

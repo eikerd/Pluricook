@@ -144,3 +144,18 @@ describe("stackComposition sorted by one ingredient", () => {
     expect(s.segments.map((x) => x.label)).toEqual(["flour", "water"]);
   });
 });
+
+describe("sorting the 100% view", () => {
+  // Codex, PR #5 round 2: the bars show shares, so a sort by grams read as
+  // out of order — 100 g of 1,000 g drew 10% above 80 g of 100 g at 80%.
+  test("orders by each recipe's share of the ingredient, as the bars are drawn", () => {
+    const m = matrix(["big", "small"], [
+      { label: "cheese", grams: [100, 80] },
+      { label: "flour", grams: [900, 20] },
+    ]);
+    const byGrams = stackComposition(m, { sortBy: { ingredient: 0, dir: "desc" } });
+    const byShare = stackComposition(m, { sortBy: { ingredient: 0, dir: "desc" }, byShare: true });
+    expect(byGrams.bars.map((b) => b.recipe)).toEqual([0, 1]);
+    expect(byShare.bars.map((b) => b.recipe)).toEqual([1, 0]);
+  });
+});
