@@ -51,7 +51,16 @@ export function RecipeLines({ detail, highlight, published }: RecipeLinesProps) 
       { key: "stated", label: "Stated", numeric: true, value: (r) => r.read.statedGrams, render: (r) => (r.read.statedGrams === null ? "—" : grams.format(r.read.statedGrams)) },
       { key: "grams", label: "Grams", numeric: true, value: (r) => r.grams, render: (r) => (r.grams === null ? "—" : <strong>{grams.format(r.grams)}</strong>) },
       { key: "share", label: "Share", numeric: true, value: (r) => r.share, render: (r) => (r.share === null ? "—" : `${r.share.toFixed(1)}%`) },
-      { key: "food", label: "USDA food", value: (r) => r.food, render: (r) => r.food ?? <span className="muted">not resolved</span> },
+      {
+        key: "food", label: "USDA food", value: (r) => r.food,
+        render: (r) =>
+          r.food === null ? <span className="muted">not resolved</span> : (
+            <>
+              {r.food}
+              {r.workaround && <span className="tag">{r.workaround}</span>}
+            </>
+          ),
+      },
     ];
     return all.filter((c): c is GridColumn<Row> => c !== false);
   }, [detail, published]);
