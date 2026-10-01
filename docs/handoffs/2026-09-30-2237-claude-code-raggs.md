@@ -4,7 +4,7 @@ tool: claude-code
 model: claude-opus-5-5
 repo: eikerd/Pluricook
 branch: raggs (worktree ../compare-recipe-wt-raggs)
-pr: see the PR opened from branch raggs (linked in the owner's message)
+pr: https://github.com/eikerd/Pluricook/pull/5
 state: pr-open
 deployed: no
 loose_ends: 7 (listed below)
