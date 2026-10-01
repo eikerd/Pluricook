@@ -20,6 +20,7 @@
  */
 
 import { EMPTY_NOT_IN_USDA, readNotInUsda, type NotInUsdaTable } from "./not-in-usda";
+import { rule } from "./rules";
 
 export const ALIASES_PATH = "data/ingredients/aliases.json";
 
@@ -102,15 +103,15 @@ export function resolveAlias(
 
   if (!quantified) {
     for (const r of table.reject) {
-      if (n === r || n.includes(r)) return { kind: "reject", matched: r };
+      if ((n === r || n.includes(r)) && rule(`reject:${r}`)) return { kind: "reject", matched: r };
     }
   }
 
   const exact = table.exact.get(n);
-  if (exact) return { kind: "exact", fdcId: exact.fdcId, note: exact.note, matched: n };
+  if (exact && rule(`alias:${n}`)) return { kind: "exact", fdcId: exact.fdcId, note: exact.note, matched: n };
 
   for (const [pattern, entry] of table.patterns) {
-    if (n.includes(pattern)) {
+    if (n.includes(pattern) && rule(`pattern:${pattern}`)) {
       return { kind: "pattern", fdcId: entry.fdcId, note: entry.note, matched: pattern };
     }
   }

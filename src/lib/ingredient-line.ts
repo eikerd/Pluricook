@@ -13,6 +13,7 @@
  */
 
 import { parseIngredientLine } from "./ingredient-parser";
+import { rule } from "./rules";
 
 /** Units we can reason about. Anything else after the number is part of the name. */
 const MASS = ["g", "gram", "grams", "gm", "kg", "kilogram", "kilograms", "mg", "oz", "ounce", "ounces", "lb", "lbs", "pound", "pounds"];
@@ -114,7 +115,9 @@ function statedGramsOf(alt: { quantity: number; unit: string } | undefined): num
  * the scripts that report on it cannot disagree (docs/recipe-gotchas.md G11).
  */
 export function conversionInput(p: ParsedLine): { quantity: number; unit: string } {
-  return p.statedGrams !== null ? { quantity: p.statedGrams, unit: "g" } : { quantity: p.quantity, unit: p.unit };
+  return p.statedGrams !== null && rule("line:stated-grams")
+    ? { quantity: p.statedGrams, unit: "g" }
+    : { quantity: p.quantity, unit: p.unit };
 }
 
 export function parseLine(rawLine: string): ParsedLine {
@@ -123,24 +126,25 @@ export function parseLine(rawLine: string): ParsedLine {
   // "1 tbsp. soy sauce" and "2 qt. broth" leave the abbreviation's dot on the
   // name. Fuzzy matching shrugs it off, which is how it hid: an EXACT alias for
   // "soy sauce" can never match ". soy sauce", so the alias silently did nothing.
-  let name = (p.ingredientName ?? "").trim().replace(/^[\s.,;:/–-]+/, "");
+  let name = (p.ingredientName ?? "").trim();
+  if (/^[\s.,;:/–-]/.test(name) && rule("line:leading-punctuation")) name = name.replace(/^[\s.,;:/–-]+/, "");
 
   // 0. The raw parser returns "to taste" as its DEFAULT when it finds no unit,
   //    so "1 onion" came back as unit "to taste" and was then rejected as not a
   //    food. A line that opens with a number has a quantity; it is a count.
   const opensWithNumber = /^\s*[\d¼½¾⅓⅔⅛⅜⅝⅞]/.test(rawLine);
-  if (unit.toLowerCase() === "to taste" && opensWithNumber) unit = "";
+  if (unit.toLowerCase() === "to taste" && opensWithNumber && rule("line:number-is-a-count")) unit = "";
 
   // 1. A "unit" we do not recognise is really the first word of the name.
   const unitKey = singular(unit);
   if (unit.toLowerCase() === "to taste") {
     // Genuinely unquantified. Left as-is so conversion refuses it.
-  } else if (unit !== "" && !KNOWN.has(unit.toLowerCase()) && !KNOWN.has(unitKey)) {
+  } else if (unit !== "" && !KNOWN.has(unit.toLowerCase()) && !KNOWN.has(unitKey) && rule("line:unknown-unit-is-name")) {
     name = `${unit} ${name}`.trim();
     unit = "each";
   } else if (unit === "") {
     unit = "each";
-  } else if (COUNT_NOUNS.includes(unitKey)) {
+  } else if (COUNT_NOUNS.includes(unitKey) && rule("line:count-noun-singular")) {
     unit = unitKey;   // "cloves" → "clove", "stalks" → "stalk"
   }
 
@@ -152,7 +156,7 @@ export function parseLine(rawLine: string): ParsedLine {
     const at = words.findIndex((w) => COUNT_NOUNS.includes(singular(w)));
     // Only when another word remains — "bay leaf" minus "leaf" still names a food,
     // but a bare "cloves" is the spice and must be left alone.
-    if (at !== -1 && words.length > 1) {
+    if (at !== -1 && words.length > 1 && rule("line:count-noun-from-name")) {
       unit = singular(words[at]!);
       words.splice(at, 1);
       name = `${words.join(" ")}${name.slice(head.length)}`.trim();

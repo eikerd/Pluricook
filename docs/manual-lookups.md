@@ -28,6 +28,11 @@ Edit the entry in `data/lookups/<dish>.json`:
 
 - `handledAt`: the date you checked, `YYYY-MM-DD`.
 - `note`: what you found, in a sentence.
+- `confirmed`: `true` when the page really was what its kind says (a recipe a
+  person can see but automation could not, a real block), `false` when it was
+  not (no recipe on the page at all, or it opened fine). This scores the gate
+  in the admin's **Rules** tab (`gate:evasion-suspected` and the rest): how
+  often each kind sent a person somewhere worth going.
 
 Re-runs keep both. An entry drops off by itself once a later run extracts the
 page.

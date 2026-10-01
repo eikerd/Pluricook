@@ -12,7 +12,8 @@
       "firstDeniedAt": "2026-09-30",
       "lastDeniedAt": "2026-09-30",
       "handledAt": null,
-      "note": null
+      "note": null,
+      "confirmed": null
     },
     {
       "url": "https://hellaphatvegan.com/blogs/recipes/garlic-noodles",
@@ -23,7 +24,8 @@
       "firstDeniedAt": "2026-09-30",
       "lastDeniedAt": "2026-09-30",
       "handledAt": null,
-      "note": null
+      "note": null,
+      "confirmed": null
     },
     {
       "url": "https://www.joshuaweissman.com/recipes/san-francisco-vietnamese-garlic-noodles-recipe",
@@ -34,7 +36,8 @@
       "firstDeniedAt": "2026-09-30",
       "lastDeniedAt": "2026-09-30",
       "handledAt": null,
-      "note": null
+      "note": null,
+      "confirmed": null
     },
     {
       "url": "https://leitesculinaria.com/416811/recipes-san-francisco-style-vietnamese-garlic-noodles.html",
@@ -45,7 +48,8 @@
       "firstDeniedAt": "2026-09-30",
       "lastDeniedAt": "2026-09-30",
       "handledAt": null,
-      "note": null
+      "note": null,
+      "confirmed": null
     },
     {
       "url": "https://cooking.nytimes.com/recipes/1023012-san-francisco-style-vietnamese-american-garlic-noodles",
@@ -56,7 +60,8 @@
       "firstDeniedAt": "2026-09-30",
       "lastDeniedAt": "2026-09-30",
       "handledAt": null,
-      "note": null
+      "note": null,
+      "confirmed": null
     },
     {
       "url": "https://perfectrecipeproject.blogspot.com/2025/03/san-francisco-garlic-noodles.html",
@@ -67,7 +72,8 @@
       "firstDeniedAt": "2026-09-30",
       "lastDeniedAt": "2026-09-30",
       "handledAt": null,
-      "note": null
+      "note": null,
+      "confirmed": null
     },
     {
       "url": "https://www.willdonovan.com/cookbook/topics/san-francisco-style-vietnamese-american-garlic-noodles",
@@ -78,7 +84,8 @@
       "firstDeniedAt": "2026-09-30",
       "lastDeniedAt": "2026-09-30",
       "handledAt": null,
-      "note": null
+      "note": null,
+      "confirmed": null
     }
   ]
 }

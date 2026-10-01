@@ -101,7 +101,13 @@
       "prepTimeMinutes": 15,
       "cookTimeMinutes": 15,
       "totalTimeRaw": "PT30M",
-      "stepCount": 20
+      "stepCount": 20,
+      "extractionRules": [
+        {
+          "id": "extract:json-control-chars",
+          "changed": false
+        }
+      ]
     },
     {
       "id": "chasingcravings.com:garlic-noodles:2026-09-30",

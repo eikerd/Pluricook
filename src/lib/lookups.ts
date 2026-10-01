@@ -45,6 +45,12 @@ export interface Lookup extends DeniedPage {
   /** Filled in by the person who looked it up. Never written by a run. */
   handledAt: string | null;
   note: string | null;
+  /**
+   * The person's judgement of the kind: true when the page really was what its
+   * denial says (a recipe hidden from automation, a real block), false when not
+   * (no recipe there at all). Scores the gate (rule-scores.ts). Never written by a run.
+   */
+  confirmed?: boolean | null;
 }
 
 /** Which kind of denial an HTTP status is. */
@@ -89,6 +95,7 @@ export function mergeLookups(
       lastDeniedAt: today,
       handledAt: prior?.handledAt ?? null,
       note: prior?.note ?? null,
+      confirmed: prior?.confirmed ?? null,
     });
   }
   return [...byUrl.values()].sort((a, b) => a.site.localeCompare(b.site) || a.url.localeCompare(b.url));

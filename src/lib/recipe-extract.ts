@@ -20,6 +20,7 @@ import {
   parseDuration,
   parseYield,
 } from "./normalize";
+import { rule } from "./rules";
 import { canonicalHost } from "./site-registry";
 import {
   assertProvenance,
@@ -130,7 +131,8 @@ function escapeControlsInStrings(text: string): string {
 function parseJsonLd(block: string): unknown {
   try {
     return JSON.parse(block);
-  } catch {
+  } catch (strict) {
+    if (!rule("extract:json-control-chars")) throw strict;
     return JSON.parse(escapeControlsInStrings(block));
   }
 }

@@ -48,10 +48,10 @@ describe("mergeLookups", () => {
 
   test("a re-run keeps the first date and the person's note", () => {
     const held: Lookup[] = [
-      { ...LEITE, firstDeniedAt: "2026-09-30", lastDeniedAt: "2026-09-30", handledAt: "2026-10-01", note: "typed in by hand" },
+      { ...LEITE, firstDeniedAt: "2026-09-30", lastDeniedAt: "2026-09-30", handledAt: "2026-10-01", note: "typed in by hand", confirmed: true },
     ];
     const [l] = mergeLookups(held, [{ ...LEITE, detail: "HTTP 429" }], [], "2026-10-05");
-    expect(l).toMatchObject({ firstDeniedAt: "2026-09-30", lastDeniedAt: "2026-10-05", detail: "HTTP 429", handledAt: "2026-10-01", note: "typed in by hand" });
+    expect(l).toMatchObject({ firstDeniedAt: "2026-09-30", lastDeniedAt: "2026-10-05", detail: "HTTP 429", handledAt: "2026-10-01", note: "typed in by hand", confirmed: true });
   });
 
   test("a page extracted this run leaves the list", () => {

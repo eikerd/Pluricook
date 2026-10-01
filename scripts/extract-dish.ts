@@ -16,6 +16,7 @@ import { curationFor, isListed, mayFetch, readCurated } from "../src/lib/curated
 import { extractRecipe, type ExtractFailure } from "../src/lib/recipe-extract";
 import { denialForExtractFailure, denialForStatus, LOOKUPS_HOW_TO, mergeLookups, type DeniedPage, type Lookup } from "../src/lib/lookups";
 import { mergeRecipes } from "../src/lib/recipe-merge";
+import { traceRules } from "../src/lib/rules";
 import { evaluateRobots, verdictForStatus, type RobotsVerdict } from "../src/lib/robots";
 import { canonicalHost, canonicalUrl } from "../src/lib/site-registry";
 import type { ExtractedRecipe } from "../src/types/provenance";
@@ -162,8 +163,9 @@ for (const target of targets.sort((a, b) => a.rank - b.rank)) {
       continue;
     }
 
-    const result = extractRecipe({
-      html: await res.text(),
+    const html = await res.text();
+    const extract = () => extractRecipe({
+      html,
       sourceUrl: target.url,
       siteName: name,
       acquisition: site.acquisition,
@@ -171,6 +173,16 @@ for (const target of targets.sort((a, b) => a.rank - b.rank)) {
       licence: site.licence ?? null,
       capturedAt: today,
     });
+    // Which extraction repairs acted, and whether the recipe would differ
+    // without each: the page is in memory now and never again, so this is the
+    // only moment the counterfactual can be run (rule-scores.ts scores it).
+    const { value: result, fired } = traceRules(extract);
+    const extractionRules = [...fired].filter((id) => id.startsWith("extract:")).map((id) => {
+      const without = traceRules(extract, new Set([id])).value;
+      const lines = (r: typeof result) => (r.ok ? r.recipe.ingredientLines.join("\n") : `failed: ${r.reason}`);
+      return { id, changed: lines(without) !== lines(result) };
+    });
+    if (result.ok && extractionRules.length > 0) result.recipe.extractionRules = extractionRules;
 
     if (!result.ok) {
       denied.push({

@@ -33,6 +33,8 @@ export interface OwnPortion {
 export interface OwnFood {
   kind: "food";
   id: number;
+  /** Its name in the file, which is also its rule id: gap:<key>. */
+  key: string;
   description: string;
   /** A USDA category id, so the food classes as USDA foods do (6 = sauces). */
   categoryId: number;
@@ -47,6 +49,8 @@ export interface OwnFood {
 export interface OwnForm {
   kind: "form";
   id: number;
+  /** Its name in the file, which is also its rule id: gap:<key>. */
+  key: string;
   description: string;
   /** The USDA record the line is counted as: the dry form. */
   countAs: number;
@@ -71,7 +75,7 @@ interface NotInUsdaFile {
 export function buildNotInUsda(file: NotInUsdaFile): NotInUsdaTable {
   const byId = new Map<number, NotInUsdaEntry>();
   for (const [key, raw] of Object.entries(file.entries ?? {})) {
-    const entry = raw as NotInUsdaEntry;
+    const entry = { ...(raw as NotInUsdaEntry), key };
     if (!Number.isInteger(entry.id) || entry.id >= 0) {
       throw new Error(`not-in-usda "${key}": id must be a negative integer, so it can never be a USDA fdc_id`);
     }

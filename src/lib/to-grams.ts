@@ -16,6 +16,7 @@
 import type { Database } from "bun:sqlite";
 import { EMPTY_TABLE, resolveAlias, type AliasTable } from "./ingredient-aliases";
 import { dryFactor, waterOf, type OwnForm } from "./not-in-usda";
+import { rule } from "./rules";
 
 /** Units that are a mass already — no food lookup needed. */
 const MASS_GRAMS: Record<string, number> = {
@@ -282,7 +283,7 @@ export function toGrams(opts: ToGramsOptions): GramResult {
   const identify = (needsPortion: boolean): FoodRow | null => {
     if ((alias.kind === "exact" || alias.kind === "pattern") && alias.fdcId < 0) {
       const own = aliases.notInUsda.byId.get(alias.fdcId);
-      if (own?.kind === "food") return { fdc_id: own.id, description: own.description };
+      if (own?.kind === "food" && rule(`gap:${own.key}`)) return { fdc_id: own.id, description: own.description };
     }
     if (alias.kind === "exact" || alias.kind === "pattern") {
       const row = opts.db
@@ -311,7 +312,7 @@ export function toGrams(opts: ToGramsOptions): GramResult {
     (alias.kind === "exact" || alias.kind === "pattern") && alias.fdcId < 0
       ? aliases.notInUsda.byId.get(alias.fdcId)
       : undefined;
-  if (form?.kind === "form") return countAsDry(opts, form, unit);
+  if (form?.kind === "form" && rule(`gap:${form.key}`)) return countAsDry(opts, form, unit);
 
   // 1. Already a mass. The arithmetic needs no food, but the IDENTITY still
   //    does: comparison clusters ingredients by fdc_id, and returning null here

@@ -1,4 +1,5 @@
 import { RawIngredient } from "../types/recipe";
+import { rule } from "./rules";
 
 export interface ParsedIngredient extends RawIngredient {
   alternateQuantity?: {
@@ -60,7 +61,7 @@ function parseQuantity(text: string): number {
 
   // "2-3" or "2–3": a range reads as its first figure.
   const range = text.split(/\s*[-–]\s*/);
-  if (range.length > 1 && range[0] !== "") return parseQuantity(range[0]!);
+  if (range.length > 1 && range[0] !== "" && rule("parse:range-first-figure")) return parseQuantity(range[0]!);
 
   // Handle fractions like "1/2" or "1 1/2"
   if (text.includes("/")) {
@@ -79,7 +80,7 @@ function parseQuantity(text: string): number {
 
   // Handle unicode fractions
   for (const [char, val] of Object.entries(FRACTIONS)) {
-    if (text.includes(char)) {
+    if (text.includes(char) && rule("parse:unicode-fraction")) {
       const remaining = text.replace(char, "").trim();
       return (remaining ? Number(remaining) : 0) + val;
     }
@@ -90,10 +91,11 @@ function parseQuantity(text: string): number {
 
 export function parseIngredientLine(line: string): ParsedIngredient {
   const originalLine = line;
-  line = line.trim().replace(LEADING_BULLET, "").trim();
+  line = line.trim();
+  if (LEADING_BULLET.test(line) && rule("parse:leading-bullet")) line = line.replace(LEADING_BULLET, "").trim();
 
   let isOptional = false;
-  if (line.toLowerCase().includes("(optional)")) {
+  if (line.toLowerCase().includes("(optional)") && rule("parse:optional-mark")) {
     isOptional = true;
     line = line.replace(/\(optional\)/i, "").trim();
   }
@@ -104,7 +106,7 @@ export function parseIngredientLine(line: string): ParsedIngredient {
   if (parenMatch) {
     const content = parenMatch[1];
     const altMatch = content.match(BRACKETED_AMOUNT);
-    if (altMatch) {
+    if (altMatch && rule("parse:bracketed-alternate")) {
       alternateQuantity = {
         quantity: parseQuantity(altMatch[1]),
         unit: altMatch[2].toLowerCase(),
@@ -130,9 +132,9 @@ export function parseIngredientLine(line: string): ParsedIngredient {
   let unit = match[2]?.trim().toLowerCase() || "";
   let name = match[3]?.trim() || "";
 
-  if (quantityStr.endsWith('"')) {
+  if (quantityStr.endsWith('"') && rule("parse:inch-mark")) {
     unit = "inch";
-  } else if (quantityStr.endsWith("'")) {
+  } else if (quantityStr.endsWith("'") && rule("parse:inch-mark")) {
     unit = "foot";
   }
 
@@ -141,7 +143,7 @@ export function parseIngredientLine(line: string): ParsedIngredient {
   // A second system's measure after a slash is an alternate, as a bracketed one
   // is: it leaves the name, and a metric mass becomes the line's stated grams.
   const slash = alternateQuantity ? null : SLASH_ALTERNATE.exec(name);
-  if (slash) {
+  if (slash && rule("parse:slash-alternate")) {
     alternateQuantity = { quantity: parseQuantity(slash[1]!), unit: slash[2]!.toLowerCase() };
     name = slash[3]!.trim();
   }

@@ -1,0 +1,4220 @@
+{
+  "_comment": [
+    "Every edge case the corpus has turned up: each line a rule changed, or that nothing could resolve,",
+    "with what it comes to now. Written by `bun scripts/rule-scores.ts --write`; replayed by",
+    "src/lib/rule-scores.test.ts, which fails when any of these lines moves. Review the diff."
+  ],
+  "lines": [
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "- Reduce to about 2 tBsp (40g total),",
+      "caughtBy": [
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1 cup (240g) Fresh Apple Cider,",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 240,
+        "fdcId": 2709319,
+        "food": "Apple cider",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• ½ tsp (2.5g) Vanilla Extract",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 2.5,
+        "fdcId": 173471,
+        "food": "Vanilla extract",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• ¼ cup (60g) Apple Cider",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 60,
+        "fdcId": 2709319,
+        "food": "Apple cider",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• ¼ tsp (1.5g) Salt",
+      "caughtBy": [
+        "alias:salt",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 1.5,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• ⅛ tsp (0.25g) Nutmeg",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 0.3,
+        "fdcId": 172335,
+        "food": "Oil, nutmeg butter",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• ⅛ tsp (0.75g) Salt",
+      "caughtBy": [
+        "alias:salt",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 0.8,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1½ cups (225g) Honeycrisp Apples,",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 225,
+        "fdcId": 1105547,
+        "food": "Apples, honeycrisp, with skin, raw",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1½ tBsp (10g) Whole Milk Powder",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 10,
+        "fdcId": 173459,
+        "food": "Protein supplement, milk based, Muscle Milk, powder",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1½ tsp (7.5g) Lemon Juice",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 7.5,
+        "fdcId": 167747,
+        "food": "Lemon juice, raw",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1large Egg, room temp, beaten",
+      "caughtBy": [
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": 173429,
+        "food": "Egg substitute, powder",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1tBsp + ½ tsp (25g) Cider Reduction",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 25,
+        "fdcId": null,
+        "food": null,
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1tsp (3g) Cinnamon",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 3,
+        "fdcId": 167940,
+        "food": "Cinnamon buns, frosted (includes honey buns)",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1tsp (5g) Fresh Lemon Juice",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 5,
+        "fdcId": 167747,
+        "food": "Lemon juice, raw",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1tsp (5g) Vanilla Extract",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 5,
+        "fdcId": 173471,
+        "food": "Vanilla extract",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1tsp (5g) Vanilla Extract",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 5,
+        "fdcId": 173471,
+        "food": "Vanilla extract",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 1tsp (6g) Salt",
+      "caughtBy": [
+        "alias:salt",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 2 tBsp (28g) Bourbon",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 28,
+        "fdcId": null,
+        "food": null,
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 2 tsp (10g) Neutral Oil",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet",
+        "pattern:neutral oil"
+      ],
+      "outcome": {
+        "grams": 10,
+        "fdcId": 172336,
+        "food": "Oil, canola",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 2 tsp (6g) Instant Yeast",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 167717,
+        "food": "Yeast extract spread",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 2½ cups (300g) Confectioners’ Sugar",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 300,
+        "fdcId": 2710259,
+        "food": "Sugar, white, confectioner's, powdered",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 2½ cups (375g) Granny Smith Apples",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 375,
+        "fdcId": 1105664,
+        "food": "Apples, granny smith, with skin, raw",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 2⅛ tsp (15g) Apple Cider Reduction",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 15,
+        "fdcId": null,
+        "food": null,
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 3 cups (360g) AP Flour",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 360,
+        "fdcId": 2003586,
+        "food": "Flour, 00",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 3 tBsp (38g) Dark Brown Sugar",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet",
+        "pattern:brown sugar"
+      ],
+      "outcome": {
+        "grams": 38,
+        "fdcId": 168833,
+        "food": "Sugars, brown",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 3 tBsp (38g) Sugar",
+      "caughtBy": [
+        "alias:sugar",
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 38,
+        "fdcId": 169655,
+        "food": "Sugars, granulated",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 3 tBsp (42g) Butter",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 42,
+        "fdcId": 790508,
+        "food": "Butter, stick, salted",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• 3 tBsp (42g) Butter, softened",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 42,
+        "fdcId": 790508,
+        "food": "Butter, stick, salted",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• ¾ cup (180g) Whole Milk, lukewarm",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:bracketed-alternate",
+        "parse:leading-bullet"
+      ],
+      "outcome": {
+        "grams": 180,
+        "fdcId": 322892,
+        "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• about 2⅛ tsp (15g) for the apples",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• about1tBsp + ½ tsp (25g) for the",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "• Brown Butter (from above)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "Brown Butter Bourbon Apple Filling",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "Cider Reduction",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "cutto ¼-inch (6mm) dice",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "cutto ¼-inch (6mm) dice",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "glaze",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "Milk Toasted Brown Butter",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "Thin Apple Cider Glaze",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "unsweetened",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "apple-fritters",
+      "site": "Kitchen in the shire",
+      "recipeId": "fixture:apple-fritters",
+      "line": "Yeasted Fritter Dough",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "1 cup tomato",
+      "caughtBy": [
+        "alias:tomato"
+      ],
+      "outcome": {
+        "grams": 242,
+        "fdcId": 170501,
+        "food": "Tomatoes, crushed, canned",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "1 garlic cloves",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 3,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "1 tb oil",
+      "caughtBy": [
+        "alias:oil"
+      ],
+      "outcome": {
+        "grams": 13.5,
+        "fdcId": 171413,
+        "food": "Oil, olive, salad or cooking",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "10 g yeast",
+      "caughtBy": [
+        "alias:yeast"
+      ],
+      "outcome": {
+        "grams": 10,
+        "fdcId": 175043,
+        "food": "Leavening agents, yeast, baker's, active dry",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "2 g dry basil",
+      "caughtBy": [
+        "alias:dry basil"
+      ],
+      "outcome": {
+        "grams": 2,
+        "fdcId": 171317,
+        "food": "Spices, basil, dried",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "2 g salt",
+      "caughtBy": [
+        "alias:salt"
+      ],
+      "outcome": {
+        "grams": 2,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "236 g water",
+      "caughtBy": [
+        "alias:water"
+      ],
+      "outcome": {
+        "grams": 236,
+        "fdcId": 174158,
+        "food": "Water, bottled, generic",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "3 g pepper",
+      "caughtBy": [
+        "alias:pepper"
+      ],
+      "outcome": {
+        "grams": 3,
+        "fdcId": 170931,
+        "food": "Spices, pepper, black",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "3 g sugar",
+      "caughtBy": [
+        "alias:sugar"
+      ],
+      "outcome": {
+        "grams": 3,
+        "fdcId": 169655,
+        "food": "Sugars, granulated",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "337 g bread flour",
+      "caughtBy": [
+        "alias:bread flour"
+      ],
+      "outcome": {
+        "grams": 337,
+        "fdcId": 168896,
+        "food": "Wheat flour, white, bread, enriched",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "4 g red pepper",
+      "caughtBy": [
+        "alias:red pepper"
+      ],
+      "outcome": {
+        "grams": 4,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "6 g salt",
+      "caughtBy": [
+        "alias:salt"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "America's Test Kitchen",
+      "recipeId": "personal:detroit-pizza:atk",
+      "line": "6 g sugar",
+      "caughtBy": [
+        "alias:sugar"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 169655,
+        "food": "Sugars, granulated",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Charlie Anderson",
+      "recipeId": "personal:detroit-pizza:charlie",
+      "line": "1.6 g yeast",
+      "caughtBy": [
+        "alias:yeast"
+      ],
+      "outcome": {
+        "grams": 1.6,
+        "fdcId": 175043,
+        "food": "Leavening agents, yeast, baker's, active dry",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Charlie Anderson",
+      "recipeId": "personal:detroit-pizza:charlie",
+      "line": "1/4 tsp red pepper",
+      "caughtBy": [
+        "alias:red pepper"
+      ],
+      "outcome": {
+        "grams": 0.5,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Charlie Anderson",
+      "recipeId": "personal:detroit-pizza:charlie",
+      "line": "205 g water",
+      "caughtBy": [
+        "alias:water"
+      ],
+      "outcome": {
+        "grams": 205,
+        "fdcId": 174158,
+        "food": "Water, bottled, generic",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Charlie Anderson",
+      "recipeId": "personal:detroit-pizza:charlie",
+      "line": "28 oz tomato",
+      "caughtBy": [
+        "alias:tomato"
+      ],
+      "outcome": {
+        "grams": 793.8,
+        "fdcId": 170501,
+        "food": "Tomatoes, crushed, canned",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Charlie Anderson",
+      "recipeId": "personal:detroit-pizza:charlie",
+      "line": "3/4 tsp thyme",
+      "caughtBy": [
+        "alias:thyme"
+      ],
+      "outcome": {
+        "grams": 0.8,
+        "fdcId": 170938,
+        "food": "Spices, thyme, dried",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Charlie Anderson",
+      "recipeId": "personal:detroit-pizza:charlie",
+      "line": "315 g all-purpose flour",
+      "caughtBy": [
+        "alias:all-purpose flour"
+      ],
+      "outcome": {
+        "grams": 315,
+        "fdcId": 168894,
+        "food": "Wheat flour, white, all-purpose, enriched, bleached",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Charlie Anderson",
+      "recipeId": "personal:detroit-pizza:charlie",
+      "line": "5 g salt",
+      "caughtBy": [
+        "alias:salt"
+      ],
+      "outcome": {
+        "grams": 5,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Charlie Anderson",
+      "recipeId": "personal:detroit-pizza:charlie",
+      "line": "6.3 g salt",
+      "caughtBy": [
+        "alias:salt"
+      ],
+      "outcome": {
+        "grams": 6.3,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Food Wishes",
+      "recipeId": "personal:detroit-pizza:chefjohn",
+      "line": "236 g water",
+      "caughtBy": [
+        "alias:water"
+      ],
+      "outcome": {
+        "grams": 236,
+        "fdcId": 174158,
+        "food": "Water, bottled, generic",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Food Wishes",
+      "recipeId": "personal:detroit-pizza:chefjohn",
+      "line": "3 tb oil",
+      "caughtBy": [
+        "alias:oil"
+      ],
+      "outcome": {
+        "grams": 40.5,
+        "fdcId": 171413,
+        "food": "Oil, olive, salad or cooking",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Food Wishes",
+      "recipeId": "personal:detroit-pizza:chefjohn",
+      "line": "375 g bread flour",
+      "caughtBy": [
+        "alias:bread flour"
+      ],
+      "outcome": {
+        "grams": 375,
+        "fdcId": 168896,
+        "food": "Wheat flour, white, bread, enriched",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Food Wishes",
+      "recipeId": "personal:detroit-pizza:chefjohn",
+      "line": "6 g salt",
+      "caughtBy": [
+        "alias:salt"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Food Wishes",
+      "recipeId": "personal:detroit-pizza:chefjohn",
+      "line": "6 g sugar",
+      "caughtBy": [
+        "alias:sugar"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 169655,
+        "food": "Sugars, granulated",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Food Wishes",
+      "recipeId": "personal:detroit-pizza:chefjohn",
+      "line": "9 g yeast",
+      "caughtBy": [
+        "alias:yeast"
+      ],
+      "outcome": {
+        "grams": 9,
+        "fdcId": 175043,
+        "food": "Leavening agents, yeast, baker's, active dry",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
+      "line": "1/4 onion",
+      "caughtBy": [
+        "line:number-is-a-count"
+      ],
+      "outcome": {
+        "grams": 27.5,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
+      "line": "2 garlic cloves",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
+      "line": "210 g water",
+      "caughtBy": [
+        "alias:water"
+      ],
+      "outcome": {
+        "grams": 210,
+        "fdcId": 174158,
+        "food": "Water, bottled, generic",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
+      "line": "28 oz tomato",
+      "caughtBy": [
+        "alias:tomato"
+      ],
+      "outcome": {
+        "grams": 793.8,
+        "fdcId": 170501,
+        "food": "Tomatoes, crushed, canned",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
+      "line": "300 g bread flour",
+      "caughtBy": [
+        "alias:bread flour"
+      ],
+      "outcome": {
+        "grams": 300,
+        "fdcId": 168896,
+        "food": "Wheat flour, white, bread, enriched",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
+      "line": "5 g yeast",
+      "caughtBy": [
+        "alias:yeast"
+      ],
+      "outcome": {
+        "grams": 5,
+        "fdcId": 175043,
+        "food": "Leavening agents, yeast, baker's, active dry",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
+      "line": "6 g salt",
+      "caughtBy": [
+        "alias:salt"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
+      "line": "dry oregano, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
+      "line": "red pepper, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
+      "line": "salt, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "PizzaHog",
+      "recipeId": "personal:detroit-pizza:pizzahog",
+      "line": "1.5 g yeast",
+      "caughtBy": [
+        "alias:yeast"
+      ],
+      "outcome": {
+        "grams": 1.5,
+        "fdcId": 175043,
+        "food": "Leavening agents, yeast, baker's, active dry",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "PizzaHog",
+      "recipeId": "personal:detroit-pizza:pizzahog",
+      "line": "205 g water",
+      "caughtBy": [
+        "alias:water"
+      ],
+      "outcome": {
+        "grams": 205,
+        "fdcId": 174158,
+        "food": "Water, bottled, generic",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "PizzaHog",
+      "recipeId": "personal:detroit-pizza:pizzahog",
+      "line": "273 g bread flour",
+      "caughtBy": [
+        "alias:bread flour"
+      ],
+      "outcome": {
+        "grams": 273,
+        "fdcId": 168896,
+        "food": "Wheat flour, white, bread, enriched",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "PizzaHog",
+      "recipeId": "personal:detroit-pizza:pizzahog",
+      "line": "4.1 g salt",
+      "caughtBy": [
+        "alias:salt"
+      ],
+      "outcome": {
+        "grams": 4.1,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "1 tb oil",
+      "caughtBy": [
+        "alias:oil"
+      ],
+      "outcome": {
+        "grams": 13.5,
+        "fdcId": 171413,
+        "food": "Oil, olive, salad or cooking",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "15 g sugar",
+      "caughtBy": [
+        "alias:sugar"
+      ],
+      "outcome": {
+        "grams": 15,
+        "fdcId": 169655,
+        "food": "Sugars, granulated",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "220 g water",
+      "caughtBy": [
+        "alias:water"
+      ],
+      "outcome": {
+        "grams": 220,
+        "fdcId": 174158,
+        "food": "Water, bottled, generic",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "28 oz tomato",
+      "caughtBy": [
+        "alias:tomato"
+      ],
+      "outcome": {
+        "grams": 793.8,
+        "fdcId": 170501,
+        "food": "Tomatoes, crushed, canned",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "3 g red pepper",
+      "caughtBy": [
+        "alias:red pepper"
+      ],
+      "outcome": {
+        "grams": 3,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "3 medium garlic cloves",
+      "caughtBy": [
+        "line:count-noun-from-name"
+      ],
+      "outcome": {
+        "grams": 9,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "300 g bread flour",
+      "caughtBy": [
+        "alias:bread flour"
+      ],
+      "outcome": {
+        "grams": 300,
+        "fdcId": 168896,
+        "food": "Wheat flour, white, bread, enriched",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "340 g pepperoni",
+      "caughtBy": [
+        "alias:pepperoni"
+      ],
+      "outcome": {
+        "grams": 340,
+        "fdcId": 174575,
+        "food": "Pepperoni, beef and pork, sliced",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "4 g salt",
+      "caughtBy": [
+        "alias:salt"
+      ],
+      "outcome": {
+        "grams": 4,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "5 g yeast",
+      "caughtBy": [
+        "alias:yeast"
+      ],
+      "outcome": {
+        "grams": 5,
+        "fdcId": 175043,
+        "food": "Leavening agents, yeast, baker's, active dry",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Serious Eats",
+      "recipeId": "personal:detroit-pizza:serious",
+      "line": "9 g salt",
+      "caughtBy": [
+        "alias:salt"
+      ],
+      "outcome": {
+        "grams": 9,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chasing Cravings",
+      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
+      "line": "1 cup pasta or noodle water",
+      "caughtBy": [
+        "pattern:noodle water"
+      ],
+      "outcome": {
+        "grams": 236.8,
+        "fdcId": 173647,
+        "food": "Beverages, water, tap, drinking",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chasing Cravings",
+      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
+      "line": "1 lb ramen, spaghetti, egg noodles or lo mein (cooked al dente)",
+      "caughtBy": [
+        "pattern:spaghetti"
+      ],
+      "outcome": {
+        "grams": 453.6,
+        "fdcId": 169736,
+        "food": "Pasta, dry, enriched",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chasing Cravings",
+      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
+      "line": "1 scallion (thinly sliced for garnish)",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 15,
+        "fdcId": 170005,
+        "food": "Onions, spring or scallions (includes tops and bulb), raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chasing Cravings",
+      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
+      "line": "1 tbsp sugar",
+      "caughtBy": [
+        "alias:sugar"
+      ],
+      "outcome": {
+        "grams": 12.5,
+        "fdcId": 169655,
+        "food": "Sugars, granulated",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chasing Cravings",
+      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
+      "line": "1 tsp crushed red pepper flakes ((optional) )",
+      "caughtBy": [
+        "pattern:red pepper flakes"
+      ],
+      "outcome": {
+        "grams": 1.8,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chasing Cravings",
+      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
+      "line": "1.5 tbsp Maggi Seasoning",
+      "caughtBy": [
+        "gap:maggi-seasoning",
+        "pattern:maggi seasoning"
+      ],
+      "outcome": {
+        "grams": 24,
+        "fdcId": -1,
+        "food": "Maggi Seasoning (liquid), our spec",
+        "basis": "not-in-usda"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chasing Cravings",
+      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
+      "line": "1/2 cup unsalted butter",
+      "caughtBy": [
+        "pattern:unsalted butter"
+      ],
+      "outcome": {
+        "grams": 113.5,
+        "fdcId": 173430,
+        "food": "Butter, without salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chasing Cravings",
+      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
+      "line": "1/4 cup Parmigiano Reggiano (freshly grated)",
+      "caughtBy": [
+        "pattern:parmigiano"
+      ],
+      "outcome": {
+        "grams": 25,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chasing Cravings",
+      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
+      "line": "2 tsp soy sauce",
+      "caughtBy": [
+        "alias:soy sauce"
+      ],
+      "outcome": {
+        "grams": 10.6,
+        "fdcId": 174277,
+        "food": "Soy sauce made from soy and wheat (shoyu)",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chasing Cravings",
+      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
+      "line": "freshly cracked black pepper",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chef Tu David Phu",
+      "recipeId": "cheftu.com:garlic-noodles:2026-09-30",
+      "line": "1 tbsp, Oyster Sauce",
+      "caughtBy": [
+        "line:leading-punctuation"
+      ],
+      "outcome": {
+        "grams": 18,
+        "fdcId": 174529,
+        "food": "Sauce, oyster, ready-to-serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chef Tu David Phu",
+      "recipeId": "cheftu.com:garlic-noodles:2026-09-30",
+      "line": "1 tbsp, Son Fish Sauce",
+      "caughtBy": [
+        "pattern:fish sauce"
+      ],
+      "outcome": {
+        "grams": 18,
+        "fdcId": 174531,
+        "food": "Sauce, fish, ready-to-serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chef Tu David Phu",
+      "recipeId": "cheftu.com:garlic-noodles:2026-09-30",
+      "line": "1 tsp, Organic Sugar [1/2 tsp Monk Fruit Sugar]",
+      "caughtBy": [
+        "pattern:organic sugar"
+      ],
+      "outcome": {
+        "grams": 4.2,
+        "fdcId": 169655,
+        "food": "Sugars, granulated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chef Tu David Phu",
+      "recipeId": "cheftu.com:garlic-noodles:2026-09-30",
+      "line": "½ tsp, Black Pepper, coarse ground",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 1.2,
+        "fdcId": 170931,
+        "food": "Spices, pepper, black",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chef Tu David Phu",
+      "recipeId": "cheftu.com:garlic-noodles:2026-09-30",
+      "line": "¼ cup, Chives or Scallion, sliced",
+      "caughtBy": [
+        "line:leading-punctuation",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 25,
+        "fdcId": 170005,
+        "food": "Onions, spring or scallions (includes tops and bulb), raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chef Tu David Phu",
+      "recipeId": "cheftu.com:garlic-noodles:2026-09-30",
+      "line": "20 oz. , Sun Noodle, Kaedama (or substitute dried spaghetti noodles)",
+      "caughtBy": [
+        "gap:fresh-wheat-noodles",
+        "pattern:sun noodle"
+      ],
+      "outcome": {
+        "grams": 434.2,
+        "fdcId": 169736,
+        "food": "Pasta, dry, enriched",
+        "basis": "counted-as-dry"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chef Tu David Phu",
+      "recipeId": "cheftu.com:garlic-noodles:2026-09-30",
+      "line": "3 tbsp, Unsalted Butter",
+      "caughtBy": [
+        "pattern:unsalted butter"
+      ],
+      "outcome": {
+        "grams": 42.6,
+        "fdcId": 173430,
+        "food": "Butter, without salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Chef Tu David Phu",
+      "recipeId": "cheftu.com:garlic-noodles:2026-09-30",
+      "line": "5 cloves, Minced Garlic",
+      "caughtBy": [
+        "line:leading-punctuation"
+      ],
+      "outcome": {
+        "grams": 15,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Cooking with Cocktail Rings",
+      "recipeId": "cookingwithcocktailrings.com:garlic-noodles:2026-09-30",
+      "line": "½ cup freshly grated Parmesan cheese, (plus additional for serving)",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 50,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Cooking with Cocktail Rings",
+      "recipeId": "cookingwithcocktailrings.com:garlic-noodles:2026-09-30",
+      "line": "½ pound spaghetti or egg noodles",
+      "caughtBy": [
+        "parse:unicode-fraction",
+        "pattern:spaghetti"
+      ],
+      "outcome": {
+        "grams": 226.8,
+        "fdcId": 169736,
+        "food": "Pasta, dry, enriched",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Cooking with Cocktail Rings",
+      "recipeId": "cookingwithcocktailrings.com:garlic-noodles:2026-09-30",
+      "line": "10 medium cloves garlic, (minced)",
+      "caughtBy": [
+        "line:count-noun-from-name"
+      ],
+      "outcome": {
+        "grams": 30,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Cooking with Cocktail Rings",
+      "recipeId": "cookingwithcocktailrings.com:garlic-noodles:2026-09-30",
+      "line": "2 tablespoons extra-virgin olive oil",
+      "caughtBy": [
+        "pattern:olive oil"
+      ],
+      "outcome": {
+        "grams": 27,
+        "fdcId": 171413,
+        "food": "Oil, olive, salad or cooking",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Cooking with Cocktail Rings",
+      "recipeId": "cookingwithcocktailrings.com:garlic-noodles:2026-09-30",
+      "line": "2 tablespoons thinly sliced green onions",
+      "caughtBy": [
+        "pattern:green onion"
+      ],
+      "outcome": {
+        "grams": 12,
+        "fdcId": 170005,
+        "food": "Onions, spring or scallions (includes tops and bulb), raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Cooking with Cocktail Rings",
+      "recipeId": "cookingwithcocktailrings.com:garlic-noodles:2026-09-30",
+      "line": "2 teaspoons maggi seasoning",
+      "caughtBy": [
+        "gap:maggi-seasoning",
+        "pattern:maggi seasoning"
+      ],
+      "outcome": {
+        "grams": 10.6,
+        "fdcId": -1,
+        "food": "Maggi Seasoning (liquid), our spec",
+        "basis": "not-in-usda"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Cooking with Cocktail Rings",
+      "recipeId": "cookingwithcocktailrings.com:garlic-noodles:2026-09-30",
+      "line": "4 tablespoons unsalted butter",
+      "caughtBy": [
+        "pattern:unsalted butter"
+      ],
+      "outcome": {
+        "grams": 56.8,
+        "fdcId": 173430,
+        "food": "Butter, without salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Living Richly on a Budget",
+      "recipeId": "livingrichlyonabudget.com:garlic-noodles:2026-09-30",
+      "line": "1 tablespoon sugar",
+      "caughtBy": [
+        "alias:sugar"
+      ],
+      "outcome": {
+        "grams": 12.5,
+        "fdcId": 169655,
+        "food": "Sugars, granulated",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Living Richly on a Budget",
+      "recipeId": "livingrichlyonabudget.com:garlic-noodles:2026-09-30",
+      "line": "1 teaspoon Maggi seasoning",
+      "caughtBy": [
+        "gap:maggi-seasoning",
+        "pattern:maggi seasoning"
+      ],
+      "outcome": {
+        "grams": 5.3,
+        "fdcId": -1,
+        "food": "Maggi Seasoning (liquid), our spec",
+        "basis": "not-in-usda"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Living Richly on a Budget",
+      "recipeId": "livingrichlyonabudget.com:garlic-noodles:2026-09-30",
+      "line": "1/2 cup unsalted butter or neutral flavor cooking oil",
+      "caughtBy": [
+        "pattern:unsalted butter"
+      ],
+      "outcome": {
+        "grams": 113.5,
+        "fdcId": 173430,
+        "food": "Butter, without salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Living Richly on a Budget",
+      "recipeId": "livingrichlyonabudget.com:garlic-noodles:2026-09-30",
+      "line": "1/4 cup parmesan cheese (or as much as you want)",
+      "caughtBy": [
+        "pattern:parmesan"
+      ],
+      "outcome": {
+        "grams": 25,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "Living Richly on a Budget",
+      "recipeId": "livingrichlyonabudget.com:garlic-noodles:2026-09-30",
+      "line": "14 - 20 oz. fresh pre-cooked chow mein noodles",
+      "caughtBy": [
+        "gap:fresh-wheat-noodles",
+        "parse:range-first-figure",
+        "pattern:fresh pre-cooked chow mein"
+      ],
+      "outcome": {
+        "grams": 304,
+        "fdcId": 169736,
+        "food": "Pasta, dry, enriched",
+        "basis": "counted-as-dry"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "smelly lunchbox",
+      "recipeId": "smellylunchbox.com:garlic-noodles:2026-09-30",
+      "line": "1 tablespoon neutral oil",
+      "caughtBy": [
+        "pattern:neutral oil"
+      ],
+      "outcome": {
+        "grams": 14,
+        "fdcId": 172336,
+        "food": "Oil, canola",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "smelly lunchbox",
+      "recipeId": "smellylunchbox.com:garlic-noodles:2026-09-30",
+      "line": "1 tablespoon soy sauce",
+      "caughtBy": [
+        "alias:soy sauce"
+      ],
+      "outcome": {
+        "grams": 16,
+        "fdcId": 174277,
+        "food": "Soy sauce made from soy and wheat (shoyu)",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "smelly lunchbox",
+      "recipeId": "smellylunchbox.com:garlic-noodles:2026-09-30",
+      "line": "1 teaspoon white sugar",
+      "caughtBy": [
+        "alias:white sugar"
+      ],
+      "outcome": {
+        "grams": 4.2,
+        "fdcId": 169655,
+        "food": "Sugars, granulated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "smelly lunchbox",
+      "recipeId": "smellylunchbox.com:garlic-noodles:2026-09-30",
+      "line": "⅓ cup Parmesan cheese",
+      "caughtBy": [
+        "parse:unicode-fraction",
+        "pattern:parmesan"
+      ],
+      "outcome": {
+        "grams": 33.3,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "smelly lunchbox",
+      "recipeId": "smellylunchbox.com:garlic-noodles:2026-09-30",
+      "line": "10-12 cloves garlic ((about 1 whole head))",
+      "caughtBy": [
+        "parse:range-first-figure"
+      ],
+      "outcome": {
+        "grams": 30,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "smelly lunchbox",
+      "recipeId": "smellylunchbox.com:garlic-noodles:2026-09-30",
+      "line": "14-16 oz package of fresh egg noodles ((dried works too))",
+      "caughtBy": [
+        "gap:fresh-egg-noodles",
+        "parse:range-first-figure",
+        "pattern:fresh egg noodles"
+      ],
+      "outcome": {
+        "grams": 301,
+        "fdcId": 169731,
+        "food": "Noodles, egg, dry, enriched",
+        "basis": "counted-as-dry"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "smelly lunchbox",
+      "recipeId": "smellylunchbox.com:garlic-noodles:2026-09-30",
+      "line": "black pepper for garnish",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "smelly lunchbox",
+      "recipeId": "smellylunchbox.com:garlic-noodles:2026-09-30",
+      "line": "green onions for garnish",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "smelly lunchbox",
+      "recipeId": "smellylunchbox.com:garlic-noodles:2026-09-30",
+      "line": "salt for cooking noodles",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:garlic-noodles:2026-09-30",
+      "line": "1 ounce Parmesan cheese (1/2 cup firmly packed freshly grated or 1/3 cup store-bought grated, optional)",
+      "caughtBy": [
+        "pattern:parmesan"
+      ],
+      "outcome": {
+        "grams": 28.3,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:garlic-noodles:2026-09-30",
+      "line": "1 pound dried spaghetti, dried thin Chinese wheat noodles, or dried Japanese ramen noodles",
+      "caughtBy": [
+        "pattern:spaghetti"
+      ],
+      "outcome": {
+        "grams": 453.6,
+        "fdcId": 169736,
+        "food": "Pasta, dry, enriched",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:garlic-noodles:2026-09-30",
+      "line": "1 tablespoon soy sauce",
+      "caughtBy": [
+        "alias:soy sauce"
+      ],
+      "outcome": {
+        "grams": 16,
+        "fdcId": 174277,
+        "food": "Soy sauce made from soy and wheat (shoyu)",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:garlic-noodles:2026-09-30",
+      "line": "4 tablespoons (1/2 stick) unsalted butter",
+      "caughtBy": [
+        "pattern:unsalted butter"
+      ],
+      "outcome": {
+        "grams": 56.8,
+        "fdcId": 173430,
+        "food": "Butter, without salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "garlic-noodles",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:garlic-noodles:2026-09-30",
+      "line": "Salt",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "1 (15 oz) can crushed tomatoes",
+      "caughtBy": [
+        "parse:bracketed-alternate"
+      ],
+      "outcome": {
+        "grams": 190,
+        "fdcId": 170051,
+        "food": "Tomatoes, red, ripe, canned, packed in tomato juice",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "1 large yellow onion (small dice)",
+      "caughtBy": [
+        "alias:yellow onion"
+      ],
+      "outcome": {
+        "grams": 150,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "1½ cups red lentils (rinsed (*see notes) )",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 288,
+        "fdcId": 174284,
+        "food": "Lentils, pink or red, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "2 dried bay leaves",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 170917,
+        "food": "Spices, bay leaf",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "2 large garlic cloves (finely chopped)",
+      "caughtBy": [
+        "line:count-noun-from-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "no-food-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "2 leeks (approx. 6 oz), white and pale green parts only, rinsed well (small dice)",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": 169246,
+        "food": "Leeks, (bulb and lower leaf-portion), raw",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "2 parmigiano-reggiano cheese rinds",
+      "caughtBy": [
+        "line:unknown-unit-is-name",
+        "pattern:parmigiano"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "2 tablespoons extra virgin olive oil (plus more for drizzling)",
+      "caughtBy": [
+        "pattern:olive oil"
+      ],
+      "outcome": {
+        "grams": 27,
+        "fdcId": 171413,
+        "food": "Oil, olive, salad or cooking",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "2 tablespoons unsalted butter",
+      "caughtBy": [
+        "pattern:unsalted butter"
+      ],
+      "outcome": {
+        "grams": 28.4,
+        "fdcId": 173430,
+        "food": "Butter, without salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "3 carrots (approx. 8 oz) (small dice)",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 183,
+        "fdcId": 170393,
+        "food": "Carrots, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "5 celery stalks (approx. 6 oz) (small dice)",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "no-food-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "freshly ground black pepper",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "grated parmigiano-reggiano cheese (for serving)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "A Beautiful Plate",
+      "recipeId": "abeautifulplate.com:lentil-soup:2026-09-21",
+      "line": "kosher salt",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Analida's Ethnic Spoon",
+      "recipeId": "ethnicspoon.com:lentil-soup:2026-09-21",
+      "line": "1 onion (diced)",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 110,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Analida's Ethnic Spoon",
+      "recipeId": "ethnicspoon.com:lentil-soup:2026-09-21",
+      "line": "2 carrots (diced)",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 122,
+        "fdcId": 170393,
+        "food": "Carrots, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Analida's Ethnic Spoon",
+      "recipeId": "ethnicspoon.com:lentil-soup:2026-09-21",
+      "line": "2 garlic cloves (minced)",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "no-food-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Analida's Ethnic Spoon",
+      "recipeId": "ethnicspoon.com:lentil-soup:2026-09-21",
+      "line": "7 cups vegetable broth",
+      "caughtBy": [
+        "alias:vegetable broth"
+      ],
+      "outcome": {
+        "grams": 1547,
+        "fdcId": 171583,
+        "food": "Soup, vegetable broth, ready to serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Indian Veggie Delight",
+      "recipeId": "indianveggiedelight.com:lentil-soup:2026-09-21",
+      "line": "1 medium yellow onions (diced)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 170004,
+        "food": "Onions, yellow, sauteed",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Indian Veggie Delight",
+      "recipeId": "indianveggiedelight.com:lentil-soup:2026-09-21",
+      "line": "1 small red bell pepper (diced (about 1/2 cup))",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 2258590,
+        "food": "Peppers, bell, red, raw",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Indian Veggie Delight",
+      "recipeId": "indianveggiedelight.com:lentil-soup:2026-09-21",
+      "line": "1-2 teaspoons garam masala powder ((or curry powder))",
+      "caughtBy": [
+        "parse:range-first-figure"
+      ],
+      "outcome": {
+        "grams": 2.5,
+        "fdcId": 169656,
+        "food": "Sugars, powdered",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Indian Veggie Delight",
+      "recipeId": "indianveggiedelight.com:lentil-soup:2026-09-21",
+      "line": "2 stalks celery (diced (about 1/2 cup))",
+      "caughtBy": [
+        "line:count-noun-singular"
+      ],
+      "outcome": {
+        "grams": 80,
+        "fdcId": 169988,
+        "food": "Celery, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Indian Veggie Delight",
+      "recipeId": "indianveggiedelight.com:lentil-soup:2026-09-21",
+      "line": "2 tablespoon freshly squeezed lemon juice",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 2709181,
+        "food": "Lemon juice, 100%, freshly squeezed",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Indian Veggie Delight",
+      "recipeId": "indianveggiedelight.com:lentil-soup:2026-09-21",
+      "line": "2-3 cups baby spinach",
+      "caughtBy": [
+        "parse:range-first-figure"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": 1750352,
+        "food": "Spinach, baby",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Indian Veggie Delight",
+      "recipeId": "indianveggiedelight.com:lentil-soup:2026-09-21",
+      "line": "salt (to taste)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Kathleen Flinn",
+      "recipeId": "kathleenflinn.com:lentil-soup:2026-09-21",
+      "line": "1 teaspoon thyme (mix italian herbs or other seasoning)",
+      "caughtBy": [
+        "alias:thyme"
+      ],
+      "outcome": {
+        "grams": 1,
+        "fdcId": 170938,
+        "food": "Spices, thyme, dried",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Kathleen Flinn",
+      "recipeId": "kathleenflinn.com:lentil-soup:2026-09-21",
+      "line": "2 garlic cloves (minced)",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "no-food-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Kathleen Flinn",
+      "recipeId": "kathleenflinn.com:lentil-soup:2026-09-21",
+      "line": "Balsamic vinegar (optional)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Kathleen Flinn",
+      "recipeId": "kathleenflinn.com:lentil-soup:2026-09-21",
+      "line": "Handful fresh chopped herbs (optional)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Making Thyme for Health",
+      "recipeId": "makingthymeforhealth.com:lentil-soup:2026-09-21",
+      "line": "1 yellow onion (finely chopped)",
+      "caughtBy": [
+        "alias:yellow onion",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 110,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Making Thyme for Health",
+      "recipeId": "makingthymeforhealth.com:lentil-soup:2026-09-21",
+      "line": "2 bay leafs",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 170917,
+        "food": "Spices, bay leaf",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Making Thyme for Health",
+      "recipeId": "makingthymeforhealth.com:lentil-soup:2026-09-21",
+      "line": "2 tablespoons extra virgin olive oil",
+      "caughtBy": [
+        "pattern:olive oil"
+      ],
+      "outcome": {
+        "grams": 27,
+        "fdcId": 171413,
+        "food": "Oil, olive, salad or cooking",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Making Thyme for Health",
+      "recipeId": "makingthymeforhealth.com:lentil-soup:2026-09-21",
+      "line": "3 carrots (finely chopped)",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 183,
+        "fdcId": 170393,
+        "food": "Carrots, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Making Thyme for Health",
+      "recipeId": "makingthymeforhealth.com:lentil-soup:2026-09-21",
+      "line": "3 garlic cloves (minced)",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "no-food-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Making Thyme for Health",
+      "recipeId": "makingthymeforhealth.com:lentil-soup:2026-09-21",
+      "line": "3 stalks celery (finely chopped)",
+      "caughtBy": [
+        "line:count-noun-singular"
+      ],
+      "outcome": {
+        "grams": 120,
+        "fdcId": 169988,
+        "food": "Celery, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Making Thyme for Health",
+      "recipeId": "makingthymeforhealth.com:lentil-soup:2026-09-21",
+      "line": "4 cups vegetable broth",
+      "caughtBy": [
+        "alias:vegetable broth"
+      ],
+      "outcome": {
+        "grams": 884,
+        "fdcId": 171583,
+        "food": "Soup, vegetable broth, ready to serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "Making Thyme for Health",
+      "recipeId": "makingthymeforhealth.com:lentil-soup:2026-09-21",
+      "line": "squeeze fresh lemon juice",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:lentil-soup:2026-09-21",
+      "line": "1 lemon (zest + juice)",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": 167802,
+        "food": "Lemon juice from concentrate, bottled, REAL LEMON",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:lentil-soup:2026-09-21",
+      "line": "1 onion, chopped ((white, brown, yellow))",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 110,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:lentil-soup:2026-09-21",
+      "line": "1.5 litres / 1.5 quarts (6 cups) vegetable or chicken (stock / broth, low sodium)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 173858,
+        "food": "Chicken spread",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:lentil-soup:2026-09-21",
+      "line": "2 celery ribs (, chopped (about 1 1/4 cups))",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": 169988,
+        "food": "Celery, raw",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:lentil-soup:2026-09-21",
+      "line": "2 cups / 400g dried lentils (, green or brown, rinsed (Note 1))",
+      "caughtBy": [
+        "line:stated-grams",
+        "parse:slash-alternate"
+      ],
+      "outcome": {
+        "grams": 400,
+        "fdcId": 2644283,
+        "food": "Lentils, dry",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:lentil-soup:2026-09-21",
+      "line": "2 dried bay leaves",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 170917,
+        "food": "Spices, bay leaf",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:lentil-soup:2026-09-21",
+      "line": "2 garlic cloves, minced",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:lentil-soup:2026-09-21",
+      "line": "Chopped fresh parsley, for garnish",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:lentil-soup:2026-09-21",
+      "line": "Warm bread, to serve",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:lentil-soup:2026-09-21",
+      "line": "1 yellow onion, chopped",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": 170004,
+        "food": "Onions, yellow, sauteed",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:lentil-soup:2026-09-21",
+      "line": "2 celery stalks, chopped",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 80,
+        "fdcId": 169988,
+        "food": "Celery, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:lentil-soup:2026-09-21",
+      "line": "2 qt. vegetable broth",
+      "caughtBy": [
+        "alias:vegetable broth",
+        "line:leading-punctuation"
+      ],
+      "outcome": {
+        "grams": 1768,
+        "fdcId": 171583,
+        "food": "Soup, vegetable broth, ready to serve",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:lentil-soup:2026-09-21",
+      "line": "3 carrots, chopped",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 183,
+        "fdcId": 170393,
+        "food": "Carrots, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "lentil-soup",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:lentil-soup:2026-09-21",
+      "line": "3 garlic cloves, finely chopped",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 9,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Betty Crocker",
+      "recipeId": "bettycrocker.com:meatloaf:2026-09-21",
+      "line": "1 lb lean ground beef (at least 80%)",
+      "caughtBy": [
+        "pattern:ground beef"
+      ],
+      "outcome": {
+        "grams": 453.6,
+        "fdcId": 174036,
+        "food": "Beef, ground, 80% lean meat / 20% fat, raw",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Betty Crocker",
+      "recipeId": "bettycrocker.com:meatloaf:2026-09-21",
+      "line": "1/2 cup ketchup",
+      "caughtBy": [
+        "alias:ketchup"
+      ],
+      "outcome": {
+        "grams": 120,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Betty Crocker",
+      "recipeId": "bettycrocker.com:meatloaf:2026-09-21",
+      "line": "1/2 cup milk",
+      "caughtBy": [
+        "alias:milk"
+      ],
+      "outcome": {
+        "grams": 124.5,
+        "fdcId": 746782,
+        "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Betty Crocker",
+      "recipeId": "bettycrocker.com:meatloaf:2026-09-21",
+      "line": "1/4 cup ketchup",
+      "caughtBy": [
+        "alias:ketchup"
+      ],
+      "outcome": {
+        "grams": 60,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Betty Crocker",
+      "recipeId": "bettycrocker.com:meatloaf:2026-09-21",
+      "line": "2 large eggs, beaten",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 169904,
+        "food": "Eggs, scrambled, frozen mixture",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "1 c. ketchup",
+      "caughtBy": [
+        "alias:ketchup",
+        "line:leading-punctuation"
+      ],
+      "outcome": {
+        "grams": 240,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "1 medium yellow onion, finely chopped",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 170004,
+        "food": "Onions, yellow, sauteed",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "1/2 c. ground Saltines (from about 3/4 sleeve)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 175068,
+        "food": "Crackers, saltines, fat-free, low-sodium",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "1/2 c. whole milk",
+      "caughtBy": [
+        "alias:whole milk",
+        "line:leading-punctuation"
+      ],
+      "outcome": {
+        "grams": 124.5,
+        "fdcId": 746782,
+        "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "2 large eggs",
+      "caughtBy": [
+        "alias:eggs"
+      ],
+      "outcome": {
+        "grams": 100,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "3 tbsp. unsalted butter",
+      "caughtBy": [
+        "pattern:unsalted butter"
+      ],
+      "outcome": {
+        "grams": 42.6,
+        "fdcId": 173430,
+        "food": "Butter, without salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "Chopped fresh thyme, for serving (optional)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "Freshly ground black pepper",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "Kosher salt",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "How To Cook Recipes",
+      "recipeId": "howtocook.recipes:meatloaf:2026-09-21",
+      "line": "1 cup ketchup",
+      "caughtBy": [
+        "alias:ketchup"
+      ],
+      "outcome": {
+        "grams": 240,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "How To Cook Recipes",
+      "recipeId": "howtocook.recipes:meatloaf:2026-09-21",
+      "line": "1 large white onion (diced)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 170705,
+        "food": "SUBWAY, sweet onion chicken teriyaki sub on white bread with lettuce, tomato and sweet onion sauce",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "How To Cook Recipes",
+      "recipeId": "howtocook.recipes:meatloaf:2026-09-21",
+      "line": "1/2 cup milk",
+      "caughtBy": [
+        "alias:milk"
+      ],
+      "outcome": {
+        "grams": 124.5,
+        "fdcId": 746782,
+        "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "How To Cook Recipes",
+      "recipeId": "howtocook.recipes:meatloaf:2026-09-21",
+      "line": "1/2 tsp pepper (to taste)",
+      "caughtBy": [
+        "alias:pepper"
+      ],
+      "outcome": {
+        "grams": 1.2,
+        "fdcId": 170931,
+        "food": "Spices, pepper, black",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "How To Cook Recipes",
+      "recipeId": "howtocook.recipes:meatloaf:2026-09-21",
+      "line": "2 eggs",
+      "caughtBy": [
+        "alias:eggs",
+        "line:number-is-a-count"
+      ],
+      "outcome": {
+        "grams": 88,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "How To Cook Recipes",
+      "recipeId": "howtocook.recipes:meatloaf:2026-09-21",
+      "line": "2 tbsp garlic cloves (minced)",
+      "caughtBy": [
+        "alias:garlic cloves"
+      ],
+      "outcome": {
+        "grams": 17,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "How To Cook Recipes",
+      "recipeId": "howtocook.recipes:meatloaf:2026-09-21",
+      "line": "3/4 cup panko breadcrumbs",
+      "caughtBy": [
+        "pattern:breadcrumb"
+      ],
+      "outcome": {
+        "grams": 81,
+        "fdcId": 174928,
+        "food": "Bread, crumbs, dry, grated, plain",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "How To Cook Recipes",
+      "recipeId": "howtocook.recipes:meatloaf:2026-09-21",
+      "line": "4 tbsp ketchup",
+      "caughtBy": [
+        "alias:ketchup"
+      ],
+      "outcome": {
+        "grams": 68,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "I Wash You Dry",
+      "recipeId": "iwashyoudry.com:meatloaf:2026-09-21",
+      "line": "1 cup Italian breadcrumbs",
+      "caughtBy": [
+        "pattern:breadcrumb"
+      ],
+      "outcome": {
+        "grams": 108,
+        "fdcId": 174928,
+        "food": "Bread, crumbs, dry, grated, plain",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "I Wash You Dry",
+      "recipeId": "iwashyoudry.com:meatloaf:2026-09-21",
+      "line": "1 tsp pepper",
+      "caughtBy": [
+        "alias:pepper"
+      ],
+      "outcome": {
+        "grams": 2.3,
+        "fdcId": 170931,
+        "food": "Spices, pepper, black",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "I Wash You Dry",
+      "recipeId": "iwashyoudry.com:meatloaf:2026-09-21",
+      "line": "½ cup bbq sauce",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 143,
+        "fdcId": 174523,
+        "food": "Sauce, barbecue",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "I Wash You Dry",
+      "recipeId": "iwashyoudry.com:meatloaf:2026-09-21",
+      "line": "½ cup onion (diced)",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 80,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "I Wash You Dry",
+      "recipeId": "iwashyoudry.com:meatloaf:2026-09-21",
+      "line": "⅓ cup ketchup",
+      "caughtBy": [
+        "alias:ketchup",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 79.9,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "I Wash You Dry",
+      "recipeId": "iwashyoudry.com:meatloaf:2026-09-21",
+      "line": "2 eggs",
+      "caughtBy": [
+        "alias:eggs",
+        "line:number-is-a-count"
+      ],
+      "outcome": {
+        "grams": 88,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "I Wash You Dry",
+      "recipeId": "iwashyoudry.com:meatloaf:2026-09-21",
+      "line": "2 lbs. lean ground beef",
+      "caughtBy": [
+        "pattern:ground beef"
+      ],
+      "outcome": {
+        "grams": 907.2,
+        "fdcId": 174036,
+        "food": "Beef, ground, 80% lean meat / 20% fat, raw",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "McCormick",
+      "recipeId": "mccormick.com:meatloaf:2026-09-21",
+      "line": "1 egg",
+      "caughtBy": [
+        "alias:egg",
+        "line:number-is-a-count"
+      ],
+      "outcome": {
+        "grams": 44,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "McCormick",
+      "recipeId": "mccormick.com:meatloaf:2026-09-21",
+      "line": "1/2 teaspoon McCormick® Pure Ground Black Pepper",
+      "caughtBy": [
+        "pattern:black pepper"
+      ],
+      "outcome": {
+        "grams": 1.2,
+        "fdcId": 170931,
+        "food": "Spices, pepper, black",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Natasha's Kitchen",
+      "recipeId": "natashaskitchen.com:meatloaf:2026-09-21",
+      "line": "1 ½ tsp white vinegar",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 7.5,
+        "fdcId": 173469,
+        "food": "Vinegar, cider",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Natasha's Kitchen",
+      "recipeId": "natashaskitchen.com:meatloaf:2026-09-21",
+      "line": "1 med onion ((1 cup), finely chopped)",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 110,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Natasha's Kitchen",
+      "recipeId": "natashaskitchen.com:meatloaf:2026-09-21",
+      "line": "1/2 tsp ground black pepper",
+      "caughtBy": [
+        "pattern:black pepper"
+      ],
+      "outcome": {
+        "grams": 1.2,
+        "fdcId": 170931,
+        "food": "Spices, pepper, black",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Natasha's Kitchen",
+      "recipeId": "natashaskitchen.com:meatloaf:2026-09-21",
+      "line": "1/3 cup milk",
+      "caughtBy": [
+        "alias:milk"
+      ],
+      "outcome": {
+        "grams": 83,
+        "fdcId": 746782,
+        "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Natasha's Kitchen",
+      "recipeId": "natashaskitchen.com:meatloaf:2026-09-21",
+      "line": "2 large eggs",
+      "caughtBy": [
+        "alias:eggs"
+      ],
+      "outcome": {
+        "grams": 100,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Natasha's Kitchen",
+      "recipeId": "natashaskitchen.com:meatloaf:2026-09-21",
+      "line": "2 Tbsp ketchup",
+      "caughtBy": [
+        "alias:ketchup"
+      ],
+      "outcome": {
+        "grams": 34,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Natasha's Kitchen",
+      "recipeId": "natashaskitchen.com:meatloaf:2026-09-21",
+      "line": "3 garlic cloves (minced)",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "no-food-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Natasha's Kitchen",
+      "recipeId": "natashaskitchen.com:meatloaf:2026-09-21",
+      "line": "3/4 cup ketchup",
+      "caughtBy": [
+        "alias:ketchup"
+      ],
+      "outcome": {
+        "grams": 180,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Natasha's Kitchen",
+      "recipeId": "natashaskitchen.com:meatloaf:2026-09-21",
+      "line": "3/4 cup Panko breadcrumbs (or gluten-free bread crumbs)",
+      "caughtBy": [
+        "pattern:breadcrumb"
+      ],
+      "outcome": {
+        "grams": 81,
+        "fdcId": 174928,
+        "food": "Bread, crumbs, dry, grated, plain",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:meatloaf:2026-09-21",
+      "line": "1 cup panko breadcrumbs ((Note 1))",
+      "caughtBy": [
+        "pattern:breadcrumb"
+      ],
+      "outcome": {
+        "grams": 108,
+        "fdcId": 174928,
+        "food": "Bread, crumbs, dry, grated, plain",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:meatloaf:2026-09-21",
+      "line": "1/2 cup tomato ketchup",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 2709733,
+        "food": "Ketchup",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:meatloaf:2026-09-21",
+      "line": "1/4 cup tomato ketchup",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 2709733,
+        "food": "Ketchup",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:meatloaf:2026-09-21",
+      "line": "2 beef bouillon cubes (, crumbled or 2 tsp beef powder (Note 2))",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": 169656,
+        "food": "Sugars, powdered",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:meatloaf:2026-09-21",
+      "line": "2 eggs",
+      "caughtBy": [
+        "alias:eggs",
+        "line:number-is-a-count"
+      ],
+      "outcome": {
+        "grams": 88,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:meatloaf:2026-09-21",
+      "line": "3 garlic cloves (, minced)",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 9,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Serious Eats",
+      "recipeId": "seriouseats.com:meatloaf:manual:2026-09-20",
+      "line": "1 pound ground beef chuck",
+      "caughtBy": [
+        "pattern:ground beef"
+      ],
+      "outcome": {
+        "grams": 453.6,
+        "fdcId": 174036,
+        "food": "Beef, ground, 80% lean meat / 20% fat, raw",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Serious Eats",
+      "recipeId": "seriouseats.com:meatloaf:manual:2026-09-20",
+      "line": "1/2 cup chicken stock",
+      "caughtBy": [
+        "alias:chicken stock"
+      ],
+      "outcome": {
+        "grams": 124.5,
+        "fdcId": 174536,
+        "food": "Soup, chicken broth, ready-to-serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Serious Eats",
+      "recipeId": "seriouseats.com:meatloaf:manual:2026-09-20",
+      "line": "1/2 cup ketchup",
+      "caughtBy": [
+        "alias:ketchup"
+      ],
+      "outcome": {
+        "grams": 120,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Serious Eats",
+      "recipeId": "seriouseats.com:meatloaf:manual:2026-09-20",
+      "line": "1/2 cup whole milk",
+      "caughtBy": [
+        "alias:whole milk"
+      ],
+      "outcome": {
+        "grams": 124.5,
+        "fdcId": 746782,
+        "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Serious Eats",
+      "recipeId": "seriouseats.com:meatloaf:manual:2026-09-20",
+      "line": "2 large eggs",
+      "caughtBy": [
+        "alias:eggs"
+      ],
+      "outcome": {
+        "grams": 100,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Serious Eats",
+      "recipeId": "seriouseats.com:meatloaf:manual:2026-09-20",
+      "line": "2 stalks celery, finely chopped",
+      "caughtBy": [
+        "line:count-noun-singular"
+      ],
+      "outcome": {
+        "grams": 80,
+        "fdcId": 169988,
+        "food": "Celery, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Serious Eats",
+      "recipeId": "seriouseats.com:meatloaf:manual:2026-09-20",
+      "line": "2 tablespoons soy sauce",
+      "caughtBy": [
+        "alias:soy sauce"
+      ],
+      "outcome": {
+        "grams": 32,
+        "fdcId": 174277,
+        "food": "Soy sauce made from soy and wheat (shoyu)",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Serious Eats",
+      "recipeId": "seriouseats.com:meatloaf:manual:2026-09-20",
+      "line": "2 tablespoons unsalted butter",
+      "caughtBy": [
+        "pattern:unsalted butter"
+      ],
+      "outcome": {
+        "grams": 28.4,
+        "fdcId": 173430,
+        "food": "Butter, without salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Spend With Pennies",
+      "recipeId": "spendwithpennies.com:meatloaf:2026-09-21",
+      "line": "1 tablespoon ketchup (or chili sauce)",
+      "caughtBy": [
+        "alias:ketchup"
+      ],
+      "outcome": {
+        "grams": 17,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Spend With Pennies",
+      "recipeId": "spendwithpennies.com:meatloaf:2026-09-21",
+      "line": "½ cup chili sauce (see note)",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 136.5,
+        "fdcId": 171595,
+        "food": "Sauce, tomato chili sauce, bottled, with salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Spend With Pennies",
+      "recipeId": "spendwithpennies.com:meatloaf:2026-09-21",
+      "line": "½ cup ketchup",
+      "caughtBy": [
+        "alias:ketchup",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 120,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Spend With Pennies",
+      "recipeId": "spendwithpennies.com:meatloaf:2026-09-21",
+      "line": "½ medium onion (diced)",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 55,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Spend With Pennies",
+      "recipeId": "spendwithpennies.com:meatloaf:2026-09-21",
+      "line": "½ teaspoon black pepper",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 1.2,
+        "fdcId": 170931,
+        "food": "Spices, pepper, black",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Spend With Pennies",
+      "recipeId": "spendwithpennies.com:meatloaf:2026-09-21",
+      "line": "2 eggs",
+      "caughtBy": [
+        "alias:eggs",
+        "line:number-is-a-count"
+      ],
+      "outcome": {
+        "grams": 88,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Spend With Pennies",
+      "recipeId": "spendwithpennies.com:meatloaf:2026-09-21",
+      "line": "2 pounds lean ground beef",
+      "caughtBy": [
+        "pattern:ground beef"
+      ],
+      "outcome": {
+        "grams": 907.2,
+        "fdcId": 174036,
+        "food": "Beef, ground, 80% lean meat / 20% fat, raw",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Spend With Pennies",
+      "recipeId": "spendwithpennies.com:meatloaf:2026-09-21",
+      "line": "¾ cup Italian bread crumbs (or seasoned breadcrumbs)",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 81,
+        "fdcId": 174928,
+        "food": "Bread, crumbs, dry, grated, plain",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Spend With Pennies",
+      "recipeId": "spendwithpennies.com:meatloaf:2026-09-21",
+      "line": "¾ cup milk",
+      "caughtBy": [
+        "alias:milk",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 186.8,
+        "fdcId": 746782,
+        "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Country Cook",
+      "recipeId": "thecountrycook.net:meatloaf:2026-09-21",
+      "line": "1 large egg",
+      "caughtBy": [
+        "alias:egg"
+      ],
+      "outcome": {
+        "grams": 50,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Country Cook",
+      "recipeId": "thecountrycook.net:meatloaf:2026-09-21",
+      "line": "½ cup ketchup",
+      "caughtBy": [
+        "alias:ketchup",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 120,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Country Cook",
+      "recipeId": "thecountrycook.net:meatloaf:2026-09-21",
+      "line": "½ Tablespoon onion powder ((or 1/2 cup finely chopped onion))",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 3.5,
+        "fdcId": 171327,
+        "food": "Spices, onion powder",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Country Cook",
+      "recipeId": "thecountrycook.net:meatloaf:2026-09-21",
+      "line": "½ teaspoon dry ground mustard",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 0.6,
+        "fdcId": 169256,
+        "food": "Mustard greens, raw",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Country Cook",
+      "recipeId": "thecountrycook.net:meatloaf:2026-09-21",
+      "line": "½ teaspoon salt",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 3,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Country Cook",
+      "recipeId": "thecountrycook.net:meatloaf:2026-09-21",
+      "line": "¼ teaspoon black pepper",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 0.6,
+        "fdcId": 170931,
+        "food": "Spices, pepper, black",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Country Cook",
+      "recipeId": "thecountrycook.net:meatloaf:2026-09-21",
+      "line": "¼ teaspoon hot sauce ((optional))",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 1.5,
+        "fdcId": 174523,
+        "food": "Sauce, barbecue",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Country Cook",
+      "recipeId": "thecountrycook.net:meatloaf:2026-09-21",
+      "line": "⅛ teaspoon garlic powder",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 0.4,
+        "fdcId": 171325,
+        "food": "Spices, garlic powder",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Country Cook",
+      "recipeId": "thecountrycook.net:meatloaf:2026-09-21",
+      "line": "3/4 cup milk",
+      "caughtBy": [
+        "alias:milk"
+      ],
+      "outcome": {
+        "grams": 186.8,
+        "fdcId": 746782,
+        "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:meatloaf:2026-09-21",
+      "line": "1 cup torn-up bread pieces, or 1/2 cup breadcrumbs",
+      "caughtBy": [
+        "pattern:breadcrumb"
+      ],
+      "outcome": {
+        "grams": 108,
+        "fdcId": 174928,
+        "food": "Bread, crumbs, dry, grated, plain",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:meatloaf:2026-09-21",
+      "line": "1/2 cup ketchup, BBQ sauce, or other sauce to coat (optional)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 2709733,
+        "food": "Ketchup",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:meatloaf:2026-09-21",
+      "line": "2 large eggs, beaten",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 169904,
+        "food": "Eggs, scrambled, frozen mixture",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:meatloaf:2026-09-21",
+      "line": "2 pounds ground meat, such as beef, pork, veal, lamb, or a mix",
+      "caughtBy": [
+        "pattern:ground meat"
+      ],
+      "outcome": {
+        "grams": 907.2,
+        "fdcId": 174036,
+        "food": "Beef, ground, 80% lean meat / 20% fat, raw",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:meatloaf:2026-09-21",
+      "line": "2 to 3 cloves garlic, minced",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:meatloaf:2026-09-21",
+      "line": "8 ounces bacon (optional)",
+      "caughtBy": [
+        "alias:bacon"
+      ],
+      "outcome": {
+        "grams": 226.8,
+        "fdcId": 168277,
+        "food": "Pork, cured, bacon, unprepared",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:meatloaf:2026-09-21",
+      "line": "Freshly cracked black pepper, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:meatloaf:2026-09-21",
+      "line": "½ yellow onion, grated",
+      "caughtBy": [
+        "line:unknown-unit-is-name",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": null,
+        "fdcId": 170004,
+        "food": "Onions, yellow, sauteed",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:meatloaf:2026-09-21",
+      "line": "¼ cup ketchup",
+      "caughtBy": [
+        "alias:ketchup",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 60,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:meatloaf:2026-09-21",
+      "line": "¼ teaspoon freshly cracked black pepper",
+      "caughtBy": [
+        "parse:unicode-fraction",
+        "pattern:black pepper"
+      ],
+      "outcome": {
+        "grams": 0.6,
+        "fdcId": 170931,
+        "food": "Spices, pepper, black",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:meatloaf:2026-09-21",
+      "line": "1½ pounds 90/10 ground beef",
+      "caughtBy": [
+        "parse:unicode-fraction",
+        "pattern:ground beef"
+      ],
+      "outcome": {
+        "grams": 680.4,
+        "fdcId": 174036,
+        "food": "Beef, ground, 80% lean meat / 20% fat, raw",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:meatloaf:2026-09-21",
+      "line": "1½ teaspoons kosher salt",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 9,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:meatloaf:2026-09-21",
+      "line": "2 large eggs, beaten",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 169904,
+        "food": "Eggs, scrambled, frozen mixture",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:meatloaf:2026-09-21",
+      "line": "¾ cup breadcrumbs",
+      "caughtBy": [
+        "parse:unicode-fraction",
+        "pattern:breadcrumb"
+      ],
+      "outcome": {
+        "grams": 81,
+        "fdcId": 174928,
+        "food": "Bread, crumbs, dry, grated, plain",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:meatloaf:2026-09-21",
+      "line": "¾ cup whole milk",
+      "caughtBy": [
+        "alias:whole milk",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 186.8,
+        "fdcId": 746782,
+        "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:meatloaf:2026-09-21",
+      "line": "1 1/2 c. ketchup",
+      "caughtBy": [
+        "alias:ketchup",
+        "line:leading-punctuation"
+      ],
+      "outcome": {
+        "grams": 360,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:meatloaf:2026-09-21",
+      "line": "1 c. whole milk",
+      "caughtBy": [
+        "alias:whole milk",
+        "line:leading-punctuation"
+      ],
+      "outcome": {
+        "grams": 249,
+        "fdcId": 746782,
+        "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:meatloaf:2026-09-21",
+      "line": "10 slices thin/regular bacon",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 172439,
+        "food": "Bacon, meatless",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:meatloaf:2026-09-21",
+      "line": "4 whole eggs, beaten",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 169904,
+        "food": "Eggs, scrambled, frozen mixture",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:meatloaf:2026-09-21",
+      "line": "Freshly ground black pepper",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Pioneer Woman",
+      "recipeId": "thepioneerwoman.com:meatloaf:2026-09-21",
+      "line": "Tabasco, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    }
+  ]
+}
