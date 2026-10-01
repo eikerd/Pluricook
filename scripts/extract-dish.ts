@@ -14,6 +14,7 @@
 import { Glob } from "bun";
 import { curationFor, isListed, mayFetch, readCurated } from "../src/lib/curated-sources";
 import { extractRecipe, type ExtractFailure } from "../src/lib/recipe-extract";
+import { denialForStatus, mergeLookups, type DeniedPage, type Lookup } from "../src/lib/lookups";
 import { mergeRecipes } from "../src/lib/recipe-merge";
 import { evaluateRobots, verdictForStatus, type RobotsVerdict } from "../src/lib/robots";
 import { canonicalHost, canonicalUrl } from "../src/lib/site-registry";
@@ -63,6 +64,10 @@ if (targets.length === 0) {
 
 const curated = await readCurated();
 
+// The local calendar date. toISOString() is UTC, which stamps an evening run in
+// America/Chicago with tomorrow's date.
+const today = new Date().toLocaleDateString("en-CA");
+
 // robots.txt is per host, so it is read once however many pages a host has.
 const robotsCache = new Map<string, { status: number; text: string }>();
 
@@ -100,6 +105,8 @@ type Row = {
 
 const rows: Row[] = [];
 const recipes: ExtractedRecipe[] = [];
+// Every page turned away — by our rules or by the site — for a person to look up.
+const denied: DeniedPage[] = [];
 
 for (const target of targets.sort((a, b) => a.rank - b.rank)) {
   const host = canonicalHost(target.url);
@@ -111,6 +118,7 @@ for (const target of targets.sort((a, b) => a.rank - b.rank)) {
   if (!isListed(curated, host)) {
     const verdict = await clearByRobots(target.url);
     if (!verdict.cleared) {
+      denied.push({ url: target.url, site: name, denial: "not-cleared", detail: verdict.reason, acquisition: null });
       rows.push({
         site: name, outcome: "skipped", detail: `not cleared — ${verdict.reason}`.slice(0, 96),
         ingredients: "", steps: "", servings: "", minutes: "",
@@ -122,6 +130,10 @@ for (const target of targets.sort((a, b) => a.rank - b.rank)) {
 
   // Permission first. A site we may not take from is never contacted.
   if (!mayFetch(site)) {
+    denied.push({
+      url: target.url, site: name, denial: site.tier === "blocked" ? "blocked" : "policy",
+      detail: `${site.tier} · ${site.acquisition}`, acquisition: site.acquisition,
+    });
     rows.push({
       site: name,
       outcome: site.tier === "blocked" ? "blocked" : "skipped",
@@ -139,6 +151,10 @@ for (const target of targets.sort((a, b) => a.rank - b.rank)) {
     });
 
     if (!res.ok) {
+      denied.push({
+        url: target.url, site: name, denial: denialForStatus(res.status),
+        detail: `HTTP ${res.status}`, acquisition: site.acquisition,
+      });
       rows.push({
         site: name, outcome: "error", detail: `HTTP ${res.status}`,
         ingredients: "", steps: "", servings: "", minutes: "",
@@ -153,6 +169,7 @@ for (const target of targets.sort((a, b) => a.rank - b.rank)) {
       acquisition: site.acquisition,
       dish,
       licence: site.licence ?? null,
+      capturedAt: today,
     });
 
     if (!result.ok) {
@@ -174,6 +191,10 @@ for (const target of targets.sort((a, b) => a.rank - b.rank)) {
       minutes: result.recipe.totalTimeMinutes ?? "",
     });
   } catch (err) {
+    denied.push({
+      url: target.url, site: name, denial: "unreachable",
+      detail: String((err as Error).message).slice(0, 96), acquisition: site.acquisition,
+    });
     rows.push({
       site: name, outcome: "error", detail: String((err as Error).message).slice(0, 48),
       ingredients: "", steps: "", servings: "", minutes: "",
@@ -224,15 +245,33 @@ console.log(
     (merged.keptManual ? ` (${merged.keptManual} hand-entered)` : ""),
 );
 
+// The denied list, held beside the corpus. A person's notes on it survive re-runs.
+const lookupsOut = `data/lookups/${dish}.json`;
+const heldLookups: Lookup[] = (await Bun.file(lookupsOut).exists())
+  ? ((await Bun.file(lookupsOut).json()) as { pages: Lookup[] }).pages ?? []
+  : [];
+const lookups = mergeLookups(heldLookups, denied, recipes.map((r) => r.provenance.sourceUrl!), today);
+
+if (lookups.length > 0) {
+  console.log(`\nFor a person to look up — ${lookups.length} page(s) denied:`);
+  for (const l of lookups) {
+    console.log(`  ${l.handledAt ? "✓" : "·"} ${l.site} (${l.denial}: ${l.detail}) ${l.url}`);
+  }
+}
+
 if (dryRun) {
   console.log("--dry-run: nothing written.");
 } else if (merged.recipes.length > 0) {
   await Bun.write(
     out,
     JSON.stringify(
-      { dish, extractedAt: new Date().toISOString().slice(0, 10), recipes: merged.recipes },
+      { dish, extractedAt: today, recipes: merged.recipes },
       null, 2,
     ) + "\n",
   );
   console.log(`→ ${out}`);
+}
+if (!dryRun && lookups.length > 0) {
+  await Bun.write(lookupsOut, JSON.stringify({ dish, updatedAt: today, pages: lookups }, null, 2) + "\n");
+  console.log(`→ ${lookupsOut}`);
 }
