@@ -175,7 +175,13 @@ interface ComparisonViewProps {
 export function ComparisonView({ revision = 0, dish: pinned }: ComparisonViewProps) {
   const [dishes, setDishes] = useState<DishSummary[] | null>(null);
   const [dish, setDish] = useState<string | null>(pinned ?? null);
-  useEffect(() => { if (pinned) setDish(pinned); }, [pinned]);
+  // Another RAGG opened in the same page: its dish, from its whole recipe —
+  // a section such as "dough" belongs to the RAGG it was picked in.
+  useEffect(() => {
+    if (!pinned) return;
+    setDish(pinned);
+    setSection(WHOLE_RECIPE);
+  }, [pinned]);
   const [section, setSection] = useState(WHOLE_RECIPE);
   // The latest outcome — an answer OR a failure, never both — kept with the
   // question it belongs to. As two separate states, one question could hold a

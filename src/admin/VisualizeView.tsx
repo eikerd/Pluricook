@@ -45,7 +45,13 @@ interface VisualizeViewProps {
 export function VisualizeView({ revision = 0, dish: pinned }: VisualizeViewProps) {
   const [dishes, setDishes] = useState<DishSummary[] | null>(null);
   const [dish, setDish] = useState<string | null>(pinned ?? null);
-  useEffect(() => { if (pinned) setDish(pinned); }, [pinned]);
+  // Another RAGG opened in the same page: its dish, from its whole recipe —
+  // a section such as "dough" belongs to the RAGG it was picked in.
+  useEffect(() => {
+    if (!pinned) return;
+    setDish(pinned);
+    setSection(WHOLE_RECIPE);
+  }, [pinned]);
   const [section, setSection] = useState(WHOLE_RECIPE);
   const [view, setView] = useState("stacked");
   const [focus, setFocus] = useState<number | null>(null);

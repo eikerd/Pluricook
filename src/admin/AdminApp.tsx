@@ -36,7 +36,10 @@ interface DatasetMeta {
 
 export function AdminApp() {
   const [datasets, setDatasets] = useState<DatasetMeta[]>([]);
-  const [raggs, setRaggs] = useState<RaggSummary[]>([]);
+  // Read once here for both the rail and the home list: each read runs the
+  // comparison for every RAGG.
+  const [raggs, setRaggs] = useState<RaggSummary[] | null>(null);
+  const [raggsError, setRaggsError] = useState<string | null>(null);
   const path = usePath();
   const recipeId = recipeIdFromPath(path);
   const raggSlug = raggSlugFromPath(path);
@@ -58,7 +61,16 @@ export function AdminApp() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/raggs").then((r) => r.json()).then(setRaggs).catch(() => setRaggs([]));
+    // Saves come quickly; an answer for an older revision must not land after a newer one.
+    let stale = false;
+    fetch("/api/admin/raggs")
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return (await r.json()) as RaggSummary[];
+      })
+      .then((list) => { if (!stale) { setRaggs(list); setRaggsError(null); } })
+      .catch((e: unknown) => { if (!stale) setRaggsError(e instanceof Error ? e.message : "Could not list the RAGGs"); });
+    return () => { stale = true; };
   }, [revision]);
 
   const current = datasets.find((d) => d.id === active);
@@ -84,7 +96,7 @@ export function AdminApp() {
           <button type="button" className={`rail__item ${isActive(HOME) ? "is-active" : ""}`} onClick={() => open(HOME)}>
             All RAGGs
           </button>
-          {raggs.map((r) => (
+          {(raggs ?? []).map((r) => (
             <button
               type="button"
               key={r.slug}
@@ -122,7 +134,7 @@ export function AdminApp() {
             of a table rather than to a fresh view. */}
         <div style={{ display: onPage ? "none" : "contents" }}>
           {active === HOME ? (
-            <RaggList revision={revision} />
+            <RaggList raggs={raggs} error={raggsError} />
           ) : (
             <DataTable
               datasetId={active}

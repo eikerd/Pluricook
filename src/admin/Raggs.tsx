@@ -31,16 +31,8 @@ const LIST_COLUMNS: GridColumn<RaggSummary>[] = [
   { key: "top3", label: "3rd", value: nth(2) },
 ];
 
-export function RaggList({ revision }: { revision: number }) {
-  const [raggs, setRaggs] = useState<RaggSummary[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    getJson<RaggSummary[]>("/api/admin/raggs")
-      .then((list) => { setRaggs(list); setError(null); })
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : "Could not list the RAGGs"));
-  }, [revision]);
-
+/** The RAGGs as AdminApp read them for the rail too; null while loading. */
+export function RaggList({ raggs, error }: { raggs: RaggSummary[] | null; error: string | null }) {
   return (
     <div className="pane">
       <header className="pane__head">
