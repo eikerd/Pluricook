@@ -177,6 +177,16 @@ export function compareRecipes(opts: CompareOptions): Comparison {
      WHERE fn.fdc_id = ?1 AND n.name = 'Sodium, Na' LIMIT 1`,
   );
 
+  // A negative id is our own food (not-in-usda.json), which carries its own
+  // sodium and category; everything else is read from usda.db.
+  const notInUsda = (opts.aliases ?? EMPTY_TABLE).notInUsda;
+  const ownFood = (id: number) => {
+    const e = id < 0 ? notInUsda.byId.get(id) : undefined;
+    return e?.kind === "food" ? e : undefined;
+  };
+  const sodiumPer100g = (id: number) => ownFood(id)?.sodiumMgPer100g ?? sodiumOf.get(id)?.amount ?? 0;
+  const categoryIdOf = (id: number) => ownFood(id)?.categoryId ?? categoryOf.get(id)?.category_id ?? null;
+
   const unmatched: Comparison["unmatched"] = [];
 
   const section = opts.section ?? null;
@@ -215,7 +225,7 @@ export function compareRecipes(opts: CompareOptions): Comparison {
       }
 
       // USDA nutrient amounts are per 100 g of the food.
-      sodiumMg += ((sodiumOf.get(result.fdcId)?.amount ?? 0) * result.grams) / 100;
+      sodiumMg += (sodiumPer100g(result.fdcId) * result.grams) / 100;
 
       parts.push({
         rawLine,
@@ -223,7 +233,7 @@ export function compareRecipes(opts: CompareOptions): Comparison {
         grams: result.grams,
         basis: result.basis,
         description: result.foodDescription ?? `fdc ${result.fdcId}`,
-        klass: classifyCategory(categoryOf.get(result.fdcId)?.category_id ?? null),
+        klass: classifyCategory(categoryIdOf(result.fdcId)),
       });
     }
 

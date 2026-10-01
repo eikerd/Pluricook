@@ -19,9 +19,12 @@
  * improves, and the work is ordinary data entry against a list of misses.
  */
 
+import { EMPTY_NOT_IN_USDA, readNotInUsda, type NotInUsdaTable } from "./not-in-usda";
+
 export const ALIASES_PATH = "data/ingredients/aliases.json";
 
 export interface AliasEntry {
+  /** A USDA fdc_id, or a negative id naming an entry in not-in-usda.json. */
   fdcId: number;
   note?: string;
 }
@@ -45,14 +48,17 @@ export interface AliasTable {
   /** Sorted longest-first, so "ground beef chuck" wins over "beef". */
   patterns: Array<[string, AliasEntry]>;
   reject: string[];
+  /** What a negative fdcId names: our own foods and forms (not-in-usda.json). */
+  notInUsda: NotInUsdaTable;
 }
 
-export const EMPTY_TABLE: AliasTable = { exact: new Map(), patterns: [], reject: [] };
+export const EMPTY_TABLE: AliasTable = { exact: new Map(), patterns: [], reject: [], notInUsda: EMPTY_NOT_IN_USDA };
 
 const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
 
-export function buildAliasTable(file: AliasFile): AliasTable {
+export function buildAliasTable(file: AliasFile, notInUsda: NotInUsdaTable = EMPTY_NOT_IN_USDA): AliasTable {
   return {
+    notInUsda,
     exact: new Map(Object.entries(file.exact ?? {}).map(([k, v]) => [norm(k), v])),
     // Longest first: a more specific phrase must beat a shorter one that is a
     // substring of it, regardless of the order they were written in.
@@ -65,8 +71,9 @@ export function buildAliasTable(file: AliasFile): AliasTable {
 
 export async function readAliases(path = ALIASES_PATH): Promise<AliasTable> {
   const file = Bun.file(path);
-  if (!(await file.exists())) return EMPTY_TABLE;
-  return buildAliasTable((await file.json()) as AliasFile);
+  const notInUsda = await readNotInUsda();
+  if (!(await file.exists())) return { ...EMPTY_TABLE, notInUsda };
+  return buildAliasTable((await file.json()) as AliasFile, notInUsda);
 }
 
 /**
