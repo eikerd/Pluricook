@@ -5,6 +5,8 @@
  * resolved each line to a food record, so that identifier is a free, natural
  * key. The cost is that clustering inherits the matcher's mistakes, which is
  * why misses are surfaced in `unmatched` and pinned in the regression fixture.
+ * Foods a cook would swap — four broths, three lentils — are first folded into
+ * one by the equivalents table (equivalents.ts), so they cluster as one.
  *
  * Amounts are stated against the dish's ANCHOR (see anchor.ts) — meat for a
  * meat dish, flour for a baked one, legumes for a dal, and so on down to a
@@ -18,6 +20,7 @@
  * far off its peers usually has a parsing error rather than a bold cook.
  */
 
+import type { Equivalents } from "./equivalents";
 import type { Database } from "bun:sqlite";
 import {
   chooseAnchor,
@@ -153,6 +156,8 @@ export interface CompareOptions {
    * Recipes that do not carry the section take no part.
    */
   section?: string | null;
+  /** Equivalent USDA foods, folded into one before clustering. See equivalents.ts. */
+  equivalents?: Equivalents;
 }
 
 interface ResolvedPart {
@@ -171,6 +176,9 @@ export function compareRecipes(opts: CompareOptions): Comparison {
 
   const categoryOf = opts.db.query<{ category_id: number | null }, [number]>(
     `SELECT category_id FROM foods WHERE fdc_id = ?1`,
+  );
+  const descriptionOf = opts.db.query<{ description: string }, [number]>(
+    `SELECT description FROM foods WHERE fdc_id = ?1`,
   );
   const sodiumOf = opts.db.query<{ amount: number | null }, [number]>(
     `SELECT fn.amount FROM food_nutrients fn JOIN nutrients n ON n.id = fn.nutrient_id
@@ -214,16 +222,21 @@ export function compareRecipes(opts: CompareOptions): Comparison {
         continue;
       }
 
-      // USDA nutrient amounts are per 100 g of the food.
+      // USDA nutrient amounts are per 100 g of the food. Sodium is the line's
+      // own match: salted butter counted as butter is still salted.
       sodiumMg += ((sodiumOf.get(result.fdcId)?.amount ?? 0) * result.grams) / 100;
 
+      // The food the line is counted as: its own match, or the one its group folds into.
+      const counted = opts.equivalents?.get(result.fdcId) ?? result.fdcId;
       parts.push({
         rawLine,
-        fdcId: result.fdcId,
+        fdcId: counted,
         grams: result.grams,
         basis: result.basis,
-        description: result.foodDescription ?? `fdc ${result.fdcId}`,
-        klass: classifyCategory(categoryOf.get(result.fdcId)?.category_id ?? null),
+        description: counted === result.fdcId
+          ? (result.foodDescription ?? `fdc ${counted}`)
+          : (descriptionOf.get(counted)?.description ?? `fdc ${counted}`),
+        klass: classifyCategory(categoryOf.get(counted)?.category_id ?? null),
       });
     }
 
