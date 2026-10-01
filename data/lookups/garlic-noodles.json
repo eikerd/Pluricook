@@ -1,0 +1,28 @@
+{
+  "dish": "garlic-noodles",
+  "updatedAt": "2026-09-30",
+  "pages": [
+    {
+      "url": "https://leitesculinaria.com/416811/recipes-san-francisco-style-vietnamese-garlic-noodles.html",
+      "site": "Leite's Culinaria",
+      "denial": "refused",
+      "detail": "HTTP 403",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-09-30",
+      "lastDeniedAt": "2026-09-30",
+      "handledAt": null,
+      "note": null
+    },
+    {
+      "url": "https://cooking.nytimes.com/recipes/1023012-san-francisco-style-vietnamese-american-garlic-noodles",
+      "site": "NYT Cooking",
+      "denial": "policy",
+      "detail": "normal · none",
+      "acquisition": "none",
+      "firstDeniedAt": "2026-09-30",
+      "lastDeniedAt": "2026-09-30",
+      "handledAt": null,
+      "note": null
+    }
+  ]
+}

@@ -133,7 +133,10 @@ describe("the Search terms table", () => {
   test("a term off the list sorts last whichever way rank is sorted", async () => {
     for (const dir of ["asc", "desc"]) {
       const page = (await queryDataset("search-terms", { sort: "rank", dir, pageSize: 500 }))!;
-      expect(page.rows.at(-1)).toMatchObject({ rank: null, slug: "detroit-pizza" });
+      // Every term off the list (Detroit pizza, garlic noodles…) trails every ranked one.
+      const firstUnranked = page.rows.findIndex((r) => r.rank === null);
+      expect(firstUnranked).toBeGreaterThan(0);
+      expect(page.rows.slice(firstUnranked).every((r) => r.rank === null)).toBe(true);
     }
   });
 
