@@ -1,0 +1,69 @@
+{
+  "_comment": [
+    "Equivalent USDA foods: ingredients a cook would swap for one another, counted as one.",
+    "",
+    "The comparison — and every chart and grid drawn from it — groups each line by the USDA food",
+    "it matched. Without this file, four broths match four USDA records and draw four bands.",
+    "Each group names the USDA food it is counted as (fdcId) and the USDA foods it stands in for",
+    "(members). A line keeps its own match for its grams and sodium; only the grouping changes.",
+    "",
+    "Look ids up in the admin's USDA foods table. A food may sit in one group only, and a group's",
+    "own food may not be another group's member.",
+    "",
+    "Seeded 2026-09-30 from the matches of lentil soup, meatloaf and Detroit pizza."
+  ],
+  "groups": [
+    {
+      "name": "Broth and stock",
+      "fdcId": 174536,
+      "members": [
+        171583, 171180, 172883, 172884, 171596, 2707132,
+        171179, 171538, 172889, 172888, 171609,
+        172922, 174557, 172923, 174566, 172924, 174551
+      ],
+      "note": "Soup, chicken broth, ready-to-serve. Whatever broth is in the fridge — vegetable, chicken or beef, regular or reduced-sodium, home-made stock, bouillon made up with water — opens every soup that calls for any of them; the owner, 2026-09-30, with a non-vegetarian broth as the default. Ready-to-use liquids only: cubes, powders and condensed soup do far more per gram, and fish stock is its own flavour."
+    },
+    {
+      "name": "Lentils",
+      "fdcId": 172420,
+      "members": [2644283, 174284],
+      "note": "Lentils, raw. 'Lentils, dry' and 'pink or red, raw' are uncooked lentils too; the colour is the cook's choice."
+    },
+    {
+      "name": "Wheat flour",
+      "fdcId": 168896,
+      "members": [168894],
+      "note": "Wheat flour, white, bread. All-purpose stands in for bread flour in a pan pizza."
+    },
+    {
+      "name": "Butter",
+      "fdcId": 173430,
+      "members": [173410, 790508],
+      "note": "Butter, without salt. Salted butter's sodium is still counted from its own record."
+    },
+    {
+      "name": "Bread for the binder",
+      "fdcId": 174928,
+      "members": [167532, 167935],
+      "note": "Bread, crumbs, dry. White bread soaked as a panade does the crumbs' job. 'Bread, pan dulce' is the matcher's reading of plain bread in The Country Cook's meatloaf."
+    },
+    {
+      "name": "Tomatoes",
+      "fdcId": 170051,
+      "members": [1750354, 321360],
+      "note": "Tomatoes, red, ripe, canned. Fresh roma or grape tomatoes in a soup do the canned ones' job. Paste is not here: it is concentrated."
+    },
+    {
+      "name": "Cooking oil",
+      "fdcId": 171413,
+      "members": [172370],
+      "note": "Oil, olive. A neutral soybean oil is the same fat for sautéing."
+    },
+    {
+      "name": "Soy sauce",
+      "fdcId": 174277,
+      "members": [172474],
+      "note": "Soy sauce (shoyu). Reduced-sodium soy sauce's sodium is still counted from its own record."
+    }
+  ]
+}

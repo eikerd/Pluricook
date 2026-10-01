@@ -13,7 +13,6 @@ import { curationFor, readCurated } from "./curated-sources";
 import { ownersView } from "./clones";
 import { installCategoryTable } from "./usda-categories";
 import { usdaFood, type UsdaFoodPage } from "./usda-food";
-import { readSearchTerms, type SearchTerm } from "./search-terms";
 import type { ExtractedRecipe } from "../types/provenance";
 
 const USDA_PATH = "usda.db";
@@ -134,24 +133,6 @@ export const DATASETS: DatasetDef[] = [
     curated: true,
   },
   {
-    id: "searches",
-    label: "Searches",
-    db: DEFAULT_REGISTRY_PATH,
-    select: `a.query, a.rank, a.kind, s.display_name AS site, a.url, a.seen_at`,
-    from: `FROM search_appearances a JOIN sites s ON s.host = a.host`,
-    columns: [
-      { key: "query", label: "Dish", width: "10rem" },
-      { key: "rank", label: "Rank", numeric: true },
-      { key: "kind", label: "Kind", badge: true },
-      { key: "site", label: "Site", width: "16rem" },
-      { key: "url", label: "URL", width: "32rem" },
-      { key: "seen_at", label: "Seen" },
-    ],
-    defaultSort: "rank",
-    defaultDir: "asc",
-    searchable: ["a.query", "s.display_name", "a.url"],
-  },
-  {
     id: "fetches",
     label: "Fetch log",
     db: DEFAULT_REGISTRY_PATH,
@@ -244,25 +225,6 @@ export const DATASETS: DatasetDef[] = [
     },
   },
   {
-    id: "search-terms",
-    label: "Search terms",
-    db: "",                    // file-backed: data/search-terms.json, not a database
-    rows: () => searchTermRows(),
-    select: "",
-    from: "",
-    columns: [
-      { key: "rank", label: "Rank", numeric: true },
-      { key: "term", label: "Term", width: "18rem" },
-      { key: "group", label: "Group", width: "20rem" },
-      { key: "slug", label: "Slug", width: "14rem" },
-      { key: "recipes", label: "Recipes", numeric: true },
-    ],
-    defaultSort: "rank",
-    defaultDir: "asc",
-    // Aliases are searched but not shown: "filet mignon" finds Beef Tenderloin.
-    searchable: ["term", "group", "slug", "aliases"],
-  },
-  {
     id: "recipes",
     label: "Recipes",
     db: "",                    // file-backed: data/recipes/*.json, not a database
@@ -326,7 +288,7 @@ function withStance(row: Record<string, unknown>): Record<string, unknown> {
 /**
  * The library's recipes as table rows, as the owner has them. A recipe's dish is
  * its file's name — the one identifier the routes and the comparison use — not
- * the `dish` written inside it, so a search term finds exactly the recipes the
+ * the `dish` written inside it, so a RAGG lists exactly the recipes the
  * comparison does.
  */
 export async function readRecipeFiles(glob: string): Promise<Record<string, unknown>[]> {
@@ -359,39 +321,6 @@ export async function readRecipeFiles(glob: string): Promise<Record<string, unkn
     }
   }
   return rows;
-}
-
-/** The search terms, each with how many of the library's recipes attach to it. */
-async function searchTermRows(): Promise<Record<string, unknown>[]> {
-  const [terms, recipes] = await Promise.all([readSearchTerms(), readRecipeFiles(RECIPE_FILES)]);
-  const attached = new Map<string, number>();
-  for (const r of recipes) attached.set(String(r.dish), (attached.get(String(r.dish)) ?? 0) + 1);
-  return terms.map((t) => ({
-    slug: t.slug,
-    term: t.term,
-    rank: t.rank,
-    group: t.group,
-    recipes: attached.get(t.slug) ?? 0,
-    aliases: t.aliases?.join(", ") ?? null,
-  }));
-}
-
-export interface TermPageData {
-  term: SearchTerm;
-  /** The Recipes table's columns, less Dish: every recipe here is this term's. */
-  columns: Column[];
-  recipes: Record<string, unknown>[];
-}
-
-/** One search term's landing page: the term, and the recipes attached to it. Null for a slug no term has. */
-export async function termPage(slug: string): Promise<TermPageData | null> {
-  const term = (await readSearchTerms()).find((t) => t.slug === slug);
-  if (!term) return null;
-  return {
-    term,
-    columns: DATASETS.find((d) => d.id === "recipes")!.columns.filter((c) => c.key !== "dish"),
-    recipes: (await readRecipeFiles(RECIPE_FILES)).filter((r) => r.dish === slug),
-  };
 }
 
 /** Star order, so sorting the ★ column puts required sites first. */
@@ -532,44 +461,4 @@ export async function queryDataset(
     .map(withStance);
 
   return { ...base, rows, total, pageSize };
-}
-
-export interface OverviewStat {
-  label: string;
-  value: number | string;
-}
-
-export async function overview(): Promise<{ stats: OverviewStat[]; warnings: string[] }> {
-  const recipeCount = (await readRecipeFiles(RECIPE_FILES)).length;
-  const reg = open(DEFAULT_REGISTRY_PATH);
-  const usda = open(USDA_PATH);
-  const n = (db: Database | null, sql: string): number =>
-    db ? (db.query<{ n: number }, []>(sql).get()?.n ?? 0) : 0;
-
-  const stats: OverviewStat[] = [
-    { label: "Sites known", value: n(reg, "SELECT COUNT(*) n FROM sites") },
-    { label: "Dishes searched", value: n(reg, "SELECT COUNT(DISTINCT query) n FROM search_appearances") },
-    { label: "Search results", value: n(reg, "SELECT COUNT(*) n FROM search_appearances") },
-    { label: "Fetch attempts", value: n(reg, "SELECT COUNT(*) n FROM fetch_attempts") },
-    { label: "Pages reached", value: n(reg, "SELECT COUNT(*) n FROM fetch_attempts WHERE outcome='ok'") },
-    { label: "Recipes extracted", value: recipeCount },
-    { label: "USDA foods", value: n(usda, "SELECT COUNT(*) n FROM foods") },
-    { label: "USDA portions", value: n(usda, "SELECT COUNT(*) n FROM portions") },
-  ];
-
-  const warnings: string[] = [];
-  if (reg) {
-    const banned = reg
-      .query<{ host: string }, []>(
-        `SELECT host FROM site_policies WHERE written_prohibition = 1 ORDER BY host`,
-      )
-      .all();
-    for (const b of banned) {
-      warnings.push(`${b.host} prohibits data mining or RAG in writing — excluded from the corpus.`);
-    }
-  }
-  if (!usda) warnings.push("usda.db not built — run bun scripts/build-usda-db.ts");
-  if (!reg) warnings.push("sources.db not built — run bun scripts/import-observations.ts");
-
-  return { stats, warnings };
 }

@@ -3,7 +3,7 @@ import { Glob } from "bun";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { queryDataset, readRecipeFiles, termPage } from "./admin-queries";
+import { readRecipeFiles } from "./admin-queries";
 import {
   parseRankedList, readSearchTerms, slugOf, splitNote, termsFromList, validateTerms, type SearchTerm,
 } from "./search-terms";
@@ -119,36 +119,6 @@ describe("the seeded terms", () => {
   });
 });
 
-describe("the Search terms table", () => {
-  test("lists every term by rank, with how many recipes attach to each", async () => {
-    const page = (await queryDataset("search-terms", { pageSize: 500 }))!;
-    expect(page.columns.map((c) => c.key)).toEqual(["rank", "term", "group", "slug", "recipes"]);
-    expect(page.total).toBe((await readSearchTerms()).length);
-    expect(page.rows[0]).toMatchObject({ rank: 1, slug: "pancake", recipes: 0 });
-    const meatloaf = page.rows.find((r) => r.slug === "meatloaf")!;
-    expect(meatloaf.recipes).toBe((await termPage("meatloaf"))!.recipes.length);
-    expect(meatloaf.recipes).toBeGreaterThan(0);
-  });
-
-  test("a term off the list sorts last whichever way rank is sorted", async () => {
-    for (const dir of ["asc", "desc"]) {
-      const page = (await queryDataset("search-terms", { sort: "rank", dir, pageSize: 500 }))!;
-      expect(page.rows.at(-1)).toMatchObject({ rank: null, slug: "detroit-pizza" });
-    }
-  });
-
-  test("says which column it is sorted by and which way, so the header can show it", async () => {
-    expect(await queryDataset("search-terms", {})).toMatchObject({ sort: "rank", dir: "asc" });
-    expect(await queryDataset("search-terms", { sort: "term", dir: "desc" })).toMatchObject({ sort: "term", dir: "desc" });
-    expect(await queryDataset("search-terms", { sort: "no-such-column" })).toMatchObject({ sort: "rank", dir: "asc" });
-  });
-
-  test("the filter finds a term by its aliases", async () => {
-    const page = (await queryDataset("search-terms", { q: "filet mignon" }))!;
-    expect(page.rows.map((r) => r.slug)).toEqual(["beef-tenderloin"]);
-  });
-});
-
 describe("which term a recipe attaches to", () => {
   // Codex, PR #3 round 1: the comparison takes a dish from its file's name
   // (the one identifier the routes use), so the terms must too.
@@ -168,18 +138,5 @@ describe("which term a recipe attaches to", () => {
     await Bun.write(join(dir, "meatloaf.json"), JSON.stringify({ dish: "meat-loaf", recipes: [recipe] }));
     const rows = await readRecipeFiles(`${dir}/*.json`);
     expect(rows.find((r) => r.id === recipe.id)?.dish).toBe("meatloaf");
-  });
-});
-
-describe("termPage", () => {
-  test("holds the term, and its recipes in the Recipes table's columns less Dish", async () => {
-    const page = (await termPage("meatloaf"))!;
-    expect(page.term).toMatchObject({ slug: "meatloaf", term: "Meatloaf Recipe", rank: 8 });
-    expect(page.columns.map((c) => c.key)).not.toContain("dish");
-    expect(page.recipes.every((r) => r.dish === "meatloaf")).toBe(true);
-  });
-
-  test("a slug no term has is null", async () => {
-    expect(await termPage("no-such-dish")).toBeNull();
   });
 });

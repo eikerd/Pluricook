@@ -21,6 +21,8 @@ export interface GridColumn<T> {
   value: (row: T) => SortValue;
   /** What the cell shows, when that differs from the sort value. */
   render?: (row: T) => ReactNode;
+  /** False for a column of controls, which has nothing to sort by. */
+  sortable?: boolean;
 }
 
 interface SortableGridProps<T> {
@@ -44,6 +46,8 @@ interface SortableGridProps<T> {
   rowClass?: (row: T) => string | undefined;
   /** Open a row's own page, as DataTable does: rows become clickable, and reachable by keyboard. */
   onRowClick?: (row: T) => void;
+  /** A last row that no sort moves — the blank row a sheet adds lines from. */
+  footer?: ReactNode;
 }
 
 /** Nulls sink to the bottom in both directions: "no value" is never the top answer. */
@@ -58,7 +62,7 @@ function compare(a: SortValue, b: SortValue, dir: SortDir): number {
   return dir === "asc" ? order : -order;
 }
 
-export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, detail, rowClass, onRowClick }: SortableGridProps<T>) {
+export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, detail, rowClass, onRowClick, footer }: SortableGridProps<T>) {
   const [sort, setSort] = useState(initialSort);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
@@ -87,6 +91,7 @@ export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, det
           <tr>
             {columns.map((c) => {
               const active = sort.key === c.key;
+              if (c.sortable === false) return <th key={c.key} className="unsorted" aria-label={c.label || undefined} />;
               return (
                 <th
                   key={c.key}
@@ -143,6 +148,7 @@ export function SortableGrid<T>({ columns, rows, label, rowKey, initialSort, det
               </Fragment>
             );
           })}
+          {footer}
         </tbody>
       </table>
     </div>

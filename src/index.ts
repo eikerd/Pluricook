@@ -1,7 +1,7 @@
 import { serve } from "bun";
 import index from "./index.html";
-import { DATASETS, overview, queryDataset, termPage, usdaFoodPage } from "./lib/admin-queries";
-import { SLUG } from "./lib/search-terms";
+import { DATASETS, queryDataset, usdaFoodPage } from "./lib/admin-queries";
+import { listRaggs, raggPage } from "./lib/raggs";
 import {
   cloneRecipe, compareDish, deleteClone, listDishes, recipePage, revertCorrection, saveCorrection, type PageOutcome,
 } from "./lib/compare-service";
@@ -18,9 +18,17 @@ const server = serve({
   routes: {
     "/*": index,
 
-    /** Headline counts and any standing warnings. */
-    "/api/admin/overview": {
-      GET: async () => Response.json(await overview()),
+    /** The RAGGs — what was searched for, and the sourced recipes gathered for it — newest first. */
+    "/api/admin/raggs": {
+      GET: async () => Response.json(await listRaggs()),
+    },
+
+    /** One RAGG: its figures, and its constituent recipes. */
+    "/api/admin/ragg": {
+      GET: async (req) => {
+        const result = await raggPage(new URL(req.url).searchParams.get("slug") ?? "");
+        return result.ok ? Response.json(result.page) : Response.json({ error: result.error }, { status: result.status });
+      },
     },
 
     /** The sidebar: which tables exist and what they hold. */
@@ -125,16 +133,6 @@ const server = serve({
         }
         const site = await setTier(req.params.host, tier as Tier, { displayName });
         return Response.json({ host: req.params.host, ...site });
-      },
-    },
-
-    /** One search term's landing page: the term, and the recipes attached to it. */
-    "/api/admin/term": {
-      GET: async (req) => {
-        const slug = new URL(req.url).searchParams.get("slug") ?? "";
-        if (!SLUG.test(slug)) return Response.json({ error: "slug must be a dish key" }, { status: 400 });
-        const page = await termPage(slug);
-        return page ? Response.json(page) : Response.json({ error: `No search term "${slug}".` }, { status: 404 });
       },
     },
 

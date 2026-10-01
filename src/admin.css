@@ -193,7 +193,7 @@ h1, h2, h3, .brand__name {
 
 /* Several grids share this page, so each takes its own height instead of
    stretching to fill the pane as a lone DataTable does. */
-.grid-wrap--fit { flex: none; margin-top: 0.6rem; }
+.grid-wrap.grid-wrap--fit { flex: none; margin-top: 0.6rem; }
 
 .pane__note { margin: 0.3rem 0 0; font-size: 0.9rem; }
 
@@ -342,12 +342,12 @@ h1, h2, h3, .brand__name {
 
 .grid thead th.sorted .arrow { opacity: 1; }
 
+/* Every cell is one line, shown whole, as in a spreadsheet: a long value
+   widens its column and the grid scrolls sideways — it never wraps, and it is
+   never cut off with an ellipsis. */
 .grid tbody td {
   padding: 0.42rem 0.7rem;
   border-bottom: 1px solid #f0e8d8;
-  max-width: 34rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -502,9 +502,6 @@ h1, h2, h3, .brand__name {
 .recipe__crumb { margin: 0 0 0.4rem; font-size: 0.9rem; }
 .recipe__actions { display: flex; gap: 0.5rem; }
 .recipe__lines { margin-top: 1.25rem; }
-/* A recipe's lines are long text: they wrap, so the sheet fits the page
-   instead of scrolling its first columns out of view. Figures stay on one line. */
-.recipe__lines .grid tbody td:not(.num) { min-width: 5rem; white-space: normal; }
 .grid tr.is-highlighted td { background: #fdf3de; }
 .recipe__section-name {
   margin: 0 0 0.35rem;
@@ -572,30 +569,48 @@ h1, h2, h3, .brand__name {
 .button--quiet { background: #fff; color: var(--paprika); }
 .button--quiet:hover:not(:disabled) { background: var(--parchment-warm); }
 
-.recipe-editor { display: grid; gap: 1.25rem; max-width: 46rem; margin-top: 1.25rem; }
-.recipe-editor fieldset {
-  display: grid;
-  gap: 0.7rem;
-  margin: 0;
-  padding: 0.9rem 1rem 1rem;
-  border: 1px solid var(--cream-line);
-  border-radius: 3px;
-  background: #fff;
+/* ── Sheets: grids typed into ─────────────────────────────── */
+
+/* A cell's input looks like the cell until it has focus. */
+.cell {
+  width: auto;
+  min-width: 100%;
+  margin: -0.2rem -0.35rem;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
 }
-.recipe-editor legend { padding: 0 0.3rem; font-weight: 600; color: var(--espresso-soft); }
-.field { display: grid; gap: 0.25rem; }
-.field > span { font-size: 0.8rem; color: var(--ink-soft); }
-.recipe-editor__figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 0.7rem; }
-.recipe-editor__section { display: grid; justify-items: start; gap: 0.5rem; padding-bottom: 0.9rem; border-bottom: 1px solid var(--cream-line); }
-.recipe-editor__section > .field { width: 100%; }
-.recipe-editor__lines {
-  width: 100%;
-  resize: vertical;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.85rem;
-  line-height: 1.5;
+.cell:hover { border-color: var(--cream-line); }
+.cell:focus { outline: none; border-color: var(--paprika); background: #fff; }
+.cell::placeholder { color: #b9a898; }
+.cell--num { text-align: right; }
+.cell-delete {
+  border: 0;
+  background: none;
+  color: #b9a898;
+  font: inherit;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
 }
-.recipe-editor__actions { display: flex; gap: 0.6rem; }
+.cell-delete:hover, .cell-delete:focus-visible { color: var(--paprika); }
+.sheet__add td { background: #fdfaf4; }
+/* A sheet's one-row details table has nothing to sort. */
+.grid--static thead th { cursor: default; }
+.grid--static thead th:hover { background: var(--parchment-warm); }
+.grid thead th.unsorted { cursor: default; }
+/* While a save is out, what the parser read describes the lines before it. */
+.recipe__lines[data-pending] .grid tbody td:not(:has(input)) { opacity: 0.55; }
+
+/* ── RAGGs ──────────────────────────────────────────────── */
+
+.rail__item--sub { padding-left: 2rem; font-size: 0.92rem; }
+/* The comparison and the charts sit inside a RAGG's page, not as pages of their own. */
+.ragg .pane { min-height: 0; padding: 0; }
+.ragg .pane .pane__head { padding-top: 1rem; }
 
 /* Table rows that open a page of their own. */
 tr.is-link { cursor: pointer; }
@@ -639,3 +654,6 @@ tr.is-link:focus-visible { outline: 2px solid var(--saffron); outline-offset: -2
 .fields__row { display: contents; }
 .fields dt { color: var(--ink-soft); }
 .fields dd { margin: 0; overflow-wrap: anywhere; }
+
+/* A chart whose legend sorts its bars: an ingredient's name is a button. */
+.plot .legendtoggle { cursor: pointer; }
