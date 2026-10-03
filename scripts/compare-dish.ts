@@ -10,6 +10,7 @@ import { Database } from "bun:sqlite";
 import { compareRecipes } from "../src/lib/compare";
 import { ownersView } from "../src/lib/clones";
 import { readAliases } from "../src/lib/ingredient-aliases";
+import { readEquivalents } from "../src/lib/equivalents";
 import type { ExtractedRecipe } from "../src/types/provenance";
 
 const dish = process.argv[2] ?? "meatloaf";
@@ -26,7 +27,7 @@ const { recipes: published } = (await file.json()) as { recipes: ExtractedRecipe
 // As the admin reads it — corrections applied, the owner's copies added — so the two cannot disagree.
 const recipes = await ownersView(slug, published);
 const db = new Database("usda.db", { readonly: true });
-const cmp = compareRecipes({ recipes, db, aliases: await readAliases() });
+const cmp = compareRecipes({ recipes, db, aliases: await readAliases(), equivalents: await readEquivalents() });
 const unit = cmp.anchor.unitLabel;
 
 function table<T>(rows: T[], cols: Array<[string, (r: T) => string, boolean]>) {

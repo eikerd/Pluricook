@@ -12,6 +12,7 @@ import { compareRecipes, type Comparison } from "./compare";
 import { makeClone, ownersView, readClones, writeClones } from "./clones";
 import { applyCorrections, readCorrections, removeCorrection, validateCorrection, writeCorrection, type RecipeCorrection } from "./corrections";
 import { readAliases } from "./ingredient-aliases";
+import { readEquivalents } from "./equivalents";
 import { describeRecipe, factsOf, groupsOf, type RecipeDetail, type RecipeFacts } from "./recipe-detail";
 import type { ExtractedRecipe } from "../types/provenance";
 
@@ -81,7 +82,7 @@ function summarize(dish: string, recipes: ExtractedRecipe[]): DishSummary {
   };
 }
 
-async function readDish(dish: string): Promise<ExtractedRecipe[] | null> {
+export async function readDish(dish: string): Promise<ExtractedRecipe[] | null> {
   // The dish arrives from a URL; keep it to a plain slug so it cannot name a path.
   if (!SLUG.test(dish)) return null;
   const path = `${RECIPES_DIR}/${dish}.json`;
@@ -132,7 +133,7 @@ export async function compareDish(dish: string, section: string | null): Promise
   }
 
   try {
-    const comparison = compareRecipes({ recipes, db, aliases: await readAliases(), section });
+    const comparison = compareRecipes({ recipes, db, aliases: await readAliases(), equivalents: await readEquivalents(), section });
     // compareRecipes names the dish from the first recipe's own field. Here the
     // filename is the identifier, so the answer is named by what was asked for —
     // otherwise a copied file answers under its original's name, and an empty
