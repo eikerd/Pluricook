@@ -1,0 +1,70 @@
+{
+  "_comment": [
+    "The owner's own copies of captured recipes, to develop. Written by the admin's recipe page and read",
+    "beside the dish's captured recipes. Private; clonedFrom names the recipe each began as."
+  ],
+  "dish": "detroit-pizza",
+  "recipes": [
+    {
+      "id": "mine:detroit-pizza:ethan-chlebowski",
+      "provenance": {
+        "host": null,
+        "siteName": "Mine · Ethan Chlebowski",
+        "sourceUrl": null,
+        "author": null,
+        "sourceTitle": "e detroit-pizza (from owner's notes)",
+        "capturedAt": "2026-10-01",
+        "method": "owner-copy",
+        "acquisitionAtCapture": "pending-review",
+        "licence": null
+      },
+      "visibility": "private",
+      "dish": "detroit-pizza",
+      "sections": [
+        {
+          "name": "dough",
+          "ingredientLines": [
+            "300 g bread flour",
+            "210 g water",
+            "5 g yeast",
+            "6 g salt"
+          ]
+        },
+        {
+          "name": "sauce",
+          "ingredientLines": [
+            "28 oz tomato",
+            "2 garlic cloves",
+            "dry oregano, to taste",
+            "red pepper, to taste",
+            "salt, to taste",
+            "42 g butter",
+            "1/4 onion"
+          ]
+        }
+      ],
+      "ingredientLines": [
+        "300 g bread flour",
+        "210 g water",
+        "5 g yeast",
+        "6 g salt",
+        "28 oz tomato",
+        "2 garlic cloves",
+        "dry oregano, to taste",
+        "red pepper, to taste",
+        "salt, to taste",
+        "42 g butter",
+        "1/4 onion"
+      ],
+      "servings": null,
+      "servingsRaw": null,
+      "totalTimeMinutes": null,
+      "totalTimeRaw": null,
+      "prepTimeMinutes": null,
+      "cookTimeMinutes": null,
+      "stepCount": null,
+      "visibilityReason": "your own copy of Ethan Chlebowski's recipe",
+      "clonedFrom": "personal:detroit-pizza:ethan"
+    }
+  ]
+}
