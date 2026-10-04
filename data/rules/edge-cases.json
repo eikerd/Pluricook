@@ -652,6 +652,151 @@
     },
     {
       "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "1/4 onion",
+      "caughtBy": [
+        "line:number-is-a-count"
+      ],
+      "outcome": {
+        "grams": 27.5,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "2 garlic cloves",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "210 g water",
+      "caughtBy": [
+        "alias:water"
+      ],
+      "outcome": {
+        "grams": 210,
+        "fdcId": 174158,
+        "food": "Water, bottled, generic",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "28 oz tomato",
+      "caughtBy": [
+        "alias:tomato"
+      ],
+      "outcome": {
+        "grams": 793.8,
+        "fdcId": 170501,
+        "food": "Tomatoes, crushed, canned",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "300 g bread flour",
+      "caughtBy": [
+        "alias:bread flour"
+      ],
+      "outcome": {
+        "grams": 300,
+        "fdcId": 168896,
+        "food": "Wheat flour, white, bread, enriched",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "5 g yeast",
+      "caughtBy": [
+        "alias:yeast"
+      ],
+      "outcome": {
+        "grams": 5,
+        "fdcId": 175043,
+        "food": "Leavening agents, yeast, baker's, active dry",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "6 g salt",
+      "caughtBy": [
+        "alias:salt"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "dry oregano, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "red pepper, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "salt, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
       "site": "America's Test Kitchen",
       "recipeId": "personal:detroit-pizza:atk",
       "line": "1 cup tomato",

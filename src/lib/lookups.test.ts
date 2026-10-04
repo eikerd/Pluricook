@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { denialForExtractFailure, denialForStatus, mergeLookups, type DeniedPage, type Lookup } from "./lookups";
+import { denialForExtractFailure, denialForStatus, mergeLookups, resolvedThisRun, type DeniedPage, type Lookup } from "./lookups";
 
 const LEITE: DeniedPage = {
   url: "https://leitesculinaria.com/416811/garlic-noodles.html",
@@ -80,5 +80,20 @@ describe("mergeLookups", () => {
   test("the same page under two spellings is one entry", () => {
     const out = mergeLookups([], [LEITE, { ...LEITE, url: "https://www.leitesculinaria.com/416811/garlic-noodles.html/" }], [], "2026-09-30");
     expect(out).toHaveLength(1);
+  });
+});
+
+describe("resolvedThisRun", () => {
+  // Codex, PR #4 round 3: a page that extracts leaves the person's list, but a
+  // verdict on its gate is scoring evidence and must not vanish with it.
+  test("a held page extracted this run is kept as resolved, verdict and all", () => {
+    const held = mergeLookups([], [LEITE, NYT], [], "2026-09-30").map((l) => (l.site === "Leite's Culinaria" ? { ...l, confirmed: true } : l));
+    const out = resolvedThisRun(held, ["https://www.leitesculinaria.com/416811/garlic-noodles.html"], "2026-10-05");
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ site: "Leite's Culinaria", confirmed: true, resolvedAt: "2026-10-05" });
+  });
+
+  test("nothing extracted, nothing resolved", () => {
+    expect(resolvedThisRun(mergeLookups([], [LEITE], [], "2026-09-30"), [], "2026-10-05")).toEqual([]);
   });
 });

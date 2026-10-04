@@ -51,6 +51,8 @@ export interface Lookup extends DeniedPage {
    * (no recipe there at all). Scores the gate (rule-scores.ts). Never written by a run.
    */
   confirmed?: boolean | null;
+  /** Set when a later run extracted the page; it then lives in the file's `resolved`, not `pages`. */
+  resolvedAt?: string;
 }
 
 /** Which kind of denial an HTTP status is. */
@@ -66,6 +68,16 @@ export function denialForStatus(status: number): Denial {
  */
 export function denialForExtractFailure(_reason: ExtractFailure): Denial {
   return "evasion-suspected";
+}
+
+/**
+ * The held pages this run extracted. They leave the person's list, but a
+ * verdict on their gate is scoring evidence (rule-scores.ts), so they are kept
+ * in the file's `resolved` list rather than dropped.
+ */
+export function resolvedThisRun(held: Lookup[], extractedUrls: string[], today: string): Lookup[] {
+  const extracted = new Set(extractedUrls.map(canonicalUrl));
+  return held.filter((l) => extracted.has(canonicalUrl(l.url))).map((l) => ({ ...l, resolvedAt: today }));
 }
 
 /**

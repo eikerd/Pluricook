@@ -24,6 +24,7 @@
 
 import type { Database } from "bun:sqlite";
 import { Glob } from "bun";
+import { ownersView } from "./clones";
 import { conversionInput, parseLine } from "./ingredient-line";
 import { readAliases, type AliasTable } from "./ingredient-aliases";
 import type { Denial, Lookup } from "./lookups";
@@ -272,7 +273,10 @@ async function readCorpus(): Promise<{ lines: CorpusLine[]; recipes: ExtractedRe
   const recipes: ExtractedRecipe[] = [];
   for await (const path of new Glob("data/recipes/*.json").scan(".")) {
     const file = (await Bun.file(path).json()) as { recipes?: ExtractedRecipe[] };
-    for (const r of file.recipes ?? []) {
+    // As the comparison reads a dish (Codex, PR #4 round 3): corrections
+    // applied, the owner's clones added, so the scores cover the lines charted.
+    const dish = path.slice(path.lastIndexOf("/") + 1).replace(/\.json$/, "");
+    for (const r of await ownersView(dish, file.recipes ?? [])) {
       recipes.push(r);
       for (const line of r.ingredientLines) {
         lines.push({ line, dish: r.dish, site: r.provenance.siteName, recipeId: r.id, capturedAt: r.provenance.capturedAt });
@@ -314,8 +318,9 @@ export async function gatherRuleEvidence(db: Database): Promise<RuleEvidence> {
 
   for (const r of recipes) catches.push(...extractionCatches(r, verdicts));
   for await (const path of new Glob("data/lookups/*.json").scan(".")) {
-    const file = (await Bun.file(path).json()) as { dish: string; pages?: Lookup[] };
-    catches.push(...gateCatches(file.dish, file.pages ?? []));
+    const file = (await Bun.file(path).json()) as { dish: string; pages?: Lookup[]; resolved?: Lookup[] };
+    // Resolved pages count too: a gate's verdicts must not vanish when a page later extracts.
+    catches.push(...gateCatches(file.dish, [...(file.pages ?? []), ...(file.resolved ?? [])]));
   }
 
   return { scores: scoreRules(await allRuleIds(aliases), catches), results, catches };

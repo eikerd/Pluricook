@@ -14,7 +14,7 @@
 import { Glob } from "bun";
 import { curationFor, isListed, mayFetch, readCurated } from "../src/lib/curated-sources";
 import { extractRecipe, type ExtractFailure } from "../src/lib/recipe-extract";
-import { denialForExtractFailure, denialForStatus, LOOKUPS_HOW_TO, mergeLookups, type DeniedPage, type Lookup } from "../src/lib/lookups";
+import { denialForExtractFailure, denialForStatus, LOOKUPS_HOW_TO, mergeLookups, resolvedThisRun, type DeniedPage, type Lookup } from "../src/lib/lookups";
 import { mergeRecipes } from "../src/lib/recipe-merge";
 import { traceRules } from "../src/lib/rules";
 import { evaluateRobots, verdictForStatus, type RobotsVerdict } from "../src/lib/robots";
@@ -263,10 +263,14 @@ console.log(
 
 // The denied list, held beside the corpus. A person's notes on it survive re-runs.
 const lookupsOut = `data/lookups/${dish}.json`;
-const heldLookups: Lookup[] = (await Bun.file(lookupsOut).exists())
-  ? ((await Bun.file(lookupsOut).json()) as { pages: Lookup[] }).pages ?? []
-  : [];
-const lookups = mergeLookups(heldLookups, denied, recipes.map((r) => r.provenance.sourceUrl!), today);
+const heldFile = (await Bun.file(lookupsOut).exists())
+  ? ((await Bun.file(lookupsOut).json()) as { pages?: Lookup[]; resolved?: Lookup[] })
+  : {};
+const heldLookups: Lookup[] = heldFile.pages ?? [];
+const extractedUrls = recipes.map((r) => r.provenance.sourceUrl!);
+const lookups = mergeLookups(heldLookups, denied, extractedUrls, today);
+// Pages that have left the list keep their gate verdicts as scoring evidence.
+const resolved = [...(heldFile.resolved ?? []), ...resolvedThisRun(heldLookups, extractedUrls, today)];
 
 if (lookups.length > 0) {
   console.log(`\nFor a person to look up — ${lookups.length} page(s) automation could not take (see ${LOOKUPS_HOW_TO}):`);
@@ -290,6 +294,6 @@ if (dryRun) {
 // Written whenever there is a list to keep current, including an empty one: a
 // page that has just extracted must leave the file, not linger in it.
 if (!dryRun && (lookups.length > 0 || heldLookups.length > 0)) {
-  await Bun.write(lookupsOut, JSON.stringify({ dish, updatedAt: today, howTo: LOOKUPS_HOW_TO, pages: lookups }, null, 2) + "\n");
+  await Bun.write(lookupsOut, JSON.stringify({ dish, updatedAt: today, howTo: LOOKUPS_HOW_TO, pages: lookups, resolved }, null, 2) + "\n");
   console.log(`→ ${lookupsOut}`);
 }
