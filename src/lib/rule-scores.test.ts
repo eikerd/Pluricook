@@ -131,9 +131,19 @@ withDb("the edge-case table", () => {
       lines: Array<{ recipeId: string; line: string; caughtBy: string[]; outcome: { grams: number | null; fdcId: number | null } }>;
     };
     const { results } = await gatherRuleEvidence(new Database("usda.db", { readonly: true }));
-    const key = (recipeId: string, line: string) => `${recipeId}\u0000${line}`;
-    const now = new Map(edgeCases(results).map((r) => [key(r.line.recipeId, r.line.line), r]));
-    const held = new Map(snapshot.lines.map((e) => [key(e.recipeId, e.line), e]));
+    // Keyed by recipe, line AND occurrence: a line a recipe lists twice (the
+    // fritters' vanilla) is two edge cases, and losing either must show.
+    const keyed = <T,>(items: T[], of: (t: T) => [string, string]) => {
+      const seen = new Map<string, number>();
+      return new Map(items.map((t) => {
+        const base = of(t).join("\u0000");
+        const n = (seen.get(base) ?? 0) + 1;
+        seen.set(base, n);
+        return [`${base}\u0000${n}`, t] as const;
+      }));
+    };
+    const now = keyed(edgeCases(results), (r) => [r.line.recipeId, r.line.line]);
+    const held = keyed(snapshot.lines, (e) => [e.recipeId, e.line]);
 
     const problems: string[] = [];
     for (const [k, e] of held) {
