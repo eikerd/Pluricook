@@ -60,6 +60,18 @@ describe("mergeLookups", () => {
     expect(out.map((l) => l.site)).toEqual(["NYT Cooking"]);
   });
 
+  test("a confirmation is kept only while the kind it judged is unchanged", () => {
+    // Codex and Copilot, PR #4 round 1: a person confirmed "refused"; a later
+    // run calling it something else must not inherit that verdict.
+    const held: Lookup[] = [
+      { ...LEITE, firstDeniedAt: "2026-09-30", lastDeniedAt: "2026-09-30", handledAt: "2026-10-01", note: "a challenge page", confirmed: true },
+    ];
+    const [same] = mergeLookups(held, [LEITE], [], "2026-10-02");
+    expect(same!.confirmed).toBe(true);
+    const [changed] = mergeLookups(held, [{ ...LEITE, denial: "unreachable", detail: "HTTP 500" }], [], "2026-10-02");
+    expect(changed).toMatchObject({ confirmed: null, note: "a challenge page", handledAt: "2026-10-01" });
+  });
+
   test("a page this run never touched is kept as it was", () => {
     const held = mergeLookups([], [LEITE], [], "2026-09-30");
     expect(mergeLookups(held, [], [], "2026-10-01")).toEqual(held);

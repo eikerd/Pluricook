@@ -21,7 +21,7 @@ its number and says it is fixed.
 | Case | Source | Fixture |
 |---|---|---|
 | Apple fritters | Kitchen in the shire, pasted by the owner from a PDF on 2026-09-26; no URL on file. Also the APPLE_FRITTERS sheet in Google Drive. | `data/fixtures/apple-fritters.txt` |
-| San Francisco garlic noodles | Six recipes extracted from JSON-LD on 2026-09-30 (`bun scripts/extract-dish.ts garlic-noodles`); two pages denied, listed in `data/lookups/garlic-noodles.json`. | `data/recipes/garlic-noodles.json` |
+| San Francisco garlic noodles | Six recipes extracted from JSON-LD on 2026-09-30 (`bun scripts/extract-dish.ts garlic-noodles`); seven pages automation could not take, listed in `data/lookups/garlic-noodles.json`. | `data/recipes/garlic-noodles.json` |
 
 ## Index
 

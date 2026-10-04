@@ -10,6 +10,9 @@
  *
  * - A rule CAUGHT a line when the line comes out differently with that rule
  *   switched off (rules.ts). Computed, never guessed.
+ * - Gates are the exception. Their counterfactual would mean fetching a page
+ *   our own policy forbids, so they are not switchable: each look-up entry is
+ *   its kind's catch, and a person's `confirmed` on it is the verdict.
  * - A catch is RIGHT or WRONG only where someone has confirmed the answer: a
  *   golden case in data/ingredients/expectations.json, a person's verdict in
  *   data/rules/verdicts.json, or, for a gate, a person's `confirmed` on a
@@ -107,17 +110,21 @@ export interface PersonVerdict {
 
 const sameOutcome = (a: Outcome, b: Outcome) => a.grams === b.grams && a.fdcId === b.fdcId;
 
-/** Does an outcome satisfy what the golden cases say about this line? null when they say nothing. */
+/**
+ * Does an outcome satisfy what the golden cases say about this line? Every
+ * constraint that names the line must hold; null when none does.
+ */
 export function goldenPasses(golden: Golden, line: string, o: Outcome): boolean | null {
+  const checks: boolean[] = [];
   const m = golden.matches.get(line);
   if (m) {
     const food = (o.food ?? "").toLowerCase();
-    return food.includes(m.expect.toLowerCase()) && !(m.reject && food.includes(m.reject.toLowerCase()));
+    checks.push(food.includes(m.expect.toLowerCase()) && !(m.reject && food.includes(m.reject.toLowerCase())));
   }
   const c = golden.counts.get(line);
-  if (c) return o.grams !== null && Math.abs(o.grams - c.grams) <= c.tolerance;
-  if (golden.rejections.has(line)) return o.grams === null;
-  return null;
+  if (c) checks.push(o.grams !== null && Math.abs(o.grams - c.grams) <= c.tolerance);
+  if (golden.rejections.has(line)) checks.push(o.grams === null);
+  return checks.length === 0 ? null : checks.every(Boolean);
 }
 
 /**

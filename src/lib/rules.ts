@@ -5,7 +5,8 @@
  * we know how good our regexes are". A rule caught something when the line
  * comes out differently with that rule switched off, so every rule needs an
  * id and an off switch. Ids are `kind:name`, the kinds being parse, line,
- * alias (exact), pattern, reject, gap, extract and gate. A rule asks
+ * alias (exact), pattern, reject, gap and extract. (Gates, `gate:<denial>`,
+ * share the naming but not the switch: see rule-scores.ts.) A rule asks
  * `rule(id)` at the moment it would act:
  *
  *     if (LEADING_BULLET.test(line) && rule("parse:leading-bullet")) { … }

@@ -2,10 +2,9 @@ import { Database } from "bun:sqlite";
 import { Glob } from "bun";
 import { describe, expect, test } from "bun:test";
 import {
-  CODE_RULES, EDGE_CASES_PATH, edgeCases, evaluateLines, gateCatches, gatherRuleEvidence, goldenPasses, lineEvaluator,
+  CODE_RULES, EDGE_CASES_PATH, edgeCases, evaluateLines, gateCatches, gatherRuleEvidence, goldenPasses,
   scoreRules, type CorpusLine, type Golden, type Outcome,
 } from "./rule-scores";
-import { readAliases } from "./ingredient-aliases";
 import { rule } from "./rules";
 
 const NO_GOLDEN: Golden = { matches: new Map(), counts: new Map(), rejections: new Set() };
@@ -61,6 +60,16 @@ describe("goldenPasses", () => {
     expect(goldenPasses(g, "2 large eggs", o(101))).toBe(true);
     expect(goldenPasses(g, "2 large eggs", o(110))).toBe(false);
   });
+  test("every constraint on a line applies, not only the first", () => {
+    // Codex, PR #4 round 1: "2 stalks celery" is both a match case and a count.
+    const g: Golden = {
+      ...NO_GOLDEN,
+      matches: new Map([["2 stalks celery", { expect: "egg" }]]),
+      counts: new Map([["2 stalks celery", { grams: 80, tolerance: 5 }]]),
+    };
+    expect(goldenPasses(g, "2 stalks celery", o(80))).toBe(true);
+    expect(goldenPasses(g, "2 stalks celery", o(null))).toBe(false);
+  });
   test("a rejection passes when the line comes to no amount", () => {
     const g: Golden = { ...NO_GOLDEN, rejections: new Set(["salt, to taste"]) };
     expect(goldenPasses(g, "salt, to taste", o(null))).toBe(true);
@@ -111,27 +120,34 @@ const withDb = available ? describe : describe.skip;
 withDb("the edge-case table", () => {
   /**
    * Every edge case the corpus has turned up, replayed. A change to any rule
-   * that moves one of these lines fails here, so it is seen and decided, not
-   * shipped. If the move is intended: `bun scripts/rule-scores.ts --write`,
-   * then read the diff of data/rules/edge-cases.json.
+   * that moves one of these lines — its grams, its food, or which rules caught
+   * it — fails here, so it is seen and decided, not shipped. So does an entry
+   * the corpus no longer produces, and a new edge case not yet recorded. If the
+   * change is intended: `bun scripts/rule-scores.ts --write`, then read the
+   * diff of data/rules/edge-cases.json.
    */
-  test("every recorded edge case still comes out as recorded", async () => {
+  test("the table and the corpus agree, line for line", async () => {
     const snapshot = (await Bun.file(EDGE_CASES_PATH).json()) as {
-      lines: Array<{ line: string; outcome: { grams: number | null; fdcId: number | null } }>;
+      lines: Array<{ recipeId: string; line: string; caughtBy: string[]; outcome: { grams: number | null; fdcId: number | null } }>;
     };
-    const evaluate = lineEvaluator(new Database("usda.db", { readonly: true }), await readAliases());
-    const moved = snapshot.lines
-      .map((e) => ({ e, now: evaluate(e.line) }))
-      .filter(({ e, now }) => now.grams !== e.outcome.grams || now.fdcId !== e.outcome.fdcId)
-      .map(({ e, now }) => `${e.line}: was ${e.outcome.grams} g of ${e.outcome.fdcId}, now ${now.grams} g of ${now.fdcId}`);
-    expect(moved, `edge cases moved:\n  ${moved.join("\n  ")}`).toEqual([]);
-  });
-
-  test("the table holds every edge case the corpus has now", async () => {
-    const snapshot = (await Bun.file(EDGE_CASES_PATH).json()) as { lines: Array<{ recipeId: string; line: string }> };
-    const held = new Set(snapshot.lines.map((l) => `${l.recipeId}\u0000${l.line}`));
     const { results } = await gatherRuleEvidence(new Database("usda.db", { readonly: true }));
-    const missing = edgeCases(results).filter((r) => !held.has(`${r.line.recipeId}\u0000${r.line.line}`)).map((r) => r.line.line);
-    expect(missing, "new edge cases: run bun scripts/rule-scores.ts --write").toEqual([]);
+    const key = (recipeId: string, line: string) => `${recipeId}\u0000${line}`;
+    const now = new Map(edgeCases(results).map((r) => [key(r.line.recipeId, r.line.line), r]));
+    const held = new Map(snapshot.lines.map((e) => [key(e.recipeId, e.line), e]));
+
+    const problems: string[] = [];
+    for (const [k, e] of held) {
+      const r = now.get(k);
+      if (!r) { problems.push(`no longer an edge case: ${e.line}`); continue; }
+      if (r.outcome.grams !== e.outcome.grams || r.outcome.fdcId !== e.outcome.fdcId) {
+        problems.push(`${e.line}: was ${e.outcome.grams} g of ${e.outcome.fdcId}, now ${r.outcome.grams} g of ${r.outcome.fdcId}`);
+      }
+      if (r.caught.join(",") !== e.caughtBy.join(",")) {
+        problems.push(`${e.line}: caught by [${e.caughtBy.join(", ")}], now [${r.caught.join(", ")}]`);
+      }
+    }
+    for (const [k, r] of now) if (!held.has(k)) problems.push(`new edge case, not recorded: ${r.line.line}`);
+
+    expect(problems, `edge cases moved — if intended, bun scripts/rule-scores.ts --write:\n  ${problems.join("\n  ")}`).toEqual([]);
   });
 });

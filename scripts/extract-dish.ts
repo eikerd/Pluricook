@@ -65,9 +65,9 @@ if (targets.length === 0) {
 
 const curated = await readCurated();
 
-// The local calendar date. toISOString() is UTC, which stamps an evening run in
-// America/Chicago with tomorrow's date.
-const today = new Date().toLocaleDateString("en-CA");
+// The owner's calendar date. toISOString() is UTC, which stamps an evening run
+// with tomorrow's date; so would the host's own zone on a UTC server.
+const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
 
 // robots.txt is per host, so it is read once however many pages a host has.
 const robotsCache = new Map<string, { status: number; text: string }>();
@@ -287,7 +287,9 @@ if (dryRun) {
   );
   console.log(`→ ${out}`);
 }
-if (!dryRun && lookups.length > 0) {
+// Written whenever there is a list to keep current, including an empty one: a
+// page that has just extracted must leave the file, not linger in it.
+if (!dryRun && (lookups.length > 0 || heldLookups.length > 0)) {
   await Bun.write(lookupsOut, JSON.stringify({ dish, updatedAt: today, howTo: LOOKUPS_HOW_TO, pages: lookups }, null, 2) + "\n");
   console.log(`→ ${lookupsOut}`);
 }

@@ -71,7 +71,8 @@ export function denialForExtractFailure(_reason: ExtractFailure): Denial {
 /**
  * Fold one run into the held list.
  *
- * - a page denied again keeps its first date and the person's handledAt/note;
+ * - a page denied again keeps its first date and the person's handledAt/note,
+ *   and their `confirmed` only while the kind it judged is unchanged;
  * - a page extracted this run leaves the list — it is no longer missing;
  * - a page this run never touched is kept as it was: silence is not success.
  */
@@ -95,7 +96,8 @@ export function mergeLookups(
       lastDeniedAt: today,
       handledAt: prior?.handledAt ?? null,
       note: prior?.note ?? null,
-      confirmed: prior?.confirmed ?? null,
+      // A confirmation judged one kind of denial; a new kind has not been judged.
+      confirmed: prior?.denial === d.denial ? (prior.confirmed ?? null) : null,
     });
   }
   return [...byUrl.values()].sort((a, b) => a.site.localeCompare(b.site) || a.url.localeCompare(b.url));
