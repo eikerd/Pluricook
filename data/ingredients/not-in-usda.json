@@ -1,0 +1,66 @@
+{
+  "_comment": [
+    "What the USDA datasets we load do not hold, and how we work around it.",
+    "Started 2026-09-30 at the owner's word: 'start our own table of things that just",
+    "apparently aren't in USDA… add the specs for Maggi and everything else that we have",
+    "to work around.'",
+    "",
+    "We load Foundation, SR Legacy and FNDDS (survey). Packaged products live in USDA's",
+    "Branded Foods dataset, which we do not load; when one exists, the entry cites it.",
+    "Like aliases.json this is our layer on top of usda.db, which is never edited.",
+    "",
+    "An entry is reached from aliases.json by its id, which is NEGATIVE so it can never",
+    "be a USDA fdc_id. Ids are permanent: never reuse one.",
+    "",
+    "kind 'food' — a food we specify: description, categoryId (a USDA category, so it",
+    "             classes as USDA foods do), sodiumMgPer100g, portions, source, assumption.",
+    "kind 'form' — a form USDA lacks, counted as the USDA record `countAs` by dry matter:",
+    "             grams × (100 − water of `waterFrom`) / (100 − water of `countAs`),",
+    "             both water figures read from usda.db at run time. Only a stated mass",
+    "             converts. Every converted line says so (basis 'counted-as-dry')."
+  ],
+  "entries": {
+    "maggi-seasoning": {
+      "kind": "food",
+      "id": -1,
+      "description": "Maggi Seasoning (liquid), our spec",
+      "categoryId": 6,
+      "sodiumMgPer100g": 7979,
+      "portions": [
+        {
+          "amount": 1,
+          "unit": "tsp",
+          "gramWeight": 5.3
+        },
+        {
+          "amount": 1,
+          "unit": "tbsp",
+          "gramWeight": 16.0
+        },
+        {
+          "amount": 1,
+          "unit": "cup",
+          "gramWeight": 255.0
+        }
+      ],
+      "source": "USDA FoodData Central, Branded Foods, fdc 2755366: MAGGI Seasoning, Nestlé, UPC 00028000111540 (the US 6.7 fl oz bottle), published 2026-03-12. Sodium 8,600 mg per 100 mL; label 430 mg per 1 tsp (5 mL), matching Nestlé Professional's label. Energy, fat and protein 0.",
+      "assumption": "Branded Foods gives liquids per 100 mL and Nestlé publishes no density, so Maggi takes soy sauce's (USDA 174277, Soy sauce made from soy and wheat: 1 cup = 255 g, 1.078 g/mL) and its portions. 8,600 mg / 1.078 = 7,979 mg per 100 g. Heuristics had matched 'Seasoning mix, dry, taco, original'."
+    },
+    "fresh-wheat-noodles": {
+      "kind": "form",
+      "id": -2,
+      "description": "Fresh wheat noodles, counted as dry pasta",
+      "countAs": 169736,
+      "waterFrom": 169727,
+      "note": "The owner, 2026-09-30: fresh noodles are counted as dry noodles, with a note that we had to. USDA has no fresh wheat-noodle record; 'Pasta, fresh-refrigerated, plain, as purchased' (169727, 31.0% water) stands for the fresh form and 'Pasta, dry, enriched' (169736, 9.9%) for the dry, so a gram of fresh counts as 0.77 g of dry. Steamed, pre-cooked noodles hold more water than raw fresh ones, so for them the dry figure is an overstatement. See G22. Sodium follows the dry record (6 mg/100 g): ramen and chow mein noodles are salted in the dough, so their sodium reads low; before this, the fried chow mein match (866 mg/100 g) read far too high."
+    },
+    "fresh-egg-noodles": {
+      "kind": "form",
+      "id": -3,
+      "description": "Fresh egg noodles, counted as dry egg noodles",
+      "countAs": 169731,
+      "waterFrom": 169727,
+      "note": "As fresh-wheat-noodles, counted as 'Noodles, egg, dry, enriched' (169731, 9.0% water). USDA's only fresh pasta record (169727) stands for the fresh form. See G22."
+    }
+  }
+}

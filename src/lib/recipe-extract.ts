@@ -20,6 +20,7 @@ import {
   parseDuration,
   parseYield,
 } from "./normalize";
+import { rule } from "./rules";
 import { canonicalHost } from "./site-registry";
 import {
   assertProvenance,
@@ -105,6 +106,37 @@ export function jsonLdBlocks(html: string): string[] {
   ].map((m) => m[1]!);
 }
 
+/**
+ * Escape raw control characters inside string literals (G19). Strict JSON
+ * forbids them; browsers' JSON-LD consumers tolerate them, so pages ship them.
+ * Characters between tokens are legal whitespace and are left alone.
+ */
+function escapeControlsInStrings(text: string): string {
+  let out = "";
+  let inString = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]!;
+    if (inString && ch === "\\") {
+      out += ch + (text[++i] ?? "");
+      continue;
+    }
+    if (ch === '"') inString = !inString;
+    const code = ch.charCodeAt(0);
+    out += inString && code < 0x20 ? `\\u${code.toString(16).padStart(4, "0")}` : ch;
+  }
+  return out;
+}
+
+/** JSON.parse, retried once with stray control characters escaped. Throws if both fail. */
+function parseJsonLd(block: string): unknown {
+  try {
+    return JSON.parse(block);
+  } catch (strict) {
+    if (!rule("extract:json-control-chars")) throw strict;
+    return JSON.parse(escapeControlsInStrings(block));
+  }
+}
+
 export interface ExtractOptions {
   html: string;
   sourceUrl: string;
@@ -137,7 +169,7 @@ export function extractRecipe(opts: ExtractOptions): ExtractResult {
   for (const block of blocks) {
     let data: unknown;
     try {
-      data = JSON.parse(block);
+      data = parseJsonLd(block);
     } catch {
       // Paula Deen ships two blocks, one of them malformed. One bad block must
       // not cost us a good one, so keep going rather than aborting the page.

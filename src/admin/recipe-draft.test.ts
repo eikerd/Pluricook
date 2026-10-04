@@ -3,7 +3,7 @@ import type { RecipePageData } from "../lib/compare-service";
 import type { RecipeDetail } from "../lib/recipe-detail";
 import { correctionFrom, draftFrom, fullCorrection, pairParsed, rowsOf, withRows } from "./recipe-draft";
 
-const line = (text: string) => ({ line: text, grams: null, share: null, food: null, read: { quantity: 0, unit: "each", name: text, statedGrams: null } });
+const line = (text: string) => ({ line: text, grams: null, share: null, food: null, workaround: null, read: { quantity: 0, unit: "each", name: text, statedGrams: null } });
 
 const published: RecipePageData["published"] = {
   sourceTitle: "Fritters",

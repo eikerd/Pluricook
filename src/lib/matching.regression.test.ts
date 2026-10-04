@@ -13,6 +13,7 @@ import { Database } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
 import { parseLine } from "./ingredient-line";
 import { readAliases } from "./ingredient-aliases";
+import { readNotInUsda } from "./not-in-usda";
 import { toGrams } from "./to-grams";
 import type { ExtractedRecipe } from "../types/provenance";
 
@@ -105,7 +106,7 @@ suite("coverage floor", () => {
 });
 
 suite("alias table integrity", () => {
-  test("every fdcId in aliases.json names a real USDA record", async () => {
+  test("every fdcId in aliases.json names a real USDA record, or one of ours", async () => {
     // A mistyped id falls through to the heuristics silently, so a wrong alias
     // looks exactly like a working one until someone reads the output closely.
     const file = (await Bun.file("data/ingredients/aliases.json").json()) as {
@@ -115,13 +116,28 @@ suite("alias table integrity", () => {
     const exists = db!.query<{ n: number }, [number]>(
       `SELECT COUNT(*) AS n FROM foods WHERE fdc_id = ?1`,
     );
+    const ours = await readNotInUsda();
     const missing: string[] = [];
     for (const [kind, table] of [["exact", file.exact], ["pattern", file.patterns]] as const) {
       for (const [phrase, entry] of Object.entries(table ?? {})) {
-        if ((exists.get(entry.fdcId)?.n ?? 0) === 0) missing.push(`${kind} "${phrase}" → ${entry.fdcId}`);
+        // A negative id names our own entry (not-in-usda.json), never usda.db.
+        const found = entry.fdcId < 0 ? ours.byId.has(entry.fdcId) : (exists.get(entry.fdcId)?.n ?? 0) > 0;
+        if (!found) missing.push(`${kind} "${phrase}" → ${entry.fdcId}`);
       }
     }
     expect(missing, `aliases pointing at no USDA record:\n  ${missing.join("\n  ")}`).toEqual([]);
+  });
+
+  test("every form in not-in-usda.json is counted as, and watered from, real USDA records", async () => {
+    const exists = db!.query<{ n: number }, [number]>(`SELECT COUNT(*) AS n FROM foods WHERE fdc_id = ?1`);
+    const missing: string[] = [];
+    for (const e of (await readNotInUsda()).byId.values()) {
+      if (e.kind !== "form") continue;
+      for (const id of [e.countAs, e.waterFrom]) {
+        if ((exists.get(id)?.n ?? 0) === 0) missing.push(`${e.description} → ${id}`);
+      }
+    }
+    expect(missing).toEqual([]);
   });
 });
 

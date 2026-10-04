@@ -91,7 +91,13 @@ export function RecipeLines({ detail, draft, pending, onCommit, highlight, publi
     },
     {
       key: "food", label: "USDA food", value: (r) => r.parsed?.food ?? null,
-      render: (r) => r.parsed?.food ?? <span className="muted">not resolved</span>,
+      render: (r) =>
+        r.parsed?.food == null ? <span className="muted">not resolved</span> : (
+          <>
+            {r.parsed.food}
+            {r.parsed.workaround && <span className="tag">{r.parsed.workaround}</span>}
+          </>
+        ),
     },
     {
       key: "delete", label: "Delete", sortable: false, value: () => null,

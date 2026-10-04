@@ -1,0 +1,91 @@
+{
+  "dish": "garlic-noodles",
+  "updatedAt": "2026-09-30",
+  "howTo": "docs/manual-lookups.md",
+  "pages": [
+    {
+      "url": "https://freshharvest.co/recipe-blog/garlic-noodles-san-francisco-style/",
+      "site": "Fresh Harvest",
+      "denial": "evasion-suspected",
+      "detail": "page answered, no recipe for automation: no-recipe-node",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-09-30",
+      "lastDeniedAt": "2026-09-30",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://hellaphatvegan.com/blogs/recipes/garlic-noodles",
+      "site": "Hella Phat Vegan",
+      "denial": "evasion-suspected",
+      "detail": "page answered, no recipe for automation: no-recipe-node",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-09-30",
+      "lastDeniedAt": "2026-09-30",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://www.joshuaweissman.com/recipes/san-francisco-vietnamese-garlic-noodles-recipe",
+      "site": "Joshua Weissman",
+      "denial": "evasion-suspected",
+      "detail": "page answered, no recipe for automation: no-ingredients",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-09-30",
+      "lastDeniedAt": "2026-09-30",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://leitesculinaria.com/416811/recipes-san-francisco-style-vietnamese-garlic-noodles.html",
+      "site": "Leite's Culinaria",
+      "denial": "refused",
+      "detail": "HTTP 403",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-09-30",
+      "lastDeniedAt": "2026-09-30",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://cooking.nytimes.com/recipes/1023012-san-francisco-style-vietnamese-american-garlic-noodles",
+      "site": "NYT Cooking",
+      "denial": "policy",
+      "detail": "normal · none",
+      "acquisition": "none",
+      "firstDeniedAt": "2026-09-30",
+      "lastDeniedAt": "2026-09-30",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://perfectrecipeproject.blogspot.com/2025/03/san-francisco-garlic-noodles.html",
+      "site": "The Perfect Recipe Project",
+      "denial": "evasion-suspected",
+      "detail": "page answered, no recipe for automation: no-recipe-node",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-09-30",
+      "lastDeniedAt": "2026-09-30",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://www.willdonovan.com/cookbook/topics/san-francisco-style-vietnamese-american-garlic-noodles",
+      "site": "Will Donovan",
+      "denial": "evasion-suspected",
+      "detail": "page answered, no recipe for automation: no-json-ld",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-09-30",
+      "lastDeniedAt": "2026-09-30",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    }
+  ]
+}

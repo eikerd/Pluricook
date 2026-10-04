@@ -115,6 +115,11 @@ export interface ExtractedRecipe {
    * downstream keeps working; this adds the structure without replacing it.
    */
   sections?: Array<{ name: string; ingredientLines: string[] }>;
+  /**
+   * Extraction repairs that acted on this page (rules.ts), and whether the
+   * recipe would have come out differently without each. Scored in rule-scores.ts.
+   */
+  extractionRules?: Array<{ id: string; changed: boolean }>;
 
   /** The dish this was captured for, e.g. "meatloaf". */
   dish: string;

@@ -1,0 +1,17 @@
+{
+  "_comment": [
+    "A person's verdict on what a rule did to one line (or one page), when no golden case",
+    "in data/ingredients/expectations.json settles it. Read by src/lib/rule-scores.ts; a",
+    "verdict here outranks the golden case. The Rules tab in the admin shows the scores.",
+    "",
+    "rule     — the rule id as the Rules tab shows it: 'pattern:parmesan', 'line:stated-grams'",
+    "subject  — the line exactly as published (or the page URL for an extract: rule)",
+    "verdict  — 'right' if the rule's change was correct, 'wrong' if it made the line worse",
+    "by, at   — who decided, and the date",
+    "note     — why, in a sentence",
+    "",
+    "Gates (gate:*) are judged on the look-up list instead: set `confirmed` on the entry in",
+    "data/lookups/<dish>.json. See docs/manual-lookups.md."
+  ],
+  "verdicts": []
+}

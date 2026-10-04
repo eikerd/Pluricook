@@ -23,6 +23,8 @@ export interface DetailLine {
   share: number | null;
   /** The USDA record it matched, or null. */
   food: string | null;
+  /** Set when the line leaned on not-in-usda.json: "not in USDA", "fresh, counted as dry ×0.77". */
+  workaround: string | null;
   /** How the parser read the line — where a gotcha shows itself. */
   read: { quantity: number; unit: string; name: string; statedGrams: number | null };
 }
@@ -58,6 +60,7 @@ function describeLine(line: string, db: Database, aliases: AliasTable): Omit<Det
     line,
     grams: counted ? result.grams : null,
     food: counted ? result.foodDescription : null,
+    workaround: counted ? result.workaround : null,
     read: { quantity: parsed.quantity, unit: parsed.unit, name: parsed.name, statedGrams: parsed.statedGrams },
   };
 }

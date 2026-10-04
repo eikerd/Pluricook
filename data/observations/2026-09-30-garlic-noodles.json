@@ -1,0 +1,33 @@
+{
+  "query": "garlic-noodles",
+  "searchQuery": "san francisco garlic noodles recipe",
+  "seenAt": "2026-09-30",
+  "engine": "firecrawl-web-search",
+  "rawResultCount": 20,
+  "creditsUsed": 4,
+  "note": "Third dish: San Francisco-style (Vietnamese American) garlic noodles, the Thanh Long / An family dish. Search excluded allrecipes.com, simplyrecipes.com, YouTube, TikTok and Instagram at query time. Kenji Lopez-Alt's NYT recipe recurs on leitesculinaria.com and willdonovan.com with the same opening lines; whether those are one recipe republished is checked at extraction, not assumed here.",
+  "appearances": [
+    { "rank": 1, "url": "https://leitesculinaria.com/416811/recipes-san-francisco-style-vietnamese-garlic-noodles.html", "kind": "recipe", "displayName": "Leite's Culinaria" },
+    { "rank": 2, "url": "https://smellylunchbox.com/garlic-noodles/", "kind": "recipe", "displayName": "smelly lunchbox" },
+    { "rank": 3, "url": "https://cooking.nytimes.com/recipes/1023012-san-francisco-style-vietnamese-american-garlic-noodles", "kind": "recipe", "displayName": "NYT Cooking" },
+    { "rank": 4, "url": "https://cookingwithcocktailrings.com/san-francisco-style-garlic-noodles/", "kind": "recipe", "displayName": "Cooking with Cocktail Rings" },
+    { "rank": 5, "url": "https://www.reddit.com/r/seriouseats/comments/v4ryc3/kenjis_sanfranciscostyle_garlic_noodles/", "kind": "social", "displayName": "Reddit" },
+    { "rank": 6, "url": "https://cheftu.com/recipelibrary/garlicnoodles", "kind": "recipe", "displayName": "Chef Tu David Phu" },
+    { "rank": 7, "url": "https://www.willdonovan.com/cookbook/topics/san-francisco-style-vietnamese-american-garlic-noodles", "kind": "recipe", "displayName": "Will Donovan" },
+    { "rank": 8, "url": "https://chasingcravings.com/garlic-noodles/", "kind": "recipe", "displayName": "Chasing Cravings" },
+    { "rank": 9, "url": "https://www.facebook.com/cookingwithcocktailrings/videos/homemade-san-francisco-style-garlic-noodles-recipecomment-noodles-and-ill-send-t/2077545992892815/", "kind": "video", "displayName": "Facebook" },
+    { "rank": 10, "url": "https://www.177milkstreet.com/stories/10-2025-garlic-noodles-prove-that-some-rules-are-worth-breaking", "kind": "other", "displayName": "Milk Street" },
+    { "rank": 11, "url": "https://www.joshuaweissman.com/recipes/san-francisco-vietnamese-garlic-noodles-recipe", "kind": "recipe", "displayName": "Joshua Weissman" },
+    { "rank": 12, "url": "https://www.facebook.com/everydayisfeastday/posts/these-garlic-noodles-were-invented-by-chef-helene-an-at-her-san-francisco-restau/1228024491576662/", "kind": "social", "displayName": "Facebook" },
+    { "rank": 13, "url": "https://www.thekitchn.com/garlic-noodles-recipe-23584855", "kind": "recipe", "displayName": "The Kitchn" },
+    { "rank": 14, "url": "https://perfectrecipeproject.blogspot.com/2025/03/san-francisco-garlic-noodles.html", "kind": "recipe", "displayName": "The Perfect Recipe Project" },
+    { "rank": 15, "url": "https://www.tasteofhome.com/article/san-francisco-style-vietnamese-american-garlic-noodles/", "kind": "other", "displayName": "Taste of Home" },
+    { "rank": 16, "url": "https://www.livingrichlyonabudget.com/vietnamese-garlic-noodles-like-thanh-longs/", "kind": "recipe", "displayName": "Living Richly on a Budget" },
+    { "rank": 17, "url": "https://hellaphatvegan.com/blogs/recipes/garlic-noodles", "kind": "recipe", "displayName": "Hella Phat Vegan" },
+    { "rank": 18, "url": "https://freshharvest.co/recipe-blog/garlic-noodles-san-francisco-style/", "kind": "recipe", "displayName": "Fresh Harvest" },
+    { "rank": 19, "url": "https://www.kqed.org/arts/13900855/garlic-noodles-sf-bay-area-iconic-foods-thanh-long-smellys", "kind": "other", "displayName": "KQED" },
+    { "rank": 20, "url": "https://cookanyday.com/products/san-francisco-style-garlic-noodles", "kind": "other", "displayName": "Anyday" }
+  ],
+  "fetchAttempts": [],
+  "policies": []
+}

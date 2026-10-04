@@ -641,6 +641,17 @@
       "rank": null,
       "group": null,
       "note": "In the library, not on the list."
+    },
+    {
+      "slug": "garlic-noodles",
+      "term": "San Francisco Garlic Noodles",
+      "rank": null,
+      "group": null,
+      "note": "In the library, not on the list. The Thanh Long / An family dish; added 2026-09-30.",
+      "aliases": [
+        "Garlic Noodles",
+        "Vietnamese Garlic Noodles"
+      ]
     }
   ]
 }

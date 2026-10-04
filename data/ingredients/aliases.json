@@ -20,6 +20,7 @@
     "",
     "Fields:",
     "  fdcId   — the USDA record to use. Look it up in the admin's USDA foods tab.",
+    "            A NEGATIVE id names an entry in not-in-usda.json: a food or form USDA lacks.",
     "  note    — why this mapping, especially when the obvious match was wrong.",
     "  reject  — true to say 'this is not a food' (e.g. 'to taste'), so the",
     "            heuristics are not given a chance to invent something."
@@ -168,6 +169,18 @@
     "vegetable stock": {
       "fdcId": 171583,
       "note": "See vegetable broth."
+    },
+    "sugar": {
+      "fdcId": 169655,
+      "note": "Garlic noodles, 2026-09-30: Sugars, granulated, which publishes tsp and cup. With a household measure, heuristics reached 'Sugars, brown' because it publishes a tbsp portion and granulated does not."
+    },
+    "white sugar": {
+      "fdcId": 169655,
+      "note": "See sugar. Heuristics reached the survey record 'Sugar, white, granulated or lump', whose portions did not convert a teaspoon."
+    },
+    "granulated sugar": {
+      "fdcId": 169655,
+      "note": "See sugar."
     }
   },
   "patterns": {
@@ -218,6 +231,66 @@
     "grated parmesan": {
       "fdcId": 171247,
       "note": "Cheese, parmesan, grated — the record with a cup portion (100 g). Heuristics reached 'parmesan, hard', which has none, so a cup of cheese weighed nothing."
+    },
+    "parmesan": {
+      "fdcId": 171247,
+      "note": "Garlic noodles, 2026-09-30: Cheese, parmesan, grated (cup 100 g, tbsp 5 g, oz). Recipes measure parmesan by volume, so they mean grated; heuristics reached 'Cheese, parmesan, hard', which publishes no cup and left the line with no weight."
+    },
+    "parmigiano": {
+      "fdcId": 171247,
+      "note": "See parmesan. 'Parmigiano Reggiano' found no match at all."
+    },
+    "neutral oil": {
+      "fdcId": 172336,
+      "note": "Garlic noodles, 2026-09-30: Oil, canola, the named default for a generic 'neutral oil' (G15). Heuristics reached 'Oil, oat' and, with a stated mass, 'Oil, corn'."
+    },
+    "fish sauce": {
+      "fdcId": 174531,
+      "note": "Garlic noodles, 2026-09-30: Sauce, fish, ready-to-serve. Covers brand-prefixed lines: 'Son Fish Sauce' reached 'Sauce, barbecue'."
+    },
+    "red pepper flakes": {
+      "fdcId": 170932,
+      "note": "Garlic noodles, 2026-09-30: Spices, pepper, red or cayenne. 'crushed red pepper flakes' reached 'Onions, dehydrated flakes'."
+    },
+    "noodle water": {
+      "fdcId": 173647,
+      "note": "Garlic noodles, 2026-09-30: Beverages, water, tap, drinking. Reserved cooking water; 'pasta or noodle water' reached 'Water convolvulus, raw', a leafy green. Carries the pot's salt in reality, which no record can know."
+    },
+    "pasta water": {
+      "fdcId": 173647,
+      "note": "See noodle water."
+    },
+    "spaghetti": {
+      "fdcId": 169736,
+      "note": "Garlic noodles, 2026-09-30: Pasta, dry, enriched (cup of spaghetti 91 g, 2 oz 57 g). Recipes weigh spaghetti dry; heuristics reached 'Spaghetti, spinach, dry' and 'Ramen bowl, NFS'. A line naming spaghetti as one alternative of several takes this too (G21)."
+    },
+    "sun noodle": {
+      "fdcId": -2,
+      "note": "Garlic noodles, 2026-09-30: fresh ramen (Sun Noodle is a brand), counted as dry pasta by dry matter (G22). The line's 'or substitute dried spaghetti' must not make it dry pasta at face mass."
+    },
+    "organic sugar": {
+      "fdcId": 169655,
+      "note": "See sugar. Chef Tu's 'Organic Sugar [1/2 tsp Monk Fruit Sugar]' reached 'Sugars, brown'."
+    },
+    "green onion": {
+      "fdcId": 170005,
+      "note": "Garlic noodles, 2026-09-30: Onions, spring or scallions (includes tops and bulb), raw — the record 'scallion' already reaches. 'green onions' reached 'Onions, young green, tops only', so one food under two names split across two records and never reached consensus (G16)."
+    },
+    "maggi seasoning": {
+      "fdcId": -1,
+      "note": "Garlic noodles, 2026-09-30: not in the USDA datasets we load; our spec in not-in-usda.json cites the Branded Foods record. Heuristics reached 'Seasoning mix, dry, taco, original' (G23)."
+    },
+    "fresh egg noodles": {
+      "fdcId": -3,
+      "note": "Garlic noodles, 2026-09-30: counted as dry egg noodles by dry matter (G22); heuristics reached the fried 'Noodles, chinese, chow mein' at 1.6% water."
+    },
+    "fresh pre-cooked chow mein": {
+      "fdcId": -2,
+      "note": "Garlic noodles, 2026-09-30: steamed fresh noodles, not the fried canned kind; counted as dry pasta by dry matter (G22), an overstatement for a pre-cooked noodle."
+    },
+    "fresh ramen": {
+      "fdcId": -2,
+      "note": "See sun noodle."
     }
   },
   "reject": [

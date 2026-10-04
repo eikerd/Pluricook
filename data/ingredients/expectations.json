@@ -183,6 +183,65 @@
       "expect": "beef, ground",
       "reject": "NFS",
       "found": "The Kitchn meatloaf — matched the survey food 'Meat, ground, NFS', cooked and salted at 382 mg sodium per 100 g against raw beef's 66. Hidden until survey nutrients joined; then it read the meatloaf at 1.92× salt."
+    },
+    {
+      "line": "1 tbsp sugar",
+      "expect": "sugars, granulated",
+      "reject": "brown",
+      "found": "Chasing Cravings, garlic noodles — a tbsp portion pulled plain sugar to brown"
+    },
+    {
+      "line": "1 teaspoon white sugar",
+      "expect": "sugars, granulated",
+      "reject": "lump",
+      "found": "smelly lunchbox, garlic noodles — the survey record converted no teaspoon"
+    },
+    {
+      "line": "⅓ cup Parmesan cheese",
+      "expect": "parmesan, grated",
+      "reject": "hard",
+      "found": "smelly lunchbox, garlic noodles — 'hard' publishes no cup, so the line had no weight"
+    },
+    {
+      "line": "1/4 cup Parmigiano Reggiano (freshly grated)",
+      "expect": "parmesan",
+      "found": "Chasing Cravings, garlic noodles — no match at all"
+    },
+    {
+      "line": "1 tablespoon neutral oil",
+      "expect": "canola",
+      "reject": "oat",
+      "found": "smelly lunchbox, garlic noodles"
+    },
+    {
+      "line": "1 tbsp, Son Fish Sauce",
+      "expect": "fish",
+      "reject": "barbecue",
+      "found": "Chef Tu David Phu, garlic noodles — a brand name before the food"
+    },
+    {
+      "line": "1 tsp crushed red pepper flakes ((optional) )",
+      "expect": "pepper, red",
+      "reject": "onions",
+      "found": "Chasing Cravings, garlic noodles"
+    },
+    {
+      "line": "1 cup pasta or noodle water",
+      "expect": "water, tap",
+      "reject": "convolvulus",
+      "found": "Chasing Cravings, garlic noodles — cooking water matched a leafy green"
+    },
+    {
+      "line": "1 pound dried spaghetti, dried thin Chinese wheat noodles, or dried Japanese ramen noodles",
+      "expect": "pasta, dry",
+      "reject": "spinach",
+      "found": "The Kitchn, garlic noodles"
+    },
+    {
+      "line": "2 tablespoons thinly sliced green onions",
+      "expect": "spring or scallions",
+      "reject": "tops only",
+      "found": "Cooking with Cocktail Rings, garlic noodles — green onion and scallion split across two records"
     }
   ],
   "rejections": [

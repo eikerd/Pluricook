@@ -1,0 +1,99 @@
+import { describe, expect, test } from "bun:test";
+import { denialForExtractFailure, denialForStatus, mergeLookups, resolvedThisRun, type DeniedPage, type Lookup } from "./lookups";
+
+const LEITE: DeniedPage = {
+  url: "https://leitesculinaria.com/416811/garlic-noodles.html",
+  site: "Leite's Culinaria",
+  denial: "refused",
+  detail: "HTTP 403",
+  acquisition: "fetch",
+};
+const NYT: DeniedPage = {
+  url: "https://cooking.nytimes.com/recipes/1023012-garlic-noodles",
+  site: "NYT Cooking",
+  denial: "policy",
+  detail: "normal · none",
+  acquisition: "none",
+};
+
+describe("denialForStatus", () => {
+  test("a site saying no is 'refused'", () => {
+    expect(denialForStatus(403)).toBe("refused");
+    expect(denialForStatus(401)).toBe("refused");
+    expect(denialForStatus(429)).toBe("refused");
+  });
+  test("anything else is 'unreachable'", () => {
+    expect(denialForStatus(500)).toBe("unreachable");
+    expect(denialForStatus(404)).toBe("unreachable");
+    expect(denialForStatus(0)).toBe("unreachable");
+  });
+});
+
+describe("denialForExtractFailure", () => {
+  // The owner, 2026-09-30: a page that answers but gives us no recipe counts as
+  // possible bot evasion, and a person checks it.
+  test("a page that answered with no usable recipe is suspected evasion", () => {
+    for (const reason of ["no-json-ld", "no-recipe-node", "no-ingredients", "unparseable-json-ld"] as const) {
+      expect(denialForExtractFailure(reason)).toBe("evasion-suspected");
+    }
+  });
+});
+
+describe("mergeLookups", () => {
+  test("a first run lists every denied page, dated today, unhandled", () => {
+    const out = mergeLookups([], [NYT, LEITE], [], "2026-09-30");
+    expect(out.map((l) => l.site)).toEqual(["Leite's Culinaria", "NYT Cooking"]);
+    expect(out[0]).toMatchObject({ firstDeniedAt: "2026-09-30", lastDeniedAt: "2026-09-30", handledAt: null, note: null });
+  });
+
+  test("a re-run keeps the first date and the person's note", () => {
+    const held: Lookup[] = [
+      { ...LEITE, firstDeniedAt: "2026-09-30", lastDeniedAt: "2026-09-30", handledAt: "2026-10-01", note: "typed in by hand", confirmed: true },
+    ];
+    const [l] = mergeLookups(held, [{ ...LEITE, detail: "HTTP 429" }], [], "2026-10-05");
+    expect(l).toMatchObject({ firstDeniedAt: "2026-09-30", lastDeniedAt: "2026-10-05", detail: "HTTP 429", handledAt: "2026-10-01", note: "typed in by hand", confirmed: true });
+  });
+
+  test("a page extracted this run leaves the list", () => {
+    const held = mergeLookups([], [LEITE, NYT], [], "2026-09-30");
+    const out = mergeLookups(held, [NYT], ["https://www.leitesculinaria.com/416811/garlic-noodles.html"], "2026-10-01");
+    expect(out.map((l) => l.site)).toEqual(["NYT Cooking"]);
+  });
+
+  test("a confirmation is kept only while the kind it judged is unchanged", () => {
+    // Codex and Copilot, PR #4 round 1: a person confirmed "refused"; a later
+    // run calling it something else must not inherit that verdict.
+    const held: Lookup[] = [
+      { ...LEITE, firstDeniedAt: "2026-09-30", lastDeniedAt: "2026-09-30", handledAt: "2026-10-01", note: "a challenge page", confirmed: true },
+    ];
+    const [same] = mergeLookups(held, [LEITE], [], "2026-10-02");
+    expect(same!.confirmed).toBe(true);
+    const [changed] = mergeLookups(held, [{ ...LEITE, denial: "unreachable", detail: "HTTP 500" }], [], "2026-10-02");
+    expect(changed).toMatchObject({ confirmed: null, note: "a challenge page", handledAt: "2026-10-01" });
+  });
+
+  test("a page this run never touched is kept as it was", () => {
+    const held = mergeLookups([], [LEITE], [], "2026-09-30");
+    expect(mergeLookups(held, [], [], "2026-10-01")).toEqual(held);
+  });
+
+  test("the same page under two spellings is one entry", () => {
+    const out = mergeLookups([], [LEITE, { ...LEITE, url: "https://www.leitesculinaria.com/416811/garlic-noodles.html/" }], [], "2026-09-30");
+    expect(out).toHaveLength(1);
+  });
+});
+
+describe("resolvedThisRun", () => {
+  // Codex, PR #4 round 3: a page that extracts leaves the person's list, but a
+  // verdict on its gate is scoring evidence and must not vanish with it.
+  test("a held page extracted this run is kept as resolved, verdict and all", () => {
+    const held = mergeLookups([], [LEITE, NYT], [], "2026-09-30").map((l) => (l.site === "Leite's Culinaria" ? { ...l, confirmed: true } : l));
+    const out = resolvedThisRun(held, ["https://www.leitesculinaria.com/416811/garlic-noodles.html"], "2026-10-05");
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ site: "Leite's Culinaria", confirmed: true, resolvedAt: "2026-10-05" });
+  });
+
+  test("nothing extracted, nothing resolved", () => {
+    expect(resolvedThisRun(mergeLookups([], [LEITE], [], "2026-09-30"), [], "2026-10-05")).toEqual([]);
+  });
+});

@@ -115,6 +115,20 @@ describe("extractRecipe — real-world awkwardness", () => {
     if (r.ok) expect(r.warnings).toContain("1 unparseable JSON-LD block(s)");
   });
 
+  test("G19: a raw line break inside a JSON-LD string (Joshua Weissman's shape)", () => {
+    // Strict JSON forbids a literal newline in a string; the page ships one in
+    // its description, so JSON.parse rejected the only block it has.
+    const html =
+      `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Recipe",` +
+      `"name":"Garlic Noodles","description":"Adapted from The Wok.\nCheap and good.",` +
+      `"recipeIngredient":["1 lb (450g) spaghetti","\t20 cloves garlic"]}</script>`;
+    const r = extractRecipe({ ...BASE, html });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.recipe.ingredientLines).toEqual(["1 lb (450g) spaghetti", "20 cloves garlic"]);
+    expect(r.warnings.join(" ")).not.toContain("unparseable");
+  });
+
   test("counts sectioned steps, not sections (RecipeTin Eats)", () => {
     const r = extractRecipe({
       ...BASE,

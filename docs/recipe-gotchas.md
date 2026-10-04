@@ -21,6 +21,7 @@ its number and says it is fixed.
 | Case | Source | Fixture |
 |---|---|---|
 | Apple fritters | Kitchen in the shire, pasted by the owner from a PDF on 2026-09-26; no URL on file. Also the APPLE_FRITTERS sheet in Google Drive. | `data/fixtures/apple-fritters.txt` |
+| San Francisco garlic noodles | Six recipes extracted from JSON-LD on 2026-09-30 (`bun scripts/extract-dish.ts garlic-noodles`); seven pages automation could not take, listed in `data/lookups/garlic-noodles.json`. | `data/recipes/garlic-noodles.json` |
 
 ## Index
 
@@ -43,6 +44,12 @@ its number and says it is fixed.
 | G15 | Plain foods match the wrong USDA record | matching | partly |
 | G16 | One food, several names, several components | matching | OK |
 | G17 | Small weights rounded to a tenth of a gram | quantity | broken |
+| G18 | A second measure after a slash | quantity | fixed |
+| G19 | A raw line break inside JSON-LD | text | fixed |
+| G20 | One recipe, several publishers | structure | not modelled |
+| G21 | Alternatives named in one line | matching | partly |
+| G22 | Fresh and dry noodles on one anchor | quantity | worked around |
+| G23 | A brand name in place of the food | matching | worked around |
 
 ---
 
@@ -156,6 +163,26 @@ read from its name. A section that others consume is a sub-recipe (G1–G4).
 - A pasted section header parses as an ingredient:
   `0 to taste · "Yeasted Fritter Dough"`.
 
+### G20 · One recipe, several publishers
+
+**Seen in** the garlic noodles search. J. Kenji López-Alt's recipe is on NYT
+Cooking, and the search snippets for Leite's Culinaria and willdonovan.com open
+with the same lines word for word: `4 tablespoons unsalted butter`,
+`20 medium garlic cloves, minced or smashed in a mortar and pestle`,
+`4 teaspoons oyster sauce`. Joshua Weissman's is "Adapted from *The Wok*" by
+the same author.
+
+**Goes wrong.** Each copy would count as an independent recipe, so one
+author's quantities would be counted three times in every consensus frequency,
+median and spread.
+
+**Should.** Notice near-identical ingredient lists across hosts, count them
+once, and credit the original. An adaptation is a separate recipe.
+
+**Today.** Not modelled. Nothing double-counted this run, but only by luck: NYT
+was skipped by policy, Leite's refused (HTTP 403), and willdonovan.com has no
+JSON-LD.
+
 ## Text
 
 ### G6 · A bullet is read as part of the number
@@ -245,6 +272,25 @@ and the hedge `about`.
   `t` to tsp, so `1 T butter` is read as a teaspoon, a threefold error. This is
   not in this recipe; it was found reading the code and confirmed by running it.
 
+### G19 · A raw line break inside JSON-LD
+
+**Seen in** Joshua Weissman's garlic noodles page, whose only JSON-LD block
+has a literal line break inside the `description` string.
+
+**Goes wrong.** Strict JSON forbids a raw control character inside a string, so
+`JSON.parse` rejected the page's only block and it was reported as
+`unparseable-json-ld`. Browsers and search engines accept the same block.
+
+**Should.** Retry once with control characters escaped inside string literals,
+leaving whitespace between tokens alone.
+
+**Fixed 2026-09-30.** The block parses, and the page now reports the real
+problem, `no-ingredients`: its Recipe node carries no ingredient list (the
+lines are only in the page's HTML). The same fix recovered one of Chef Tu's
+three broken blocks.
+
+Test: "G19: …" in `recipe-extract.test.ts`.
+
 ## Quantities
 
 ### G11 · Stated grams are thrown away
@@ -317,6 +363,40 @@ the lines where that matters, and salinity is computed from the salt.
 **Today.** 0.25 g gives `0.3`, and 0.75 g gives `0.8`. Found once G11 let the
 stated grams through.
 
+### G22 · Fresh and dry noodles on one anchor
+
+**Seen in** garlic noodles: `20 oz. , Sun Noodle, Kaedama`,
+`14 - 20 oz. fresh pre-cooked chow mein noodles` and
+`14-16 oz package of fresh egg noodles` beside `1 pound dried spaghetti`.
+
+**Goes wrong.** The dish anchors on grain, and every other line is measured as
+a percentage of the grain's mass. A pound of fresh noodles holds much less
+flour than a pound of dry, so recipes using fresh noodles read as lighter on
+everything else. USDA has no fresh wheat-noodle record, and the fresh lines
+match *Noodles, chinese, chow mein*, which is fried at 1.6% water. Dry pasta is
+9.9% and cooked egg noodles are 67.7%.
+
+**Should.** Anchor on a dry-equivalent mass: convert a fresh or cooked form by
+its water content, from a record that states one.
+
+**Worked around 2026-09-30**, at the owner's word: "go ahead and change it to
+a dry noodle, but make a note that you had to do that." Fresh noodles are a
+*form* in `data/ingredients/not-in-usda.json`, counted as the dry record by dry
+matter: grams × (100 − 31.0) / (100 − 9.9) = 0.77, from *Pasta,
+fresh-refrigerated, plain, as purchased* and *Pasta, dry, enriched*. Fresh egg
+noodles count as *Noodles, egg, dry, enriched*. Each converted line carries
+basis `counted-as-dry` and says so. Only a stated mass converts; a cup of fresh
+noodles is refused.
+
+It is a workaround, not a fix. Steamed, pre-cooked noodles hold more water
+than raw fresh ones, so their dry figure is high. Sodium now follows the dry
+record, 6 mg per 100 g, so noodles salted in the dough read low. Before, the
+fried chow mein match at 866 mg per 100 g read far higher: Chef Tu's 20 oz of
+fresh ramen alone carried about 4,900 mg of sodium that is not in the recipe.
+
+Tests: "a form USDA lacks — fresh noodles counted as dry (G22)" in
+`not-in-usda.test.ts`.
+
 ## Food matching
 
 ### G18 · A second measure after a slash
@@ -370,6 +450,22 @@ such as "lukewarm" and "room temp, beaten" as part of the name.
 existing route. Treat "AP" as all-purpose. Map a generic class ("neutral oil")
 to a named default, and say so on the line.
 
+**Seen again in** garlic noodles, 2026-09-30. The same mechanism: a line with
+a household measure considers only records that publish one, so the plain
+record loses to a cousin that does.
+
+| Line as published | Matched before | Now (alias) |
+|---|---|---|
+| `1 tbsp sugar` | *Sugars, brown* | *Sugars, granulated* |
+| `⅓ cup Parmesan cheese` | *Cheese, parmesan, hard*, no weight | *Cheese, parmesan, grated* |
+| `1/4 cup Parmigiano Reggiano (freshly grated)` | no match | *Cheese, parmesan, grated* |
+| `1 tablespoon neutral oil` | *Oil, oat* | *Oil, canola* |
+| `1 tsp crushed red pepper flakes ((optional) )` | *Onions, dehydrated flakes* | *Spices, pepper, red or cayenne* |
+| `1 cup pasta or noodle water` | *Water convolvulus, raw* (a leafy green) | *Beverages, water, tap, drinking* |
+| `1 pound dried spaghetti, dried thin Chinese wheat noodles, …` | *Spaghetti, spinach, dry* | *Pasta, dry, enriched* |
+
+Each is a golden case in `data/ingredients/expectations.json`.
+
 ### G16 · One food, several names, several components
 
 **Seen in** apple fritters. Lemon juice appears as `Lemon Juice` (filling) and
@@ -385,6 +481,54 @@ lines across components.
 **Today.** Both lemon juices resolve to *Lemon juice, raw*. The salts and
 vanillas convert line by line, except the ¼ tsp salt (G7). Nothing is merged
 across components.
+
+**Seen again in** garlic noodles: `green onions` reached *Onions, young green,
+tops only* while `scallion` reached *Onions, spring or scallions*, so the one
+food sat in two records and missed the consensus. Aliased 2026-09-30; scallions
+now count in 4 of 6 recipes.
+
+### G21 · Alternatives named in one line
+
+**Seen in** garlic noodles: `½ pound spaghetti or egg noodles`,
+`1 lb ramen, spaghetti, egg noodles or lo mein (cooked al dente)`,
+`2 tablespoon unsalted or salted butter`,
+`1/2 cup unsalted butter or neutral flavor cooking oil`,
+`¼ cup, Chives or Scallion, sliced`.
+
+**Goes wrong.** The whole list goes to search, and whichever word ranks
+highest wins: `ramen, spaghetti, …` reached *Ramen bowl, NFS*, and `unsalted
+or salted butter` reached *Butter, salted*.
+
+**Should.** Take the first-named alternative as the line's food and keep the
+others as alternates, as a bracketed or slashed measure is kept (G18).
+
+**Today.** Partly. The `spaghetti` alias catches the two noodle lines;
+`unsalted or salted butter` still matches *Butter, salted*.
+
+### G23 · A brand name in place of the food
+
+**Seen in** garlic noodles: `1 tbsp, Son Fish Sauce`, `Sun Noodle, Kaedama`,
+`2 teaspoons maggi seasoning`.
+
+**Goes wrong.** The brand word steers the search: Son Fish Sauce reached
+*Sauce, barbecue*, and Maggi reached *Seasoning mix, dry, taco, original*.
+Maggi Seasoning has no USDA record at all.
+
+**Should.** Alias a brand to its generic food. For a brand with no USDA
+counterpart, record the stand-in chosen and its reason, or leave the line
+unresolved rather than invent a match.
+
+**Worked around 2026-09-30.** Fish sauce and Sun Noodle are aliased. Maggi is
+the first *food* in `data/ingredients/not-in-usda.json`, the owner's "own table
+of things that just apparently aren't in USDA".
+
+Maggi is in fact in USDA, in Branded Foods: fdc 2755366, the US 6.7 fl oz
+bottle, 8,600 mg of sodium per 100 mL. We do not load Branded Foods; we load
+Foundation, SR Legacy and FNDDS. The entry cites that record and takes soy
+sauce's density, which it says it assumed. A line with Maggi now converts with
+basis `not-in-usda`.
+
+Tests: "a food USDA lacks — Maggi Seasoning" in `not-in-usda.test.ts`.
 
 ---
 

@@ -13,6 +13,7 @@ import { curationFor, readCurated } from "./curated-sources";
 import { ownersView } from "./clones";
 import { installCategoryTable } from "./usda-categories";
 import { usdaFood, type UsdaFoodPage } from "./usda-food";
+import { edgeCases, gatherRuleEvidence } from "./rule-scores";
 import type { ExtractedRecipe } from "../types/provenance";
 
 const USDA_PATH = "usda.db";
@@ -250,7 +251,68 @@ export const DATASETS: DatasetDef[] = [
     defaultDir: "asc",
     searchable: ["site", "title", "dish"],
   },
+  {
+    id: "rules",
+    label: "Rules",
+    db: "",                    // computed: every rule run against the corpus (rule-scores.ts)
+    rows: () => ruleRows(),
+    select: "",
+    from: "",
+    columns: [
+      { key: "rule", label: "Rule", width: "22rem" },
+      { key: "kind", label: "Kind", badge: true },
+      { key: "caught", label: "Caught", numeric: true },
+      { key: "onNewRecipes", label: "On new recipes", numeric: true },
+      { key: "right", label: "Right", numeric: true },
+      { key: "wrong", label: "Wrong", numeric: true },
+      { key: "score", label: "Score", numeric: true },
+    ],
+    defaultSort: "caught",
+    defaultDir: "desc",
+    searchable: ["rule", "kind"],
+  },
+  {
+    id: "edge-cases",
+    label: "Edge cases",
+    db: "",                    // computed: the corpus lines a rule changed or nothing resolved
+    rows: () => edgeCaseRows(),
+    select: "",
+    from: "",
+    columns: [
+      { key: "dish", label: "Dish", width: "9rem" },
+      { key: "site", label: "Source", width: "13rem" },
+      { key: "line", label: "Line", width: "26rem" },
+      { key: "caughtBy", label: "Caught by", width: "18rem" },
+      { key: "food", label: "Food", width: "18rem" },
+      { key: "grams", label: "Grams", numeric: true },
+    ],
+    defaultSort: "dish",
+    defaultDir: "asc",
+    searchable: ["dish", "site", "line", "caughtBy", "food"],
+  },
 ];
+
+/** Every rule scored against the whole corpus; about a fifth of a second, so computed per request. */
+async function ruleRows(): Promise<Record<string, unknown>[]> {
+  const db = open(USDA_PATH);
+  if (!db) return [];
+  const { scores } = await gatherRuleEvidence(db);
+  return scores.map((s) => ({ ...s }));
+}
+
+async function edgeCaseRows(): Promise<Record<string, unknown>[]> {
+  const db = open(USDA_PATH);
+  if (!db) return [];
+  const { results } = await gatherRuleEvidence(db);
+  return edgeCases(results).map((r) => ({
+    dish: r.line.dish,
+    site: r.line.site,
+    line: r.line.line,
+    caughtBy: r.caught.join(", ") || "— unresolved",
+    food: r.outcome.food,
+    grams: r.outcome.grams,
+  }));
+}
 
 export interface PageResult {
   rows: Record<string, unknown>[];

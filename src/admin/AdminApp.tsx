@@ -28,6 +28,9 @@ const ROW_PAGE: Record<string, (row: Record<string, unknown>) => string> = {
 /** The view a page's address belongs to, so Back from a page opened by its address lands there. */
 const listOf = (path: string) => (usdaFoodIdFromPath(path) !== null ? "usda-foods" : HOME);
 
+/** How good our rules are (rule-scores.ts): their own rail group, above the raw tables. */
+const QUALITY = ["rules", "edge-cases"];
+
 interface DatasetMeta {
   id: string;
   label: string;
@@ -107,8 +110,20 @@ export function AdminApp() {
             </button>
           ))}
 
+          <p className="rail__group">Quality</p>
+          {datasets.filter((d) => QUALITY.includes(d.id)).map((d) => (
+            <button
+              type="button"
+              key={d.id}
+              className={`rail__item ${isActive(d.id) ? "is-active" : ""}`}
+              onClick={() => open(d.id)}
+            >
+              {d.label}
+            </button>
+          ))}
+
           <p className="rail__group">Data</p>
-          {datasets.map((d) => (
+          {datasets.filter((d) => !QUALITY.includes(d.id)).map((d) => (
             <button
               type="button"
               key={d.id}

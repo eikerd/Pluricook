@@ -15,6 +15,8 @@
 
 import type { Database } from "bun:sqlite";
 import { EMPTY_TABLE, resolveAlias, type AliasTable } from "./ingredient-aliases";
+import { dryFactor, waterOf, type OwnForm } from "./not-in-usda";
+import { rule } from "./rules";
 
 /** Units that are a mass already — no food lookup needed. */
 const MASS_GRAMS: Record<string, number> = {
@@ -68,7 +70,11 @@ export type Basis =
   /** The unit is not one we can reason about (e.g. "to taste", "pinch"). */
   | "unconvertible-unit"
   /** Our alias table says this phrase is not a food at all. */
-  | "rejected-by-alias";
+  | "rejected-by-alias"
+  /** A food the USDA datasets we load lack, converted by our own spec (not-in-usda.json). */
+  | "not-in-usda"
+  /** A form USDA lacks (fresh noodles), counted as another record's dry matter (G22). */
+  | "counted-as-dry";
 
 export interface GramResult {
   grams: number | null;
@@ -80,6 +86,11 @@ export interface GramResult {
   portionUsed: string | null;
   /** Free-text note when the conversion is approximate or refused. */
   note: string | null;
+  /**
+   * Set when the line leaned on our not-in-usda table instead of USDA, in a
+   * few words fit for a tag: "not in USDA", "fresh, counted as dry ×0.77".
+   */
+  workaround: string | null;
 }
 
 export function normalizeUnit(unit: string): string {
@@ -270,6 +281,10 @@ export function toGrams(opts: ToGramsOptions): GramResult {
    * curated decision cannot be overturned by a ranking change.
    */
   const identify = (needsPortion: boolean): FoodRow | null => {
+    if ((alias.kind === "exact" || alias.kind === "pattern") && alias.fdcId < 0) {
+      const own = aliases.notInUsda.byId.get(alias.fdcId);
+      if (own?.kind === "food" && rule(`gap:${own.key}`)) return { fdc_id: own.id, description: own.description };
+    }
     if (alias.kind === "exact" || alias.kind === "pattern") {
       const row = opts.db
         ?.query<FoodRow, [number]>(`SELECT fdc_id, description FROM foods WHERE fdc_id = ?1`)
@@ -281,7 +296,7 @@ export function toGrams(opts: ToGramsOptions): GramResult {
 
   const empty: GramResult = {
     grams: null, basis: "unconvertible-unit", fdcId: null,
-    foodDescription: null, portionUsed: null, note: null,
+    foodDescription: null, portionUsed: null, note: null, workaround: null,
   };
 
   if (alias.kind === "reject") {
@@ -291,6 +306,13 @@ export function toGrams(opts: ToGramsOptions): GramResult {
   if (!Number.isFinite(opts.quantity) || opts.quantity <= 0) {
     return { ...empty, note: "no usable quantity" };
   }
+
+  // 0. A form USDA lacks: counted as the dry record, by dry matter (G22).
+  const form =
+    (alias.kind === "exact" || alias.kind === "pattern") && alias.fdcId < 0
+      ? aliases.notInUsda.byId.get(alias.fdcId)
+      : undefined;
+  if (form?.kind === "form" && rule(`gap:${form.key}`)) return countAsDry(opts, form, unit);
 
   // 1. Already a mass. The arithmetic needs no food, but the IDENTITY still
   //    does: comparison clusters ingredients by fdc_id, and returning null here
@@ -308,6 +330,7 @@ export function toGrams(opts: ToGramsOptions): GramResult {
       foodDescription: identified?.description ?? null,
       portionUsed: null,
       note: identified ? null : "mass exact; food not identified",
+      workaround: identified && identified.fdc_id < 0 ? NOT_IN_USDA_TAG : null,
     };
   }
 
@@ -316,11 +339,17 @@ export function toGrams(opts: ToGramsOptions): GramResult {
   const food = identify(true);
   if (!food) return { ...empty, basis: "no-food-match", note: `no USDA match for "${opts.name}"` };
 
-  const portions = opts.db
-    .query<PortionRow, [number]>(
-      `SELECT amount, unit, modifier, gram_weight FROM portions WHERE fdc_id = ?1`,
-    )
-    .all(food.fdc_id);
+  // Our own food carries its own portions; a USDA one has them in usda.db.
+  const own = food.fdc_id < 0 ? aliases.notInUsda.byId.get(food.fdc_id) : undefined;
+  const portions: PortionRow[] =
+    own?.kind === "food"
+      ? own.portions.map((p) => ({ amount: p.amount, unit: null, modifier: p.unit, gram_weight: p.gramWeight }))
+      : opts.db
+          .query<PortionRow, [number]>(
+            `SELECT amount, unit, modifier, gram_weight FROM portions WHERE fdc_id = ?1`,
+          )
+          .all(food.fdc_id);
+  const ownBasis = own ? ({ basis: "not-in-usda", workaround: NOT_IN_USDA_TAG } as const) : null;
 
   const describe = (p: PortionRow) =>
     `${p.amount ?? 1} ${p.modifier ?? p.unit ?? ""} = ${p.gram_weight} g`.replace(/\s+/g, " ").trim();
@@ -351,6 +380,8 @@ export function toGrams(opts: ToGramsOptions): GramResult {
     return {
       grams: Math.round(opts.quantity * per * 10) / 10,
       basis: "usda-portion",
+      workaround: null,
+      ...ownBasis,
       fdcId: food.fdc_id,
       foodDescription: food.description,
       portionUsed: describe(chosen),
@@ -375,6 +406,8 @@ export function toGrams(opts: ToGramsOptions): GramResult {
       return {
         grams: Math.round(opts.quantity * per * (thisMl / otherMl) * 10) / 10,
         basis: "usda-portion-scaled",
+        workaround: null,
+        ...ownBasis,
         fdcId: food.fdc_id,
         foodDescription: food.description,
         portionUsed: describe(alt),
@@ -389,5 +422,42 @@ export function toGrams(opts: ToGramsOptions): GramResult {
     fdcId: food.fdc_id,
     foodDescription: food.description,
     note: `"${food.description}" publishes no ${unit} portion (${portions.length} portions available)`,
+  };
+}
+
+const NOT_IN_USDA_TAG = "not in USDA";
+
+/**
+ * A fresh form counted as its dry record (G22). Only a stated mass converts: a
+ * cup of fresh noodles has no density on record, and a guess would be the
+ * confident wrong answer this module refuses to give.
+ */
+function countAsDry(opts: ToGramsOptions, form: OwnForm, unit: string): GramResult {
+  const dry = opts.db
+    ?.query<FoodRow, [number]>(`SELECT fdc_id, description FROM foods WHERE fdc_id = ?1`)
+    .get(form.countAs);
+  const refused = (note: string): GramResult => ({
+    grams: null, basis: "no-portion-match", fdcId: dry?.fdc_id ?? null,
+    foodDescription: dry?.description ?? null, portionUsed: null, note, workaround: null,
+  });
+  const massFactor = MASS_GRAMS[unit];
+  if (massFactor === undefined) return refused(`${form.description} by ${unit}: only a stated mass converts to dry`);
+  const wetWater = opts.db ? waterOf(opts.db, form.waterFrom) : null;
+  const dryWater = opts.db ? waterOf(opts.db, form.countAs) : null;
+  if (!dry || wetWater === null || dryWater === null) {
+    return refused(`${form.description}: the USDA water figures needed are missing`);
+  }
+  const factor = dryFactor(wetWater, dryWater);
+  const asStated = Math.round(opts.quantity * massFactor * 10) / 10;
+  return {
+    grams: Math.round(asStated * factor * 10) / 10,
+    basis: "counted-as-dry",
+    fdcId: dry.fdc_id,
+    foodDescription: dry.description,
+    portionUsed: null,
+    note:
+      `${form.description}: ${asStated} g as stated, counted as ${Math.round(asStated * factor)} g dry ` +
+      `(×${factor.toFixed(2)}: ${wetWater}% water fresh, ${dryWater}% dry)`,
+    workaround: `fresh, counted as dry ×${factor.toFixed(2)}`,
   };
 }
