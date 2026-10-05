@@ -1,0 +1,75 @@
+{
+  "dish": "picadillo",
+  "extractedAt": "2026-10-05",
+  "recipes": [
+    {
+      "id": "personal:picadillo:zaragoza",
+      "provenance": {
+        "host": "youtube.com",
+        "siteName": "Jonathan Zaragoza",
+        "sourceUrl": "https://www.youtube.com/watch?v=WCMJJLg5Pe8&t=976s",
+        "author": "Jonathan Zaragoza",
+        "sourceTitle": "The Ground Beef Recipe Everyone Makes Differently",
+        "capturedAt": "2026-10-05",
+        "method": "personal-collection",
+        "acquisitionAtCapture": "pending-review",
+        "licence": null
+      },
+      "visibility": "private",
+      "dish": "picadillo",
+      "sections": [
+        {
+          "name": "picadillo",
+          "ingredientLines": [
+            "454 g ground beef",
+            "60 g neutral oil",
+            "165 g white onion",
+            "20 g garlic",
+            "125 g carrot",
+            "230 g yukon gold potatoes",
+            "430 g roma tomatoes",
+            "20 g ancho chile",
+            "7 g pasilla chile",
+            "5 g guajillo chile",
+            "12 g worcestershire sauce",
+            "35 g castelvetrano olives",
+            "2 fresh bay leaves",
+            "0.75 g whole cumin seeds",
+            "0.5 g mexican oregano",
+            "0.5 g whole coriander seeds",
+            "0.3 g ground allspice",
+            "1.4 g ground canela"
+          ]
+        }
+      ],
+      "ingredientLines": [
+        "454 g ground beef",
+        "60 g neutral oil",
+        "165 g white onion",
+        "20 g garlic",
+        "125 g carrot",
+        "230 g yukon gold potatoes",
+        "430 g roma tomatoes",
+        "20 g ancho chile",
+        "7 g pasilla chile",
+        "5 g guajillo chile",
+        "12 g worcestershire sauce",
+        "35 g castelvetrano olives",
+        "2 fresh bay leaves",
+        "0.75 g whole cumin seeds",
+        "0.5 g mexican oregano",
+        "0.5 g whole coriander seeds",
+        "0.3 g ground allspice",
+        "1.4 g ground canela"
+      ],
+      "servings": null,
+      "servingsRaw": null,
+      "totalTimeMinutes": null,
+      "totalTimeRaw": null,
+      "prepTimeMinutes": null,
+      "cookTimeMinutes": null,
+      "stepCount": null,
+      "visibilityReason": "source not cleared — acquisition is pending-review, which does not permit hand entry"
+    }
+  ]
+}
