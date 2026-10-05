@@ -1,0 +1,68 @@
+{
+  "_comment": [
+    "Picadillo, from Jonathan Zaragoza's video 'The Ground Beef Recipe Everyone Makes Differently'",
+    "(YouTube, recipe around 16:16). The owner pasted the ingredient list on 2026-10-05.",
+    "",
+    "Every line gave grams first, so each cell is that gram figure. The volumes and prep notes",
+    "that followed have no place in a matrix cell, so they are kept here as the lines were given:",
+    "",
+    "  454 g (1 lb) ground beef",
+    "  60 g (1/4 cup) neutral oil, plus more as needed",
+    "  165 g (1 medium) white onion, small dice",
+    "  20 g garlic, minced",
+    "  125 g (1 medium) carrot, peeled and small dice",
+    "  230 g (2 small) yukon gold potatoes, peeled and small dice",
+    "  430 g roma tomatoes, chopped",
+    "  20 g (1) ancho chile, stemmed and seeded",
+    "  7 g (1) pasilla chile, stemmed and seeded",
+    "  5 g (1) guajillo chile, stemmed and seeded",
+    "  12 g (about 2 1/2 tsp) worcestershire sauce",
+    "  35 g (about 1/4 cup) castelvetrano olives, pitted and chopped",
+    "  2 fresh bay leaves",
+    "  0.75 g (1/2 tsp) whole cumin seeds",
+    "  0.5 g (1/2 tsp) mexican oregano",
+    "  0.5 g (1/4 tsp) whole coriander seeds",
+    "  0.3 g (1/8 tsp) ground allspice",
+    "  1.4 g (1/4 tsp) ground canela",
+    "",
+    "YouTube is not on data/sources/curated.json, so the import keeps this recipe PRIVATE."
+  ],
+
+  "dish": "picadillo",
+  "convention": "bare-numbers-are-grams",
+  "compiledBy": "owner",
+  "compiledAt": "2026-10-05",
+
+  "sources": [
+    { "key": "zaragoza", "siteName": "Jonathan Zaragoza", "author": "Jonathan Zaragoza",
+      "sourceUrl": "https://www.youtube.com/watch?v=WCMJJLg5Pe8&t=976s",
+      "sourceTitle": "The Ground Beef Recipe Everyone Makes Differently",
+      "note": "YouTube creator (@goatboyintl)." }
+  ],
+
+  "sections": [
+    {
+      "name": "picadillo",
+      "rows": [
+        { "ingredient": "Ground Beef",           "cells": { "zaragoza": 454 } },
+        { "ingredient": "Neutral Oil",           "cells": { "zaragoza": 60 } },
+        { "ingredient": "White Onion",           "cells": { "zaragoza": 165 } },
+        { "ingredient": "Garlic",                "cells": { "zaragoza": 20 } },
+        { "ingredient": "Carrot",                "cells": { "zaragoza": 125 } },
+        { "ingredient": "Yukon Gold Potatoes",   "cells": { "zaragoza": 230 } },
+        { "ingredient": "Roma Tomatoes",         "cells": { "zaragoza": 430 } },
+        { "ingredient": "Ancho Chile",           "cells": { "zaragoza": 20 } },
+        { "ingredient": "Pasilla Chile",         "cells": { "zaragoza": 7 } },
+        { "ingredient": "Guajillo Chile",        "cells": { "zaragoza": 5 } },
+        { "ingredient": "Worcestershire Sauce",  "cells": { "zaragoza": 12 } },
+        { "ingredient": "Castelvetrano Olives",  "cells": { "zaragoza": 35 } },
+        { "ingredient": "Fresh Bay Leaves",      "cells": { "zaragoza": 2 } },
+        { "ingredient": "Whole Cumin Seeds",     "cells": { "zaragoza": 0.75 } },
+        { "ingredient": "Mexican Oregano",       "cells": { "zaragoza": 0.5 } },
+        { "ingredient": "Whole Coriander Seeds", "cells": { "zaragoza": 0.5 } },
+        { "ingredient": "Ground Allspice",       "cells": { "zaragoza": 0.3 } },
+        { "ingredient": "Ground Canela",         "cells": { "zaragoza": 1.4 } }
+      ]
+    }
+  ]
+}
