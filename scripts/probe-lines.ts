@@ -49,6 +49,6 @@ for (const raw of lines) {
   console.log(`  parsed  ${parsed.quantity} ${parsed.unit} · ${JSON.stringify(parsed.name)}`);
   console.log(`  stated  ${parsed.statedGrams === null ? "—" : `${parsed.statedGrams} g`}`);
   console.log(
-    `  grams   ${result.grams === null ? "—" : result.grams.toFixed(1)} · ${result.foodDescription ?? result.basis}`,
+    `  grams   ${result.grams === null ? "—" : result.grams} · ${result.foodDescription ?? result.note ?? result.basis}`,
   );
 }

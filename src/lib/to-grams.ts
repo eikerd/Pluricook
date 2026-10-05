@@ -323,8 +323,10 @@ export function toGrams(opts: ToGramsOptions): GramResult {
   if (massFactor !== undefined) {
     // opts.db may legitimately be absent: a mass needs no lookup to be exact.
     const identified = identify(false);
+    // A tenth of a gram is a fifth of a quarter-gram of nutmeg (G17).
+    const per = rule("line:hundredth-gram") ? 100 : 10;
     return {
-      grams: Math.round(opts.quantity * massFactor * 10) / 10,
+      grams: Math.round(opts.quantity * massFactor * per) / per,
       basis: "direct-mass",
       fdcId: identified?.fdc_id ?? null,
       foodDescription: identified?.description ?? null,

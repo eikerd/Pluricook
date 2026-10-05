@@ -184,6 +184,46 @@
     }
   },
   "patterns": {
+    "carrot": {
+      "fdcId": 170393,
+      "note": "Carrots, raw (SR, nine portions). Foundation's tie-break picked 'Carrots, baby, raw' for a plain carrot (G15, Zaragoza picadillo)."
+    },
+    "baby carrot": {
+      "fdcId": 168568,
+      "note": "Carrots, baby, raw. Keeps baby carrots off the plain 'carrot' pattern above."
+    },
+    "yukon gold": {
+      "fdcId": 2346403,
+      "note": "Potatoes, gold, without skin, raw. 'yukon' is not in the index, so the fallback searched 'potatoes' alone and found red (G15)."
+    },
+    "castelvetrano": {
+      "fdcId": 169096,
+      "note": "Olives, pickled, canned or bottled, green. Castelvetrano is a green olive; the fallback reached a pimiento-stuffed Manzanilla (G15)."
+    },
+    "ancho chile": {
+      "fdcId": 169396,
+      "note": "Peppers, ancho, dried. USDA files chiles under 'Peppers'; the fallback reached 'Chiles rellenos' (G25). Not bare 'ancho': that is inside 'anchovy'."
+    },
+    "ancho chili": {
+      "fdcId": 169396,
+      "note": "Same record as 'ancho chile'."
+    },
+    "pasilla": {
+      "fdcId": 168579,
+      "note": "Peppers, pasilla, dried (G25)."
+    },
+    "guajillo": {
+      "fdcId": 168570,
+      "note": "STAND-IN: USDA has no guajillo. Peppers, hot chile, sun-dried is the nearest dried red chile (G25)."
+    },
+    "canela": {
+      "fdcId": 171320,
+      "note": "Spices, cinnamon, ground. Canela is Ceylon cinnamon; USDA does not separate it from cassia (G26)."
+    },
+    "mexican oregano": {
+      "fdcId": 171328,
+      "note": "STAND-IN: Spices, oregano, dried. Mexican oregano is Lippia graveolens, a different plant USDA does not list (G26)."
+    },
     "ground beef": {
       "fdcId": 174036,
       "note": "Covers 'lean ground beef', 'ground beef chuck'."

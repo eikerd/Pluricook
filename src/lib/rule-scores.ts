@@ -37,16 +37,20 @@ export const CODE_RULES = [
   "parse:leading-bullet",
   "parse:optional-mark",
   "parse:bracketed-alternate",
+  "parse:bracketed-hedge",
+  "parse:bracketed-count",
   "parse:range-first-figure",
   "parse:unicode-fraction",
   "parse:inch-mark",
   "parse:slash-alternate",
   "line:leading-punctuation",
+  "line:comma-after-food",
   "line:number-is-a-count",
   "line:unknown-unit-is-name",
   "line:count-noun-singular",
   "line:count-noun-from-name",
   "line:stated-grams",
+  "line:hundredth-gram",
   "extract:json-control-chars",
 ] as const;
 
@@ -240,6 +244,7 @@ export const EDGE_CASES_PATH = "data/rules/edge-cases.json";
 /** Pasted fixtures that are recipes, scored alongside the extracted corpus. */
 const FIXTURES: Array<{ path: string; dish: string; site: string; capturedAt: string }> = [
   { path: "data/fixtures/apple-fritters.txt", dish: "apple-fritters", site: "Kitchen in the shire", capturedAt: "2026-09-26" },
+  { path: "data/fixtures/picadillo-zaragoza.txt", dish: "picadillo", site: "Jonathan Zaragoza", capturedAt: "2026-10-05" },
 ];
 
 export function lineEvaluator(db: Database, aliases: AliasTable): (line: string) => Outcome {

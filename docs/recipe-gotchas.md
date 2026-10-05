@@ -22,6 +22,7 @@ its number and says it is fixed.
 |---|---|---|
 | Apple fritters | Kitchen in the shire, pasted by the owner from a PDF on 2026-09-26; no URL on file. Also the APPLE_FRITTERS sheet in Google Drive. | `data/fixtures/apple-fritters.txt` |
 | San Francisco garlic noodles | Six recipes extracted from JSON-LD on 2026-09-30 (`bun scripts/extract-dish.ts garlic-noodles`); seven pages automation could not take, listed in `data/lookups/garlic-noodles.json`. | `data/recipes/garlic-noodles.json` |
+| Picadillo | Jonathan Zaragoza, "The Ground Beef Recipe Everyone Makes Differently" (YouTube, `WCMJJLg5Pe8`), ingredient list pasted by the owner on 2026-10-05. Every line but one leads with its grams. | `data/fixtures/picadillo-zaragoza.txt` |
 
 ## Index
 
@@ -43,13 +44,18 @@ its number and says it is fixed.
 | G14 | A counted item with no weight | quantity | broken |
 | G15 | Plain foods match the wrong USDA record | matching | partly |
 | G16 | One food, several names, several components | matching | OK |
-| G17 | Small weights rounded to a tenth of a gram | quantity | broken |
+| G17 | Small weights rounded to a tenth of a gram | quantity | fixed |
 | G18 | A second measure after a slash | quantity | fixed |
 | G19 | A raw line break inside JSON-LD | text | fixed |
 | G20 | One recipe, several publishers | structure | not modelled |
 | G21 | Alternatives named in one line | matching | partly |
 | G22 | Fresh and dry noodles on one anchor | quantity | worked around |
 | G23 | A brand name in place of the food | matching | worked around |
+| G24 | A bare count or a hedged measure in brackets stays in the name | text | fixed |
+| G25 | Dried chiles named by variety | matching | worked around |
+| G26 | A regional name USDA lacks | matching | worked around |
+| G27 | The comma after a food's first word is dropped | text | fixed |
+| G28 | Taking out the count noun cuts the name mid-word | text | fixed |
 
 ---
 
@@ -291,6 +297,75 @@ three broken blocks.
 
 Test: "G19: …" in `recipe-extract.test.ts`.
 
+### G24 · A bare count or a hedged measure in brackets stays in the name
+
+**Seen in** picadillo: `20 g (1) ancho chile, stemmed and seeded` (also pasilla
+and guajillo), `12 g (about 2 1/2 tsp) worcestershire sauce`,
+`35 g (about 1/4 cup) castelvetrano olives, pitted and chopped`.
+
+**Goes wrong.** A bracketed amount was read only when a unit word followed the
+digits straight away. `(1)` has no unit and `(about …)` opens with a word, so
+both stayed in the name: `(1) ancho chile, …`. Matching drops brackets, so the
+foods were unaffected. The name shown was wrong, and a hedged gram figure,
+`(about 120g)`, was never taken as stated.
+
+**Should.** Take both out of the name. A bare count is kept as an alternate in
+`each`, a cross-check on the mass beside it. A hedge word (about, approx.,
+approximately, roughly, around, ~) is dropped before the amount is read, but
+only when what follows it is an amount: `(about a pound)` stays in the name.
+
+**Fixed 2026-10-05.** Rules `parse:bracketed-count` and `parse:bracketed-hedge`
+in `ingredient-parser.ts`. Removing the bracket from `2 leeks (approx. 6 oz),
+white and pale green parts only` and `5 celery stalks (approx. 6 oz) (small
+dice)` (lentil soup) exposed G27 and G28. Those two already broke every line
+whose bracketed amount was taken out, hedged or not.
+
+Tests: "G24: …" in `ingredient-line.test.ts`.
+
+### G27 · The comma after a food's first word is dropped
+
+**Seen in** lentil soup: `2 leeks (approx. 6 oz), white and pale green parts
+only, …`. It also affects any line shaped like `2 onions, chopped`.
+
+**Goes wrong.** The parser reads the first word after the number as a unit.
+For `2 onions, chopped` that gives `onions` as the unit and `, chopped` as the
+name. The leading comma was stripped, and the unknown "unit" was put back
+in front of the name, giving `onions chopped`. Matching splits on the first
+comma, so it searched `onions chopped`. Once G24 took the leeks' bracket out,
+they searched `leeks white and pale green parts only` and found *Quail, meat
+only, raw*. Only the leeks changed result in the edge-case table, because most
+names still match on their first word.
+
+**Should.** Put the comma back between the food and what follows it:
+`onions, chopped`.
+
+**Fixed 2026-10-05.** Rule `line:comma-after-food` in `ingredient-line.ts`.
+
+Tests: "G27: …" in `ingredient-line.test.ts`.
+
+### G28 · Taking out the count noun cuts the name mid-word
+
+**Seen in** lentil soup: `5 celery stalks (approx. 6 oz) (small dice)` and
+`2 garlic cloves (minced)`. It also affects every counted line with a bracket
+before its first comma.
+
+**Goes wrong.** `line:count-noun-from-name` finds the count noun ("stalks",
+"cloves") in the name with its brackets blanked out. It blanked each bracket
+to a single space, then cut the real name at an offset measured in the blanked
+one. `celery stalks (small dice)` became `celerysmall dice)`. `garlic
+(minced)` matched nothing, so every `N garlic cloves (minced)` line in the
+corpus had no grams.
+
+**Should.** Blank a bracket to spaces of its own length, so the offsets agree,
+and take only the count noun out.
+
+**Fixed 2026-10-05**, in the same rule. Now resolved: five garlic lines across
+lentil soup and meatloaf, at 6 g and 9 g; A Beautiful Plate's celery, at 200 g;
+and RecipeTin Eats' `2 beef bouillon cubes (…)` (meatloaf), which had matched
+*Sugars, powdered*.
+
+Tests: "G28: …" in `ingredient-line.test.ts`.
+
 ## Quantities
 
 ### G11 · Stated grams are thrown away
@@ -350,6 +425,11 @@ without grams.
 **Today.** `1 large · "Egg, room temp, beaten"` matches *Egg substitute,
 powder*, with no grams.
 
+**Seen again in** picadillo, 2026-10-05: `2 fresh bay leaves` parses as
+`2 leaf · "fresh bay"` and matches *Spices, bay leaf*, with no grams. USDA
+publishes only `1 tsp, crumbled = 0.6 g` for it, and that is the dried leaf,
+not the fresh one. It is the only line of eighteen without grams.
+
 ### G17 · Small weights rounded to a tenth of a gram
 
 **Seen in** apple fritters: `⅛ tsp (0.25g) Nutmeg`, `⅛ tsp (0.75g) Salt`.
@@ -362,6 +442,17 @@ the lines where that matters, and salinity is computed from the salt.
 
 **Today.** 0.25 g gives `0.3`, and 0.75 g gives `0.8`. Found once G11 let the
 stated grams through.
+
+**Fixed 2026-10-05**, when the picadillo's `0.75 g (1/2 tsp) whole cumin seeds`
+came out as 0.8 g. Both stated grams and a line that leads with grams reach
+`toGrams` as a mass, so the fix is in its first step: a mass is rounded to
+0.01 g (rule `line:hundredth-gram`). 0.25 g of nutmeg and 0.75 g of cumin now
+stay exact. Pounds and ounces move by the same hundredth: 2 lb is 907.18 g, was
+907.2. Volume conversions still round to 0.1 g; USDA's portions are not more
+precise than that. `probe-lines.ts` printed every figure to one decimal too,
+which hid the fix; it now prints the figure as is.
+
+Tests: "G17: …" in `to-grams.test.ts`.
 
 ### G22 · Fresh and dry noodles on one anchor
 
@@ -466,6 +557,20 @@ record loses to a cousin that does.
 
 Each is a golden case in `data/ingredients/expectations.json`.
 
+**Seen again in** picadillo, 2026-10-05. Each of these lines states its grams,
+so the whole search was open to it, and the fallback search drops words the
+index lacks:
+
+| Line as published | Matched before | Now (pattern) |
+|---|---|---|
+| `125 g (1 medium) carrot, peeled and small dice` | *Carrots, baby, raw* | *Carrots, raw* |
+| `230 g (2 small) yukon gold potatoes, …` | *Potatoes, red, without skin, raw* | *Potatoes, gold, without skin, raw* |
+| `35 g (about 1/4 cup) castelvetrano olives, …` | *Olives, green, Manzanilla, stuffed with pimiento* | *Olives, pickled, canned or bottled, green* |
+
+"yukon" and "castelvetrano" are not in the index, so the search fell back to
+"potatoes" and "olives" alone. A `baby carrot` pattern keeps baby carrots off
+the plain one. Each is a golden case.
+
 ### G16 · One food, several names, several components
 
 **Seen in** apple fritters. Lemon juice appears as `Lemon Juice` (filling) and
@@ -531,6 +636,47 @@ basis `not-in-usda`.
 Tests: "a food USDA lacks — Maggi Seasoning" in `not-in-usda.test.ts`.
 
 ---
+
+### G25 · Dried chiles named by variety
+
+**Seen in** picadillo: `20 g (1) ancho chile, stemmed and seeded`,
+`7 g (1) pasilla chile, …`, `5 g (1) guajillo chile, …`.
+
+**Goes wrong.** USDA files chiles under "Peppers". "ancho chile" found no
+record holding both words, so the search fell back to "chile" alone and matched
+the survey dish *Chiles rellenos, cheese-filled* for all three.
+
+**Should.** Match each variety to its dried record. Where USDA has none, use a
+named stand-in and say so.
+
+**Worked around 2026-10-05** with patterns:
+- `ancho chile` (and `ancho chili`) → *Peppers, ancho, dried*. Bare "ancho"
+  would also catch "anchovy".
+- `pasilla` → *Peppers, pasilla, dried*. USDA's 7 g per pepper matches the
+  recipe's.
+- `guajillo` → *Peppers, hot chile, sun-dried*, marked STAND-IN in its note.
+  USDA has no guajillo.
+
+The general fix, reading "chile" as "peppers" when searching, is not built.
+
+### G26 · A regional name USDA lacks
+
+**Seen in** picadillo: `1.4 g (1/4 tsp) ground canela`,
+`0.5 g (1/2 tsp) mexican oregano`.
+
+**Goes wrong.** Canela matched nothing. Its mass was exact, but the line
+dropped out of every food comparison. Mexican oregano matched *Spices,
+oregano, dried*, a different plant, and nothing on the line said so.
+
+**Should.** Map each to its nearest record and say what was assumed.
+
+**Worked around 2026-10-05** with patterns:
+- `canela` → *Spices, cinnamon, ground*. USDA does not separate Ceylon from
+  cassia.
+- `mexican oregano` → *Spices, oregano, dried*, marked STAND-IN.
+
+`probe-lines.ts` used to print the basis where the food goes, which hid the
+miss. It now prints the line's note: `mass exact; food not identified`.
 
 ## Prior art
 

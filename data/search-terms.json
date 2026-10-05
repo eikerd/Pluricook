@@ -652,6 +652,13 @@
         "Garlic Noodles",
         "Vietnamese Garlic Noodles"
       ]
+    },
+    {
+      "slug": "picadillo",
+      "term": "Picadillo",
+      "rank": null,
+      "group": null,
+      "note": "In the library, not on the list. Added 2026-10-05 with Jonathan Zaragoza's version."
     }
   ]
 }

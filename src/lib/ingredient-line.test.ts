@@ -165,6 +165,46 @@ describe("recipe gotchas — docs/recipe-gotchas.md", () => {
     expect(conversionInput(parseLine("1 kg / 2 lb ground beef"))).toEqual({ quantity: 1, unit: "kg" });
   });
 
+  // G24: a bare count or a hedged measure in brackets — Jonathan Zaragoza's picadillo.
+  test.each([
+    ["20 g (1) ancho chile, stemmed and seeded", 20, "ancho chile, stemmed and seeded"],
+    ["12 g (about 2 1/2 tsp) worcestershire sauce", 12, "worcestershire sauce"],
+    ["35 g (about 1/4 cup) castelvetrano olives, pitted and chopped", 35, "castelvetrano olives, pitted and chopped"],
+    ["0.75 g (1/2 tsp) whole cumin seeds", 0.75, "whole cumin seeds"],
+  ])("G24: %p leaves the brackets out of the name", (line, quantity, name) => {
+    const p = parseLine(line);
+    expect(p.quantity).toBe(quantity);
+    expect(p.unit).toBe("g");
+    expect(p.name).toBe(name);
+  });
+
+  test("G24: a hedged gram figure in brackets still counts as stated", () => {
+    expect(parseLine("1 cup (about 120g) flour").statedGrams).toBe(120);
+  });
+
+  test("G24: a bracketed note that is not an amount stays in the name", () => {
+    expect(parseLine("1 can (about a pound) tomatoes").name).toContain("(about a pound)");
+    expect(parseLine("2 cups (6mm dice) apples").name).toBe("apples");
+  });
+
+  // G27: a comma after a food named by its first word is not dropped.
+  test.each([
+    ["2 onions, chopped", "onions, chopped"],
+    ["2 leeks (approx. 6 oz), white and pale green parts only", "leeks, white and pale green parts only"],
+    ["2 leeks (6 oz), white and pale green parts only", "leeks, white and pale green parts only"],
+  ])("G27: %p keeps its comma", (line, name) => {
+    expect(parseLine(line).name).toBe(name);
+  });
+
+  // G28: taking the count noun out of the name keeps the rest of the name whole.
+  test.each([
+    ["5 celery stalks (6 oz) (small dice)", "stalk", "celery (small dice)"],
+    ["5 celery stalks (approx. 6 oz) (small dice)", "stalk", "celery (small dice)"],
+    ["3 garlic cloves (large), minced", "clove", "garlic (large), minced"],
+  ])("G28: %p", (line, unit, name) => {
+    expect(parseLine(line)).toMatchObject({ unit, name });
+  });
+
   test("G18: a slash with no measure after it is left to the name", () => {
     expect(parseLine("2 cups / sliced peaches").name).toBe("sliced peaches");
     expect(parseLine("1 cup half/half").name).toBe("half/half");
