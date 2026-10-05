@@ -16,6 +16,14 @@
     "Add a case whenever a miss is noticed. Never delete one to make a suite pass."
   ],
   "cases": [
+    {"line": "125 g (1 medium) carrot, peeled and small dice", "expect": "Carrots, raw", "reject": "baby", "found": "Zaragoza picadillo (G15) — Foundation's tie-break preferred 'Carrots, baby, raw'"},
+    {"line": "230 g (2 small) yukon gold potatoes, peeled and small dice", "expect": "gold", "reject": "red", "found": "Zaragoza picadillo (G15) — 'yukon' is not in the index; fallback on 'potatoes' found red"},
+    {"line": "35 g (about 1/4 cup) castelvetrano olives, pitted and chopped", "expect": "olives, pickled, canned or bottled, green", "reject": "stuffed with pimiento", "found": "Zaragoza picadillo (G15) — fallback on 'olives' reached a stuffed Manzanilla"},
+    {"line": "20 g (1) ancho chile, stemmed and seeded", "expect": "ancho, dried", "reject": "chiles rellenos", "found": "Zaragoza picadillo (G25) — USDA files chiles under 'Peppers'; fallback reached a survey dish"},
+    {"line": "7 g (1) pasilla chile, stemmed and seeded", "expect": "pasilla, dried", "reject": "chiles rellenos", "found": "Zaragoza picadillo (G25)"},
+    {"line": "5 g (1) guajillo chile, stemmed and seeded", "expect": "hot chile, sun-dried", "reject": "chiles rellenos", "found": "Zaragoza picadillo (G25) — no guajillo record; sun-dried hot chile stands in"},
+    {"line": "1.4 g (1/4 tsp) ground canela", "expect": "cinnamon", "reject": "", "found": "Zaragoza picadillo (G26) — canela matched nothing"},
+    {"line": "0.5 g (1/2 tsp) mexican oregano", "expect": "oregano, dried", "reject": "", "found": "Zaragoza picadillo (G26) — a stand-in; the alias note says so"},
     {
       "line": "1 medium onion, finely chopped",
       "expect": "onion",

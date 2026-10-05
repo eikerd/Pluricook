@@ -37,10 +37,19 @@ describe("mass units need no database", () => {
   const nodb = null as unknown as Database;
 
   test("converts each mass unit exactly", () => {
-    expect(toGrams({ quantity: 2, unit: "lb", name: "ground beef", db: nodb }).grams).toBe(907.2);
+    expect(toGrams({ quantity: 2, unit: "lb", name: "ground beef", db: nodb }).grams).toBe(907.18);
     expect(toGrams({ quantity: 8, unit: "oz", name: "butter", db: nodb }).grams).toBe(226.8);
     expect(toGrams({ quantity: 450, unit: "g", name: "chicken", db: nodb }).grams).toBe(450);
     expect(toGrams({ quantity: 1.5, unit: "kg", name: "flour", db: nodb }).grams).toBe(1500);
+  });
+
+  // G17: a tenth of a gram is a fifth of a quarter-gram of nutmeg.
+  test.each([
+    [0.75, "whole cumin seeds"],
+    [0.25, "nutmeg"],
+    [0.3, "ground allspice"],
+  ])("G17: %p g of %s stays exact", (quantity, name) => {
+    expect(toGrams({ quantity, unit: "g", name, db: nodb }).grams).toBe(quantity);
   });
 
   test("reports the basis so the number can be trusted or questioned", () => {

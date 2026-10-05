@@ -127,7 +127,11 @@ export function parseLine(rawLine: string): ParsedLine {
   // name. Fuzzy matching shrugs it off, which is how it hid: an EXACT alias for
   // "soy sauce" can never match ". soy sauce", so the alias silently did nothing.
   let name = (p.ingredientName ?? "").trim();
-  if (/^[\s.,;:/–-]/.test(name) && rule("line:leading-punctuation")) name = name.replace(/^[\s.,;:/–-]+/, "");
+  let lead = "";
+  if (/^[\s.,;:/–-]/.test(name) && rule("line:leading-punctuation")) {
+    lead = /^[\s.,;:/–-]+/.exec(name)![0];
+    name = name.slice(lead.length);
+  }
 
   // 0. The raw parser returns "to taste" as its DEFAULT when it finds no unit,
   //    so "1 onion" came back as unit "to taste" and was then rejected as not a
@@ -140,7 +144,10 @@ export function parseLine(rawLine: string): ParsedLine {
   if (unit.toLowerCase() === "to taste") {
     // Genuinely unquantified. Left as-is so conversion refuses it.
   } else if (unit !== "" && !KNOWN.has(unit.toLowerCase()) && !KNOWN.has(unitKey) && rule("line:unknown-unit-is-name")) {
-    name = `${unit} ${name}`.trim();
+    // "2 onions, chopped": the comma the parser left after "onions" belongs
+    // between the food and its preparation, not nowhere (G27).
+    const comma = /[,;]/.test(lead) && rule("line:comma-after-food") ? "," : "";
+    name = `${unit}${comma} ${name}`.trim();
     unit = "each";
   } else if (unit === "") {
     unit = "each";
@@ -151,15 +158,18 @@ export function parseLine(rawLine: string): ParsedLine {
   // 2. A counted line often carries its count noun inside the name:
   //    "garlic cloves, minced" is cloves of garlic, not a food called that.
   if (unit === "each" || SIZES.includes(unit.toLowerCase())) {
-    const head = name.replace(/\([^)]*\)/g, " ").split(/,|;/)[0]!;
+    // Brackets are blanked to the same length, so offsets into `head` are
+    // offsets into `name` too; a shorter stand-in once cut the name mid-word (G28).
+    const head = name.replace(/\([^)]*\)/g, (m) => " ".repeat(m.length)).split(/,|;/)[0]!;
     const words = head.trim().split(/\s+/);
     const at = words.findIndex((w) => COUNT_NOUNS.includes(singular(w)));
     // Only when another word remains — "bay leaf" minus "leaf" still names a food,
     // but a bare "cloves" is the spice and must be left alone.
     if (at !== -1 && words.length > 1 && rule("line:count-noun-from-name")) {
       unit = singular(words[at]!);
-      words.splice(at, 1);
-      name = `${words.join(" ")}${name.slice(head.length)}`.trim();
+      const noun = new RegExp(`(^|\\s)${words[at]}(?=\\s|$)`);
+      const kept = name.slice(0, head.length).replace(noun, "$1").replace(/\s\s+/g, " ").trim();
+      name = `${kept}${name.slice(head.length)}`.trim();
     }
   }
 

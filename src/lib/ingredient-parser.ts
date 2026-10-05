@@ -41,6 +41,12 @@ const LEADING_BULLET = /^(?:[•∙·▪◦‣*]|-(?=\s))\s*/;
 /** "30g (2T)", "3 cups (0.25 g)": the amount inside brackets, decimals included. */
 const BRACKETED_AMOUNT = new RegExp(`^([\\d\\s\\/\\-–.${VULGAR}]+)\\s*([a-zA-Z]+)`);
 
+/** "(about 2 1/2 tsp)", "(approx. 120g)": a hedge before a bracketed amount. See G24. */
+const BRACKETED_HEDGE = /^(?:about|approx\.?|approximately|roughly|around|~)\s*/i;
+
+/** "20 g (1) ancho chile": a bare count in brackets beside a mass. See G24. */
+const BRACKETED_COUNT = new RegExp(`^\\s*[\\d${VULGAR}][\\d\\s\\/.${VULGAR}]*$`);
+
 /** "Quantity Unit Ingredient". */
 const QUANTITY_UNIT_NAME = new RegExp(`^([\\d\\s\\/\\-–${VULGAR}\\."]+)\\s*([a-zA-Z]+|")?\\s*(.*)$`);
 
@@ -104,13 +110,19 @@ export function parseIngredientLine(line: string): ParsedIngredient {
   let alternateQuantity;
   const parenMatch = line.match(/\(([^)]+)\)/);
   if (parenMatch) {
-    const content = parenMatch[1];
+    let content = parenMatch[1] ?? "";
+    const hedged = BRACKETED_HEDGE.test(content) && BRACKETED_AMOUNT.test(content.replace(BRACKETED_HEDGE, ""));
+    if (hedged && rule("parse:bracketed-hedge")) content = content.replace(BRACKETED_HEDGE, "");
     const altMatch = content.match(BRACKETED_AMOUNT);
     if (altMatch && rule("parse:bracketed-alternate")) {
       alternateQuantity = {
         quantity: parseQuantity(altMatch[1]),
         unit: altMatch[2].toLowerCase(),
       };
+      line = line.replace(parenMatch[0], "").replace(/\s\s+/g, ' ').trim();
+    } else if (BRACKETED_COUNT.test(content) && rule("parse:bracketed-count")) {
+      // The count is a cross-check on the mass beside it, not a measure of its own.
+      alternateQuantity = { quantity: parseQuantity(content), unit: "each" };
       line = line.replace(parenMatch[0], "").replace(/\s\s+/g, ' ').trim();
     }
   }
