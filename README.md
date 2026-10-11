@@ -1,4 +1,4 @@
-# bun-react-tailwind-shadcn-template
+# Pluricook
 
 To install dependencies:
 
