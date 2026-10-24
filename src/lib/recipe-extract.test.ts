@@ -186,6 +186,11 @@ describe("extractRecipe — refusals", () => {
     expect(r).toMatchObject({ ok: false, reason: "no-ingredients" });
   });
 
+  test("G33: one ingredient line is not a recipe (Kikkoman's markup says only 'Chicken')", () => {
+    const r = extractRecipe({ ...BASE, html: ld({ ...RECIPE, recipeIngredient: ["Chicken"] }) });
+    expect(r).toMatchObject({ ok: false, reason: "one-ingredient" });
+  });
+
   test("never returns a half-filled recipe on failure", () => {
     const r = extractRecipe({ ...BASE, html: "<html></html>" });
     expect(r.ok).toBe(false);

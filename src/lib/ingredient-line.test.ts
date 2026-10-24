@@ -205,6 +205,32 @@ describe("recipe gotchas — docs/recipe-gotchas.md", () => {
     expect(parseLine(line)).toMatchObject({ unit, name });
   });
 
+  // G31: a container's net weight, hyphenated onto its size — The Modern Proper.
+  test.each([
+    ["1 (7-ounce) jar sun-dried tomatoes, drained and roughly chopped", 198.447, "sun-dried tomatoes, drained and roughly chopped"],
+    ["2 (14.5-oz) cans diced tomatoes", 822.136, "diced tomatoes"],
+    ["1 (1-pound) package spaghetti", 453.592, "spaghetti"],
+  ])("G31: %p weighs %p g", (line, grams, name) => {
+    expect(parseLine(line)).toMatchObject({ statedGrams: grams, name });
+  });
+
+  test("G31: an ounce in brackets without the hyphen is still not trusted", () => {
+    expect(parseLine("1 (8 oz) package cream cheese").statedGrams).toBeNull();
+  });
+
+  // G32: a recipe card's metric conversion straight after the measure — Sweet y Salado.
+  test.each([
+    ["¾ cup 177 ml chicken stock", null, "chicken stock"],
+    ["¼ cup 25 g Parmesan cheese, grated", 25, "Parmesan cheese, grated"],
+    ["⅓ cup 18 g sun-dried tomatoes", 18, "sun-dried tomatoes"],
+  ])("G32: %p states %p g, and the conversion leaves the name", (line, grams, name) => {
+    expect(parseLine(line)).toMatchObject({ statedGrams: grams, name });
+  });
+
+  test("G32: a count after a measure is not a conversion", () => {
+    expect(parseLine("1 cup 2% milk").name).toBe("2% milk");
+  });
+
   test("G18: a slash with no measure after it is left to the name", () => {
     expect(parseLine("2 cups / sliced peaches").name).toBe("sliced peaches");
     expect(parseLine("1 cup half/half").name).toBe("half/half");

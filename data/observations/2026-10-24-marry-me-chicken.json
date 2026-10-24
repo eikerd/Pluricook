@@ -1,0 +1,31 @@
+{
+  "query": "marry-me-chicken",
+  "searchQuery": "marry me chicken recipe",
+  "seenAt": "2026-10-24",
+  "engine": "firecrawl-web-search",
+  "rawResultCount": 20,
+  "creditsUsed": 4,
+  "note": "Fifth dish: Marry Me Chicken, the sun-dried tomato and Parmesan cream chicken Delish published in 2016 as 'skillet Sicilian chicken' (its URL still says so). Search excluded allrecipes.com, simplyrecipes.com, YouTube, TikTok and Instagram at query time. Andy Cooks came back twice under two srsltid tracking parameters; both are kept as seen, with the parameter dropped, and extraction folds them to one page. The Recipe Critic result is Marry Me Chicken Pasta, a different dish with penne, so it is recorded as other.",
+  "appearances": [
+    { "rank": 1, "url": "https://www.delish.com/cooking/recipe-ideas/a46330/skillet-sicilian-chicken-recipe/", "kind": "recipe", "displayName": "Delish" },
+    { "rank": 2, "url": "https://littlesunnykitchen.com/marry-me-chicken/", "kind": "recipe", "displayName": "Little Sunny Kitchen" },
+    { "rank": 3, "url": "https://www.simplyorganic.com/recipes/marry-me-chicken", "kind": "recipe", "displayName": "Simply Organic" },
+    { "rank": 4, "url": "https://damndelicious.net/2026/07/24/marry-me-chicken/", "kind": "recipe", "displayName": "Damn Delicious" },
+    { "rank": 5, "url": "https://www.thecountrycook.net/marry-me-chicken/", "kind": "recipe", "displayName": "The Country Cook" },
+    { "rank": 6, "url": "https://www.budgetbytes.com/marry-me-chicken/", "kind": "recipe", "displayName": "Budget Bytes" },
+    { "rank": 7, "url": "https://www.facebook.com/chefbillyparisi/videos/marry-me-chicken-recipe-httpswwwbillyparisicommarry-me-chicken-recipe/28650570304577911/", "kind": "video", "displayName": "Facebook" },
+    { "rank": 8, "url": "https://therecipecritic.com/marry-me-chicken-pasta/", "kind": "other", "displayName": "The Recipe Critic" },
+    { "rank": 9, "url": "https://www.kingsford.com/recipes/marry-me-chicken/", "kind": "recipe", "displayName": "Kingsford" },
+    { "rank": 10, "url": "https://www.bbcgoodfood.com/recipes/marry-me-chicken", "kind": "recipe", "displayName": "BBC Good Food" },
+    { "rank": 11, "url": "https://www.thekitchn.com/marry-me-chicken-recipe-23627447", "kind": "recipe", "displayName": "The Kitchn" },
+    { "rank": 12, "url": "https://themodernproper.com/marry-me-chicken", "kind": "recipe", "displayName": "The Modern Proper" },
+    { "rank": 13, "url": "https://www.meatchurch.com/blogs/recipes/marry-me-chicken", "kind": "recipe", "displayName": "Meat Church" },
+    { "rank": 14, "url": "https://www.facebook.com/robynqshow/posts/marry-me-chicken/1428796809390339/", "kind": "social", "displayName": "Facebook" },
+    { "rank": 15, "url": "https://kikkomanusa.com/recipes/marry-me-chicken/", "kind": "recipe", "displayName": "Kikkoman" },
+    { "rank": 16, "url": "https://www.oliveandmango.com/marry-me-chicken/", "kind": "recipe", "displayName": "Olive & Mango" },
+    { "rank": 17, "url": "https://www.andy-cooks.com/blogs/recipes/marry-me-chicken", "kind": "recipe", "displayName": "Andy Cooks" },
+    { "rank": 18, "url": "https://sweetysalado.com/en/marry-me-chicken/", "kind": "recipe", "displayName": "Sweet y Salado" },
+    { "rank": 19, "url": "https://www.andy-cooks.com/blogs/recipes/marry-me-chicken", "kind": "recipe", "displayName": "Andy Cooks" },
+    { "rank": 20, "url": "https://12tomatoes.com/marry-me-chicken/", "kind": "recipe", "displayName": "12 Tomatoes" }
+  ]
+}

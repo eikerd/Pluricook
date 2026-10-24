@@ -43,6 +43,7 @@ export const CODE_RULES = [
   "parse:unicode-fraction",
   "parse:inch-mark",
   "parse:slash-alternate",
+  "parse:bare-alternate",
   "line:leading-punctuation",
   "line:comma-after-food",
   "line:number-is-a-count",
@@ -51,7 +52,11 @@ export const CODE_RULES = [
   "line:count-noun-from-name",
   "line:stated-grams",
   "line:hundredth-gram",
+  "line:container-net-weight",
+  "line:piece-is-whole",
+  "line:poured-not-whipped",
   "extract:json-control-chars",
+  "extract:one-line-is-no-recipe",
 ] as const;
 
 /** Look-up kinds, each scored as a gate: how often it sent a page to a person, and how often rightly. */

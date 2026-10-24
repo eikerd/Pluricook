@@ -23,6 +23,7 @@ its number and says it is fixed.
 | Apple fritters | Kitchen in the shire, pasted by the owner from a PDF on 2026-09-26; no URL on file. Also the APPLE_FRITTERS sheet in Google Drive. | `data/fixtures/apple-fritters.txt` |
 | San Francisco garlic noodles | Six recipes extracted from JSON-LD on 2026-09-30 (`bun scripts/extract-dish.ts garlic-noodles`); seven pages automation could not take, listed in `data/lookups/garlic-noodles.json`. | `data/recipes/garlic-noodles.json` |
 | Picadillo | Jonathan Zaragoza, "The Ground Beef Recipe Everyone Makes Differently" (YouTube, `WCMJJLg5Pe8`), ingredient list pasted by the owner on 2026-10-05. Every line but one leads with its grams. | `data/fixtures/picadillo-zaragoza.txt` |
+| Marry me chicken | Seven recipes extracted from JSON-LD on 2026-10-24 (`bun scripts/extract-dish.ts marry-me-chicken`); nine pages automation could not take, listed in `data/lookups/marry-me-chicken.json`. | `data/recipes/marry-me-chicken.json` |
 
 ## Index
 
@@ -56,6 +57,12 @@ its number and says it is fixed.
 | G26 | A regional name USDA lacks | matching | worked around |
 | G27 | The comma after a food's first word is dropped | text | fixed |
 | G28 | Taking out the count noun cuts the name mid-word | text | fixed |
+| G29 | A counted chicken breast has no weight | quantity | fixed |
+| G30 | A cup of cream read as whipped | quantity | fixed |
+| G31 | A container's net weight is thrown away | quantity | fixed |
+| G32 | A metric conversion with no slash or bracket | text | fixed |
+| G33 | The markup disagrees with the page | structure | partly |
+| G34 | A spice blend USDA has no record for | matching | broken |
 
 ---
 
@@ -677,6 +684,121 @@ oregano, dried*, a different plant, and nothing on the line said so.
 
 `probe-lines.ts` used to print the basis where the food goes, which hid the
 miss. It now prints the line's note: `mass exact; food not identified`.
+
+### G29 · A counted chicken breast has no weight
+
+**Seen in** marry me chicken, 2026-10-24: `4 boneless, skinless chicken
+breasts` (Delish, Simply Organic, The Modern Proper), `4 chicken breasts` (BBC
+Good Food), `2 chicken breasts` (Andy Cooks).
+
+**Goes wrong.** Two misses in a row. The search took "boneless" for the food
+and reached *Pork, fresh, loin, blade (chops), boneless*; "chicken breasts"
+reached *Chicken breast, roll, oven-roasted*, a deli meat. The one line that
+did reach raw breast (12 Tomatoes) still got no grams: SR Legacy weighs a breast
+as `1 piece = 272 g`, and "piece" was not on the list of whole-item portions.
+The backbone of the dish converted in none of eight recipes, and the comparison
+anchored on dairy.
+
+**Should.** Raw boneless skinless breast, 272 g each, from USDA's own portion.
+
+**Fixed 2026-10-24.** A `chicken breast` pattern pins *Chicken, broiler or
+fryers, breast, skinless, boneless, meat only, raw* (171077), and a portion
+named "piece" counts as one whole item (`line:piece-is-whole`). Four breasts
+come to 1,088 g; The Modern Proper's own "about 2 pounds" is 907 g, so USDA's
+breast runs large. The comparison now anchors on meat.
+
+Tests: "G29: a counted chicken breast weighs USDA's one piece" in
+`to-grams.test.ts`; golden cases in `expectations.json`.
+
+### G30 · A cup of cream read as whipped
+
+**Seen in** marry me chicken: `1/2 c. heavy cream` (Delish), `2/3 cup heavy
+cream`, `150ml double cream`.
+
+**Goes wrong.** USDA lists two cups for *Cream, fluid, heavy whipping*: `cup,
+whipped = 120 g` first, `cup, fluid (yields 2 cups whipped) = 238 g` second.
+The first was taken, so half a cup of cream weighed 60 g, half of what it does.
+
+**Should.** A recipe that does not say whipped means poured cream.
+
+**Fixed 2026-10-24** (`line:poured-not-whipped`). A portion that says
+whipped, outside its brackets, is passed over unless the line says whip; the
+scaled path (ml from the cup) does the same. ½ cup is now 119 g.
+
+Tests: "G30: a cup of heavy cream is poured, not whipped" and "G30: a recipe
+that says whipped still gets the whipped cup" in `to-grams.test.ts`.
+
+### G31 · A container's net weight is thrown away
+
+**Seen in** marry me chicken: `1 (7-ounce) jar sun-dried tomatoes, drained and
+roughly chopped` (The Modern Proper).
+
+**Goes wrong.** The bracket was read as an ounce alternate and dropped, since
+"(8 oz)" in brackets is as often fluid ounces. "jar" became part of the name, so
+the line matched *Tomatoes, red, ripe, canned* and weighed whatever one
+"medium" portion of that came to: 111 g.
+
+**Should.** "1 (7-ounce) jar" is 7 oz on the label: 198 g.
+
+**Fixed 2026-10-24** (`line:container-net-weight`). A count of a container
+(jar, can, tin, package, packet, bag, box, carton, tub, bottle) with a
+hyphenated size in brackets weighs count × size. A bare `(8 oz)` is still not
+trusted. The jar is weighed before draining, so the line overstates the
+tomatoes by their oil.
+
+Tests: "G31: …" in `ingredient-line.test.ts`.
+
+### G32 · A metric conversion with no slash or bracket
+
+**Seen in** marry me chicken: `¾ cup 177 ml chicken stock`, `¼ cup 25 g
+Parmesan cheese, grated`, `⅓ cup 18 g sun-dried tomatoes` (Sweet y Salado, a
+WP Recipe Maker card with its unit conversion printed inline).
+
+**Goes wrong.** "177 ml chicken stock" was taken as the name, so the exact
+`chicken stock` alias missed and the line reached *Soup, stock, beef,
+home-prepared*. The 25 g and 18 g were never used as the line's own weighing.
+
+**Should.** Read the second measure as an alternate, as G18 does after a
+slash.
+
+**Fixed 2026-10-24** (`parse:bare-alternate`). A metric measure straight
+after the first one leaves the name; a gram figure becomes the stated grams.
+Only metric units qualify, so `1 cup 2% milk` keeps its name.
+
+Tests: "G32: …" in `ingredient-line.test.ts`.
+
+### G33 · The markup disagrees with the page
+
+**Seen in** marry me chicken: Kikkoman's JSON-LD gives `"recipeIngredient":
+["Chicken"]` while the page lists fourteen lines; Sweet y Salado's gives `4
+boneless` where its page says boneless, skinless chicken breasts.
+
+**Goes wrong.** Kikkoman entered the corpus as a one-ingredient recipe and
+counted against every consensus line. Sweet y Salado's breasts reached pork,
+with no grams.
+
+**Should.** A one-line recipe is no recipe: send the page to a person.
+A truncated line cannot be repaired from the markup alone.
+
+**Today.** Partly. One line is now a failure, `one-ingredient`
+(`extract:one-line-is-no-recipe`), and Kikkoman is on the look-up list. `4
+boneless` is still in the corpus, unconverted.
+
+Tests: "G33: one ingredient line is not a recipe" in `recipe-extract.test.ts`.
+
+### G34 · A spice blend USDA has no record for
+
+**Seen in** marry me chicken: `1 teaspoon Italian seasoning` (The Modern
+Proper), `1 1/2 teaspoons Simply Organic® Italian Seasoning`.
+
+**Goes wrong.** Both reached *Seasoning mix, dry, taco, original*, the record
+Maggi reached before G23's fix. Taco seasoning is salted; Italian seasoning is
+dried herbs. Two of seven recipes now share a wrong food.
+
+**Should.** A spec in `not-in-usda.json` citing a Branded Foods record, as
+Maggi has, or no match rather than a wrong one.
+
+**Today.** Broken; not fixed in this run.
 
 ## Prior art
 

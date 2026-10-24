@@ -1,0 +1,116 @@
+{
+  "dish": "marry-me-chicken",
+  "updatedAt": "2026-10-24",
+  "howTo": "docs/manual-lookups.md",
+  "pages": [
+    {
+      "url": "https://www.budgetbytes.com/marry-me-chicken/",
+      "site": "Budget Bytes",
+      "denial": "refused",
+      "detail": "HTTP 403",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-10-24",
+      "lastDeniedAt": "2026-10-24",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://damndelicious.net/2026/07/24/marry-me-chicken/",
+      "site": "Damn Delicious",
+      "denial": "refused",
+      "detail": "HTTP 403",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-10-24",
+      "lastDeniedAt": "2026-10-24",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://kikkomanusa.com/recipes/marry-me-chicken/",
+      "site": "Kikkoman",
+      "denial": "evasion-suspected",
+      "detail": "page answered, no recipe for automation: one-ingredient",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-10-24",
+      "lastDeniedAt": "2026-10-24",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://www.kingsford.com/recipes/marry-me-chicken/",
+      "site": "Kingsford",
+      "denial": "evasion-suspected",
+      "detail": "page answered, no recipe for automation: no-ingredients",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-10-24",
+      "lastDeniedAt": "2026-10-24",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://littlesunnykitchen.com/marry-me-chicken/",
+      "site": "Little Sunny Kitchen",
+      "denial": "refused",
+      "detail": "HTTP 403",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-10-24",
+      "lastDeniedAt": "2026-10-24",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://www.meatchurch.com/blogs/recipes/marry-me-chicken",
+      "site": "Meat Church",
+      "denial": "evasion-suspected",
+      "detail": "page answered, no recipe for automation: no-json-ld",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-10-24",
+      "lastDeniedAt": "2026-10-24",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://www.oliveandmango.com/marry-me-chicken/",
+      "site": "Olive & Mango",
+      "denial": "evasion-suspected",
+      "detail": "page answered, no recipe for automation: no-json-ld",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-10-24",
+      "lastDeniedAt": "2026-10-24",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://www.thecountrycook.net/marry-me-chicken/",
+      "site": "The Country Cook",
+      "denial": "refused",
+      "detail": "HTTP 403",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-10-24",
+      "lastDeniedAt": "2026-10-24",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    },
+    {
+      "url": "https://www.thekitchn.com/marry-me-chicken-recipe-23627447",
+      "site": "The Kitchn",
+      "denial": "refused",
+      "detail": "HTTP 403",
+      "acquisition": "fetch",
+      "firstDeniedAt": "2026-10-24",
+      "lastDeniedAt": "2026-10-24",
+      "handledAt": null,
+      "note": null,
+      "confirmed": null
+    }
+  ],
+  "resolved": []
+}

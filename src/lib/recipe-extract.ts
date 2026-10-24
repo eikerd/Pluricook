@@ -38,7 +38,9 @@ export type ExtractFailure =
   /** Every JSON-LD block failed to parse (Paula Deen had one of these too). */
   | "unparseable-json-ld"
   /** A Recipe node with no ingredients is not a usable recipe. */
-  | "no-ingredients";
+  | "no-ingredients"
+  /** One line where the page lists many: Kikkoman's markup says only "Chicken" (G33). */
+  | "one-ingredient";
 
 export type ExtractResult =
   | { ok: true; recipe: ExtractedRecipe; warnings: string[] }
@@ -198,6 +200,9 @@ export function extractRecipe(opts: ExtractOptions): ExtractResult {
 
   const lines = ingredientLines(node.recipeIngredient ?? node.ingredients);
   if (lines.length === 0) return { ok: false, reason: "no-ingredients", blocks: blocks.length };
+  if (lines.length === 1 && rule("extract:one-line-is-no-recipe")) {
+    return { ok: false, reason: "one-ingredient", blocks: blocks.length };
+  }
 
   const yielded = parseYield(node.recipeYield);
   const totalRaw = cleanText(node.totalTime) ?? null;

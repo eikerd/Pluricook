@@ -103,6 +103,15 @@ const STATED_MASS: Record<string, number> = {
   g: 1, gm: 1, gram: 1, grams: 1, kg: 1000, kilogram: 1000, kilograms: 1000,
 };
 
+/**
+ * "1 (7-ounce) jar sun-dried tomatoes", "2 (14.5-oz) cans tomatoes": the
+ * container's net weight, hyphenated onto the size as a label prints it. Unlike
+ * a bare "(8 oz)", an ounce here is the weight on the label (G31).
+ */
+const CONTAINERS = ["jar", "can", "tin", "package", "packet", "bag", "box", "carton", "tub", "bottle", "container"];
+const NET_WEIGHT = /\(\s*(\d+(?:\.\d+)?)\s*-\s*(ounce|oz|pound|lb)s?\.?\s*\)/i;
+const NET_GRAMS: Record<string, number> = { ounce: 28.3495, oz: 28.3495, pound: 453.592, lb: 453.592 };
+
 function statedGramsOf(alt: { quantity: number; unit: string } | undefined): number | null {
   const factor = alt ? STATED_MASS[alt.unit.toLowerCase()] : undefined;
   if (!alt || factor === undefined || !Number.isFinite(alt.quantity) || alt.quantity <= 0) return null;
@@ -173,6 +182,19 @@ export function parseLine(rawLine: string): ParsedLine {
     }
   }
 
+  // 3. A counted container with its net weight on the label weighs that much.
+  let netGrams: number | null = null;
+  const net = NET_WEIGHT.exec(rawLine);
+  const first = name.split(/\s+/)[0] ?? "";
+  const container = CONTAINERS.includes(singular(unit))
+    ? singular(unit)
+    : unit === "each" && CONTAINERS.includes(singular(first)) ? first : null;
+  if (net && container && p.quantity > 0 && rule("line:container-net-weight")) {
+    netGrams = Math.round(p.quantity * Number(net[1]) * NET_GRAMS[net[2]!.toLowerCase()]! * 1000) / 1000;
+    if (unit === "each") name = name.slice(first.length).trim();
+    unit = "each";
+  }
+
   return {
     quantity: p.quantity,
     unit,
@@ -180,7 +202,7 @@ export function parseLine(rawLine: string): ParsedLine {
     // From the whole line, since the word may sit before the food ("ground
     // oregano"), after a comma ("onion, chopped") or in brackets.
     preparation: p.preparation ?? extractPreparation(rawLine),
-    statedGrams: statedGramsOf(p.alternateQuantity),
+    statedGrams: netGrams ?? statedGramsOf(p.alternateQuantity),
     rawLine,
   };
 }

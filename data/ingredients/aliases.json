@@ -26,6 +26,10 @@
     "            heuristics are not given a chance to invent something."
   ],
   "exact": {
+    "butter": {
+      "fdcId": 173410,
+      "note": "Marry me chicken, 2026-10-24: Butter, salted (SR Legacy, tbsp 14.2 g). '2 tbsp butter' reached it, but '25g (0.9 oz) butter', which needs no portion, reached Foundation's 'Butter, stick, salted', so one food sat on two records (G16)."
+    },
     "ground beef": {
       "fdcId": 174036,
       "note": "Beef, ground, 80% lean / 20% fat, raw. The default for meatloaf; heuristics reached corned beef."
@@ -331,6 +335,46 @@
     "fresh ramen": {
       "fdcId": -2,
       "note": "See sun noodle."
+    },
+    "chicken breast": {
+      "fdcId": 171077,
+      "note": "Marry me chicken, 2026-10-24: Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw (1 piece = 272 g). 'boneless, skinless chicken breasts' reached 'Pork, fresh, loin, blade (chops), boneless' and '4 chicken breasts' reached 'Chicken breast, roll, oven-roasted', a deli meat. The backbone of the dish converted in none of eight recipes (G29)."
+    },
+    "heavy cream": {
+      "fdcId": 170859,
+      "note": "Marry me chicken, 2026-10-24: Cream, fluid, heavy whipping. Already the heuristic match; pinned so the cream every recipe uses cannot drift to 'light (coffee cream)', which '¾ cup 177 ml heavy cream' reached."
+    },
+    "double cream": {
+      "fdcId": 170859,
+      "note": "Marry me chicken, 2026-10-24: Cream, fluid, heavy whipping. British double cream is about 48% fat against heavy cream's 36%; USDA has no double cream, and heavy is the nearest. It had reached 'Cream, fluid, light (coffee cream or table cream)', at 20%."
+    },
+    "plain flour": {
+      "fdcId": 168894,
+      "note": "Marry me chicken, 2026-10-24: = all-purpose flour (Wheat flour, white, all-purpose, enriched, bleached). The British and Australian name; heuristics reached 'Snacks, pretzels, hard, plain, made with enriched flour'."
+    },
+    "crushed red pepper": {
+      "fdcId": 170932,
+      "note": "Marry me chicken, 2026-10-24: Spices, pepper, red or cayenne, as 'red pepper flakes'. 'Simply Organic® Crushed Red Pepper' reached 'Pepper, banana, raw'."
+    },
+    "chilli flakes": {
+      "fdcId": 170932,
+      "note": "Marry me chicken, 2026-10-24: Spices, pepper, red or cayenne, as 'red pepper flakes'. The British spelling reached 'Onions, dehydrated flakes'."
+    },
+    "chili flakes": {
+      "fdcId": 170932,
+      "note": "Marry me chicken, 2026-10-24: See chilli flakes; the same miss with one l."
+    },
+    "tomatoes in oil": {
+      "fdcId": 169384,
+      "note": "Marry me chicken, 2026-10-24: Tomatoes, sun-dried, packed in oil, drained (1 cup = 110 g, twice the dry-packed 54 g). '125g sundried tomatoes in oil, drained' reached 'Oil, corn'."
+    },
+    "sundried tomato": {
+      "fdcId": 168567,
+      "note": "Marry me chicken, 2026-10-24: Tomatoes, sun-dried. 'sundried' as one word is not the indexed 'sun-dried'. A line that says 'in oil' is caught first by the longer 'tomatoes in oil'."
+    },
+    "dried thyme": {
+      "fdcId": 170938,
+      "note": "Marry me chicken, 2026-10-24: Spices, thyme, dried. '1/2 teaspoon dried thyme' reached 'Thyme, fresh', 0.4 g where dried is 0.5 g, and split one food across two records."
     }
   },
   "reject": [
