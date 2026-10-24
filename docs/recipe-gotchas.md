@@ -23,7 +23,7 @@ its number and says it is fixed.
 | Apple fritters | Kitchen in the shire, pasted by the owner from a PDF on 2026-09-26; no URL on file. Also the APPLE_FRITTERS sheet in Google Drive. | `data/fixtures/apple-fritters.txt` |
 | San Francisco garlic noodles | Six recipes extracted from JSON-LD on 2026-09-30 (`bun scripts/extract-dish.ts garlic-noodles`); seven pages automation could not take, listed in `data/lookups/garlic-noodles.json`. | `data/recipes/garlic-noodles.json` |
 | Picadillo | Jonathan Zaragoza, "The Ground Beef Recipe Everyone Makes Differently" (YouTube, `WCMJJLg5Pe8`), ingredient list pasted by the owner on 2026-10-05. Every line but one leads with its grams. | `data/fixtures/picadillo-zaragoza.txt` |
-| Marry me chicken | Seven recipes extracted from JSON-LD on 2026-10-24 (`bun scripts/extract-dish.ts marry-me-chicken`); nine pages automation could not take, listed in `data/lookups/marry-me-chicken.json`. | `data/recipes/marry-me-chicken.json` |
+| Marry me chicken | Seven recipes extracted from JSON-LD on 2026-10-24 (`bun scripts/extract-dish.ts marry-me-chicken`); nine pages automation could not take, listed in `data/lookups/marry-me-chicken.json`. That Dude Can Cook's ingredient list (Sonny Hurrell, YouTube; video not on file), pasted by the owner the same day. | `data/recipes/marry-me-chicken.json`, `data/fixtures/marry-me-chicken-thatdudecancook.txt` |
 
 ## Index
 
@@ -63,6 +63,8 @@ its number and says it is fixed.
 | G32 | A metric conversion with no slash or bracket | text | fixed |
 | G33 | The markup disagrees with the page | structure | partly |
 | G34 | A spice blend USDA has no record for | matching | broken |
+| G35 | An alias misses a food followed by its preparation | matching | fixed |
+| G36 | USDA's portion is in the plural | quantity | fixed |
 
 ---
 
@@ -799,6 +801,54 @@ dried herbs. Two of seven recipes now share a wrong food.
 Maggi has, or no match rather than a wrong one.
 
 **Today.** Broken; not fixed in this run.
+
+### G35 · An alias misses a food followed by its preparation
+
+**Seen in** marry me chicken, That Dude Can Cook's paste: `1/2 yellow onion
+diced`. Then, by the edge-case replay, across three older dishes: `1 yellow
+onion, chopped` (lentil soup), `2 large eggs, beaten` (meatloaf, three
+recipes), `• 1large Egg, room temp, beaten` (apple fritters).
+
+**Goes wrong.** An exact alias matches the whole name only. `yellow onion` and
+`eggs` are exact aliases, but the names were `yellow onion diced` and `eggs,
+beaten`, so the search ran instead: the onions reached *Onions, yellow,
+sauteed* and the eggs *Eggs, scrambled, frozen mixture*, both with no grams.
+The paste's onion had no comma at all, so the preparation looked like part of
+the food.
+
+**Should.** Try the exact alias on the food before its preparation.
+
+**Fixed 2026-10-24**, with two rules. `line:trailing-preparation` sets a
+trailing preparation word (and an adverb before it, "finely chopped") apart
+with a comma, when the name has no comma of its own. `line:alias-before-comma`
+tries an exact alias on the name before its first comma. Eleven lines in four
+dishes now convert: eggs at 50 g each, a yellow onion at 110 g. A food named by
+its preparation ("crushed tomatoes") is untouched, since only trailing words
+move.
+
+Tests: "G35: …" in `ingredient-line.test.ts`; the onion is a golden case.
+
+### G36 · USDA's portion is in the plural
+
+**Seen in** marry me chicken, That Dude Can Cook: `12-14 basil leaves`.
+
+**Goes wrong.** The line counts "leaf"; USDA writes *Basil, fresh* as `5 leaves
+= 2.5 g`. The portion matcher looked for the word "leaf" and found none, so the
+basil had no weight.
+
+**Should.** 12 leaves at 0.5 g each: 6 g.
+
+**Fixed 2026-10-24** (`line:plural-portion`). A count unit also matches its
+plural in a portion's wording ("leaves" for leaf, an added "s" otherwise).
+
+Tests: "G36: a counted leaf finds USDA's portion written in the plural" in
+`to-grams.test.ts`.
+
+Also from this paste: `1/2 cup dry white wine` reached *Wine cooler* and `2 tsp
+Dijon mustard` reached *Mustard greens, raw* (the bare-mustard miss PR #5's
+note listed). Both are aliased: white wine → *Alcoholic beverage, wine, table,
+white*; dijon → *Mustard, prepared, yellow*, marked STAND-IN, since USDA has no
+Dijon. The meatloaf's `1 tbsp. Dijon mustard` now converts too.
 
 ## Prior art
 

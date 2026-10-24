@@ -190,6 +190,11 @@ withDb("marry me chicken, 2026-10-24", () => {
     expect(toGrams({ quantity: 150, unit: "ml", name: "heavy cream", db: db!, aliases }).grams).toBeCloseTo(151, 0);
   });
 
+  test("G36: a counted leaf finds USDA's portion written in the plural", () => {
+    const r = toGrams({ quantity: 12, unit: "leaf", name: "basil", db: db!, aliases: pinned(172232, "basil") });
+    expect(r.grams).toBe(6);
+  });
+
   test("G30: a recipe that says whipped still gets the whipped cup", () => {
     const aliases = pinned(HEAVY_CREAM, "heavy cream");
     expect(toGrams({ quantity: 1, unit: "cup", name: "heavy cream, whipped", db: db!, aliases }).grams).toBe(120);

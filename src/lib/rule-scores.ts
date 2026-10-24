@@ -55,6 +55,9 @@ export const CODE_RULES = [
   "line:container-net-weight",
   "line:piece-is-whole",
   "line:poured-not-whipped",
+  "line:trailing-preparation",
+  "line:alias-before-comma",
+  "line:plural-portion",
   "extract:json-control-chars",
   "extract:one-line-is-no-recipe",
 ] as const;
@@ -250,6 +253,7 @@ export const EDGE_CASES_PATH = "data/rules/edge-cases.json";
 const FIXTURES: Array<{ path: string; dish: string; site: string; capturedAt: string }> = [
   { path: "data/fixtures/apple-fritters.txt", dish: "apple-fritters", site: "Kitchen in the shire", capturedAt: "2026-09-26" },
   { path: "data/fixtures/picadillo-zaragoza.txt", dish: "picadillo", site: "Jonathan Zaragoza", capturedAt: "2026-10-05" },
+  { path: "data/fixtures/marry-me-chicken-thatdudecancook.txt", dish: "marry-me-chicken", site: "That Dude Can Cook", capturedAt: "2026-10-24" },
 ];
 
 export function lineEvaluator(db: Database, aliases: AliasTable): (line: string) => Outcome {

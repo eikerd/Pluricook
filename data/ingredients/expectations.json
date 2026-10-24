@@ -322,6 +322,24 @@
       "expect": "chicken",
       "reject": "beef",
       "found": "Sweet y Salado, marry me chicken — '177 ml' left in the name (G32)"
+    },
+    {
+      "line": "1/2 cup dry white wine",
+      "expect": "wine, table, white",
+      "reject": "cooler",
+      "found": "That Dude Can Cook, marry me chicken"
+    },
+    {
+      "line": "2 tsp Dijon mustard",
+      "expect": "mustard, prepared",
+      "reject": "greens",
+      "found": "That Dude Can Cook, marry me chicken — STAND-IN, USDA has no Dijon"
+    },
+    {
+      "line": "1/2 yellow onion diced",
+      "expect": "onions, raw",
+      "reject": "sauteed",
+      "found": "That Dude Can Cook, marry me chicken — no comma before the preparation (G35)"
     }
   ],
   "rejections": [

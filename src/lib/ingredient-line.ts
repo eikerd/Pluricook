@@ -182,7 +182,20 @@ export function parseLine(rawLine: string): ParsedLine {
     }
   }
 
-  // 3. A counted container with its net weight on the label weighs that much.
+  // 3. "1/2 yellow onion diced": a preparation word trailing the food with no
+  //    comma before it is still the preparation, not part of the food's name (G35).
+  if (!/[,;(]/.test(name)) {
+    const words = name.split(/\s+/);
+    let cut = words.length;
+    while (cut > 1 && CONDITION_WORDS.includes(words[cut - 1]!.toLowerCase())) cut--;
+    // "finely chopped", "roughly diced": the adverb goes with its preparation.
+    if (cut < words.length && cut > 1 && /ly$/i.test(words[cut - 1]!)) cut--;
+    if (cut < words.length && rule("line:trailing-preparation")) {
+      name = `${words.slice(0, cut).join(" ")}, ${words.slice(cut).join(" ")}`;
+    }
+  }
+
+  // 4. A counted container with its net weight on the label weighs that much.
   let netGrams: number | null = null;
   const net = NET_WEIGHT.exec(rawLine);
   const first = name.split(/\s+/)[0] ?? "";

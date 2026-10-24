@@ -253,7 +253,11 @@ function portionMatchesUnit(p: PortionRow, unit: string): boolean {
   if (unit === "cup") return /\bcup\b/.test(text);
   if (unit === "tbsp") return /\btbsp\b|\btablespoon/.test(text);
   if (unit === "tsp") return /\btsp\b|\bteaspoon/.test(text);
-  return new RegExp(`\\b${unit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(text);
+  const escaped = unit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (new RegExp(`\\b${escaped}\\b`).test(text)) return true;
+  // USDA may write the plural: fresh basil is "5 leaves = 2.5 g" (G36).
+  const plural = unit === "leaf" ? "leaves" : `${escaped}s`;
+  return /^[a-z]+$/.test(unit) && new RegExp(`\\b${plural}\\b`).test(text) && rule("line:plural-portion");
 }
 
 export interface ToGramsOptions {

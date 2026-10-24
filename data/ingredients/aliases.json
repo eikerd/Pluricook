@@ -375,6 +375,14 @@
     "dried thyme": {
       "fdcId": 170938,
       "note": "Marry me chicken, 2026-10-24: Spices, thyme, dried. '1/2 teaspoon dried thyme' reached 'Thyme, fresh', 0.4 g where dried is 0.5 g, and split one food across two records."
+    },
+    "white wine": {
+      "fdcId": 174837,
+      "note": "Marry me chicken (That Dude Can Cook), 2026-10-24: Alcoholic beverage, wine, table, white (fl oz 29 g). '1/2 cup dry white wine' reached 'Wine cooler', with no grams."
+    },
+    "dijon": {
+      "fdcId": 172234,
+      "note": "Marry me chicken (That Dude Can Cook), 2026-10-24: Mustard, prepared, yellow (tsp 5 g). USDA has no Dijon; prepared yellow mustard is the nearest record and is marked STAND-IN here. '2 tsp Dijon mustard' reached 'Mustard greens, raw', the miss PR #5's note listed for bare mustard."
     }
   },
   "reject": [

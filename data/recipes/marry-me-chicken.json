@@ -256,6 +256,73 @@
       "cookTimeMinutes": null,
       "totalTimeRaw": "P0DT0H30M0S",
       "stepCount": 6
+    },
+    {
+      "id": "personal:marry-me-chicken:thatdudecancook",
+      "provenance": {
+        "host": null,
+        "siteName": "That Dude Can Cook",
+        "sourceUrl": null,
+        "author": "Sonny Hurrell",
+        "sourceTitle": "Marry Me Chicken",
+        "capturedAt": "2026-10-24",
+        "method": "personal-collection",
+        "acquisitionAtCapture": "pending-review",
+        "licence": null
+      },
+      "visibility": "private",
+      "dish": "marry-me-chicken",
+      "sections": [
+        {
+          "name": "marry me chicken",
+          "ingredientLines": [
+            "3-4 chicken breasts",
+            "2 tbsp olive oil",
+            "2 tbsp unsalted butter",
+            "1/2 yellow onion",
+            "5 garlic cloves",
+            "2 tbsp tomato paste",
+            "1/2 cup sun-dried tomatoes",
+            "1/2 cup dry white wine",
+            "1 cup chicken stock",
+            "1/3 cup heavy cream",
+            "1 tsp dried oregano",
+            "1/2 tsp dried chili flakes",
+            "12-14 basil leaves",
+            "2 tsp dijon mustard",
+            "3/4 cup parmesan cheese",
+            "lemon, to taste",
+            "salt and pepper, to taste"
+          ]
+        }
+      ],
+      "ingredientLines": [
+        "3-4 chicken breasts",
+        "2 tbsp olive oil",
+        "2 tbsp unsalted butter",
+        "1/2 yellow onion",
+        "5 garlic cloves",
+        "2 tbsp tomato paste",
+        "1/2 cup sun-dried tomatoes",
+        "1/2 cup dry white wine",
+        "1 cup chicken stock",
+        "1/3 cup heavy cream",
+        "1 tsp dried oregano",
+        "1/2 tsp dried chili flakes",
+        "12-14 basil leaves",
+        "2 tsp dijon mustard",
+        "3/4 cup parmesan cheese",
+        "lemon, to taste",
+        "salt and pepper, to taste"
+      ],
+      "servings": null,
+      "servingsRaw": null,
+      "totalTimeMinutes": null,
+      "totalTimeRaw": null,
+      "prepTimeMinutes": null,
+      "cookTimeMinutes": null,
+      "stepCount": null,
+      "visibilityReason": "no source URL on file — add one to make it publishable"
     }
   ]
 }

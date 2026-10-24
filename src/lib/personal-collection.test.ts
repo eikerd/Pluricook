@@ -40,6 +40,11 @@ describe("parseCell — every shorthand in the owner's Detroit Pizza sheet", () 
     expect(parseCell("1/4")).toEqual({ kind: "count", quantity: "1/4", size: null });
   });
 
+  test("a range is a count, kept as written for the line parser", () => {
+    expect(parseCell("3-4")).toEqual({ kind: "count", quantity: "3-4", size: null });
+    expect(parseCell("12 – 14")).toEqual({ kind: "count", quantity: "12-14", size: null });
+  });
+
   test("'taste' is present but deliberately unquantified", () => {
     expect(parseCell("taste").kind).toBe("unquantified");
     expect(parseCell("to taste").kind).toBe("unquantified");

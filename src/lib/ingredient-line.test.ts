@@ -231,6 +231,18 @@ describe("recipe gotchas — docs/recipe-gotchas.md", () => {
     expect(parseLine("1 cup 2% milk").name).toBe("2% milk");
   });
 
+  // G35: a preparation word after the food with no comma — That Dude Can Cook's paste.
+  test.each([
+    ["1/2 yellow onion diced", "yellow onion, diced"],
+    ["2 carrots finely chopped", "carrots, finely chopped"],
+  ])("G35: %p sets the preparation apart", (line, name) => {
+    expect(parseLine(line).name).toBe(name);
+  });
+
+  test("G35: a food named with a preparation word is left whole", () => {
+    expect(parseLine("1 cup crushed tomatoes").name).toBe("crushed tomatoes");
+  });
+
   test("G18: a slash with no measure after it is left to the name", () => {
     expect(parseLine("2 cups / sliced peaches").name).toBe("sliced peaches");
     expect(parseLine("1 cup half/half").name).toBe("half/half");
