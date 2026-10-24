@@ -378,7 +378,8 @@ export function toGrams(opts: ToGramsOptions): GramResult {
     ? wholeItemPortions(portions)
     : portions.filter((p) => portionMatchesUnit(p, unit));
   const poured = candidates.filter((p) => !isWhipped(p));
-  const saysWhipped = /\bwhip/i.test(`${opts.name} ${opts.condition ?? ""}`);
+  // Whipped is a state; "whipping cream" names the cream and is poured (G30).
+  const saysWhipped = /\bwhipped\b/i.test(`${opts.name} ${opts.condition ?? ""}`);
   if (!saysWhipped && poured.length > 0 && poured.length < candidates.length && rule("line:poured-not-whipped")) {
     candidates = poured;
   }

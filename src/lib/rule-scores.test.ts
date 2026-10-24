@@ -2,7 +2,7 @@ import { Database } from "bun:sqlite";
 import { Glob } from "bun";
 import { describe, expect, test } from "bun:test";
 import {
-  CODE_RULES, EDGE_CASES_PATH, edgeCases, evaluateLines, gateCatches, gatherRuleEvidence, goldenPasses,
+  CODE_RULES, deniedExtractionCatches, EDGE_CASES_PATH, edgeCases, evaluateLines, gateCatches, gatherRuleEvidence, goldenPasses,
   scoreRules, type CorpusLine, type Golden, type Outcome,
 } from "./rule-scores";
 import { rule } from "./rules";
@@ -98,6 +98,17 @@ describe("gateCatches", () => {
       firstDeniedAt: "2026-09-30", lastDeniedAt: "2026-09-30", handledAt: null, note: null };
     const catches = gateCatches("noodles", [{ ...page, confirmed: true }, { ...page, url: "https://b/", confirmed: false }, { ...page, url: "https://c/" }]);
     expect(scoreRules(["gate:evasion-suspected"], catches)[0]).toMatchObject({ caught: 3, right: 1, wrong: 1, score: 50 });
+  });
+});
+
+describe("deniedExtractionCatches", () => {
+  test("G33: a rule that turned a page away is scored from its look-up entry", () => {
+    const page = { url: "https://kikkoman/", site: "Kikkoman", denial: "evasion-suspected" as const, detail: "", acquisition: null,
+      firstDeniedAt: "2026-10-24", lastDeniedAt: "2026-10-24", handledAt: null, note: null,
+      extractionRules: [{ id: "extract:one-line-is-no-recipe", changed: true }] };
+    const catches = deniedExtractionCatches("marry-me-chicken", [page],
+      [{ rule: "extract:one-line-is-no-recipe", subject: "https://kikkoman/", verdict: "right", by: "owner", at: "2026-10-24" }]);
+    expect(scoreRules(["extract:one-line-is-no-recipe"], catches)[0]).toMatchObject({ caught: 1, right: 1, score: 100 });
   });
 });
 

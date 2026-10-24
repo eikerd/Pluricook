@@ -37,6 +37,12 @@ export interface DeniedPage {
   detail: string;
   /** The curated acquisition rule at the time, or null for an unlisted host. */
   acquisition: Acquisition | null;
+  /**
+   * Extraction rules that acted on a page that then failed, and whether it would
+   * have extracted without each. A rule that turns a page away (G33) can only
+   * leave its evidence here, since no recipe is stored (rule-scores.ts).
+   */
+  extractionRules?: Array<{ id: string; changed: boolean }>;
 }
 
 export interface Lookup extends DeniedPage {

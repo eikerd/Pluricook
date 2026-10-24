@@ -233,13 +233,24 @@ export function gateCatches(dish: string, pages: Lookup[]): Catch[] {
 
 /** Extraction repairs, recorded on each recipe when it was extracted. */
 export function extractionCatches(recipe: ExtractedRecipe, verdicts: PersonVerdict[]): Catch[] {
-  const url = recipe.provenance.sourceUrl ?? recipe.id;
-  return (recipe.extractionRules ?? [])
+  return ruleCatches(recipe.extractionRules, recipe.provenance.sourceUrl ?? recipe.id, recipe.dish, recipe.provenance.capturedAt, verdicts);
+}
+
+/** Extraction rules that turned a page away, recorded on its look-up entry (G33). */
+export function deniedExtractionCatches(dish: string, pages: Lookup[], verdicts: PersonVerdict[]): Catch[] {
+  return pages.flatMap((p) => ruleCatches(p.extractionRules, p.url, dish, p.firstDeniedAt, verdicts));
+}
+
+function ruleCatches(
+  rules: Array<{ id: string; changed: boolean }> | undefined,
+  url: string, dish: string, capturedAt: string | null, verdicts: PersonVerdict[],
+): Catch[] {
+  return (rules ?? [])
     .filter((r) => r.changed)
     .map((r) => {
       const person = verdicts.find((v) => v.rule === r.id && v.subject === url);
       return {
-        rule: r.id, subject: url, dish: recipe.dish, capturedAt: recipe.provenance.capturedAt,
+        rule: r.id, subject: url, dish, capturedAt,
         verified: person?.verdict ?? null, by: person ? "person" : null,
       };
     });
@@ -335,6 +346,7 @@ export async function gatherRuleEvidence(db: Database): Promise<RuleEvidence> {
     const file = (await Bun.file(path).json()) as { dish: string; pages?: Lookup[]; resolved?: Lookup[] };
     // Resolved pages count too: a gate's verdicts must not vanish when a page later extracts.
     catches.push(...gateCatches(file.dish, [...(file.pages ?? []), ...(file.resolved ?? [])]));
+    catches.push(...deniedExtractionCatches(file.dish, file.pages ?? [], verdicts));
   }
 
   return { scores: scoreRules(await allRuleIds(aliases), catches), results, catches };

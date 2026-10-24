@@ -33,6 +33,12 @@
       "denial": "evasion-suspected",
       "detail": "page answered, no recipe for automation: one-ingredient",
       "acquisition": "fetch",
+      "extractionRules": [
+        {
+          "id": "extract:one-line-is-no-recipe",
+          "changed": true
+        }
+      ],
       "firstDeniedAt": "2026-10-24",
       "lastDeniedAt": "2026-10-24",
       "handledAt": null,
