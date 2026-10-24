@@ -110,6 +110,14 @@ export function resolveAlias(
   const exact = table.exact.get(n);
   if (exact && rule(`alias:${n}`)) return { kind: "exact", fdcId: exact.fdcId, note: exact.note, matched: n };
 
+  // "yellow onion, diced" is a yellow onion: an exact name may be followed by
+  // its preparation after a comma (G35).
+  const head = n.split(/\s*[,;]\s*/)[0]!;
+  const headed = head !== n ? table.exact.get(head) : undefined;
+  if (headed && rule("line:alias-before-comma") && rule(`alias:${head}`)) {
+    return { kind: "exact", fdcId: headed.fdcId, note: headed.note, matched: head };
+  }
+
   for (const [pattern, entry] of table.patterns) {
     if (n.includes(pattern) && rule(`pattern:${pattern}`)) {
       return { kind: "pattern", fdcId: entry.fdcId, note: entry.note, matched: pattern };

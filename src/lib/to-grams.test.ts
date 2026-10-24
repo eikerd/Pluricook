@@ -9,6 +9,7 @@
 
 import { Database } from "bun:sqlite";
 import { describe, expect, test } from "bun:test";
+import { buildAliasTable, type AliasTable } from "./ingredient-aliases";
 import { foodTerms, matchFood, normalizeUnit, toGrams } from "./to-grams";
 
 const USDA = "usda.db";
@@ -172,6 +173,46 @@ withDb("matching regressions found on the meatloaf corpus", () => {
  * Known matching gaps, reproduced here so they are visible rather than folded
  * into the coverage number. Each is a real failure on the meatloaf corpus.
  */
+withDb("marry me chicken, 2026-10-24", () => {
+  // Raw, boneless, skinless breast: SR Legacy weighs one as "1 piece = 272 g".
+  const BREAST = 171077;
+  const HEAVY_CREAM = 170859;
+
+  test("G29: a counted chicken breast weighs USDA's one piece", () => {
+    const r = toGrams({ quantity: 4, unit: "each", name: "chicken breast", db: db!, aliases: pinned(BREAST, "chicken breast") });
+    expect(r.grams).toBe(1088);
+    expect(r.portionUsed).toContain("piece");
+  });
+
+  test("G30: a cup of heavy cream is poured, not whipped", () => {
+    const aliases = pinned(HEAVY_CREAM, "heavy cream");
+    expect(toGrams({ quantity: 0.5, unit: "cup", name: "heavy cream", db: db!, aliases }).grams).toBe(119);
+    expect(toGrams({ quantity: 150, unit: "ml", name: "heavy cream", db: db!, aliases }).grams).toBeCloseTo(151, 0);
+  });
+
+  test("G36: a counted leaf finds USDA's portion written in the plural", () => {
+    const r = toGrams({ quantity: 12, unit: "leaf", name: "basil", db: db!, aliases: pinned(172232, "basil") });
+    expect(r.grams).toBe(6);
+  });
+
+  test("G30: whipping cream is the cream's name, and is poured", () => {
+    const aliases = pinned(HEAVY_CREAM, "whipping cream");
+    expect(toGrams({ quantity: 1, unit: "cup", name: "heavy whipping cream", db: db!, aliases }).grams).toBe(238);
+    expect(toGrams({ quantity: 1, unit: "cup", name: "heavy cream for whipping", db: db!, aliases: pinned(HEAVY_CREAM, "heavy cream") }).grams).toBe(238);
+  });
+
+  test("G30: a recipe that says whipped still gets the whipped cup", () => {
+    const aliases = pinned(HEAVY_CREAM, "heavy cream");
+    expect(toGrams({ quantity: 1, unit: "cup", name: "heavy cream, whipped", db: db!, aliases }).grams).toBe(120);
+    expect(toGrams({ quantity: 236.588, unit: "ml", name: "heavy cream, whipped", db: db!, aliases }).grams).toBe(120);
+  });
+});
+
+/** An alias table holding one pattern, so a test does not depend on aliases.json. */
+function pinned(fdcId: number, phrase: string): AliasTable {
+  return buildAliasTable({ exact: {}, patterns: { [phrase]: { fdcId, note: "test" } }, reject: [] });
+}
+
 withDb("known gaps — documented, not yet fixed", () => {
   test.todo("'garlic cloves' should not match the clove spice", () => {
     // Currently resolves to "Spices, cloves, ground": the unit word "cloves"

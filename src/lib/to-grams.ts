@@ -231,9 +231,20 @@ function wholeItemPortions(portions: PortionRow[]): PortionRow[] {
     if (/\b(cup|cups|tbsp|tsp|tablespoon|teaspoon|oz|fl|slice|chopped|sliced|diced|grated|mashed|nlea|serving|stalk|clove|sprig|ring|wedge)/.test(text)) {
       return false;
     }
+    // SR Legacy weighs one boneless chicken breast as "1 piece" (G29).
+    if (/\bpiece\b/.test(text) && rule("line:piece-is-whole")) return true;
     return /\b(extra large|large|medium|small|jumbo|whole|each|fruit|item)\b/.test(text) ||
       (p.unit !== null && p.unit !== "");
   });
+}
+
+/**
+ * USDA files cream's whipped volume under the same "cup" as its poured one:
+ * 120 g against 238 g. A recipe that does not say whipped means poured (G30).
+ * The fluid row mentions whipping only in brackets ("yields 2 cups whipped").
+ */
+function isWhipped(p: PortionRow): boolean {
+  return /\bwhipped\b/.test(`${p.unit ?? ""} ${p.modifier ?? ""}`.toLowerCase().replace(/\([^)]*\)/g, ""));
 }
 
 /** Does a USDA portion row describe the unit we are trying to convert? */
@@ -242,7 +253,11 @@ function portionMatchesUnit(p: PortionRow, unit: string): boolean {
   if (unit === "cup") return /\bcup\b/.test(text);
   if (unit === "tbsp") return /\btbsp\b|\btablespoon/.test(text);
   if (unit === "tsp") return /\btsp\b|\bteaspoon/.test(text);
-  return new RegExp(`\\b${unit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(text);
+  const escaped = unit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (new RegExp(`\\b${escaped}\\b`).test(text)) return true;
+  // USDA may write the plural: fresh basil is "5 leaves = 2.5 g" (G36).
+  const plural = unit === "leaf" ? "leaves" : `${escaped}s`;
+  return /^[a-z]+$/.test(unit) && new RegExp(`\\b${plural}\\b`).test(text) && rule("line:plural-portion");
 }
 
 export interface ToGramsOptions {
@@ -359,9 +374,15 @@ export function toGrams(opts: ToGramsOptions): GramResult {
   // A line that counts ("2 large eggs", "1 onion") wants a whole-item portion;
   // one that measures ("1 cup", "2 cloves") wants a portion in that unit.
   const isCount = unit === "each" || SIZE_WORDS.includes(unit);
-  const candidates = isCount
+  let candidates = isCount
     ? wholeItemPortions(portions)
     : portions.filter((p) => portionMatchesUnit(p, unit));
+  const poured = candidates.filter((p) => !isWhipped(p));
+  // Whipped is a state; "whipping cream" names the cream and is poured (G30).
+  const saysWhipped = /\bwhipped\b/i.test(`${opts.name} ${opts.condition ?? ""}`);
+  if (!saysWhipped && poured.length > 0 && poured.length < candidates.length && rule("line:poured-not-whipped")) {
+    candidates = poured;
+  }
 
   if (candidates.length > 0) {
     const has = (p: PortionRow, word: string) =>
@@ -402,7 +423,9 @@ export function toGrams(opts: ToGramsOptions): GramResult {
   const thisMl = ML[unit];
   if (thisMl !== undefined) {
     for (const [otherUnit, otherMl] of Object.entries(ML)) {
-      const alt = portions.find((p) => portionMatchesUnit(p, otherUnit));
+      const inUnit = portions.filter((p) => portionMatchesUnit(p, otherUnit));
+      // Poured unless the line says whipped, as in the direct path above (G30).
+      const alt = (rule("line:poured-not-whipped") ? inUnit.find((p) => isWhipped(p) === saysWhipped) : undefined) ?? inUnit[0];
       if (!alt) continue;
       const per = alt.gram_weight / (alt.amount && alt.amount > 0 ? alt.amount : 1);
       return {

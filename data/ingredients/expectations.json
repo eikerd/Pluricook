@@ -250,6 +250,102 @@
       "expect": "spring or scallions",
       "reject": "tops only",
       "found": "Cooking with Cocktail Rings, garlic noodles — green onion and scallion split across two records"
+    },
+    {
+      "line": "4 boneless, skinless chicken breasts",
+      "expect": "breast, skinless, boneless, meat only, raw",
+      "reject": "pork",
+      "found": "Delish, marry me chicken — the backbone reached pork loin (G29)"
+    },
+    {
+      "line": "4 chicken breasts",
+      "expect": "breast, skinless, boneless, meat only, raw",
+      "reject": "roll",
+      "found": "BBC Good Food, marry me chicken — a deli chicken roll"
+    },
+    {
+      "line": "150ml double cream",
+      "expect": "heavy whipping",
+      "reject": "light",
+      "found": "BBC Good Food, marry me chicken"
+    },
+    {
+      "line": "¾ cup 177 ml heavy cream",
+      "expect": "heavy whipping",
+      "reject": "light",
+      "found": "Sweet y Salado, marry me chicken"
+    },
+    {
+      "line": "30g plain flour",
+      "expect": "wheat flour",
+      "reject": "pretzels",
+      "found": "BBC Good Food, marry me chicken"
+    },
+    {
+      "line": "1/2 teaspoon Simply Organic® Crushed Red Pepper",
+      "expect": "pepper, red",
+      "reject": "banana",
+      "found": "Simply Organic, marry me chicken — a brand before the food"
+    },
+    {
+      "line": "½ - 1 tsp chilli flakes (to taste)",
+      "expect": "pepper, red",
+      "reject": "onions",
+      "found": "BBC Good Food, marry me chicken"
+    },
+    {
+      "line": "1 tsp chili flakes (Optional)",
+      "expect": "pepper, red",
+      "reject": "onions",
+      "found": "Sweet y Salado, marry me chicken"
+    },
+    {
+      "line": "125g sundried tomatoes in oil, drained and roughly chopped, 3 tbsp oil reserved",
+      "expect": "packed in oil",
+      "reject": "oil, corn",
+      "found": "BBC Good Food, marry me chicken"
+    },
+    {
+      "line": "1/2 teaspoon dried thyme",
+      "expect": "thyme, dried",
+      "reject": "fresh",
+      "found": "12 Tomatoes, marry me chicken"
+    },
+    {
+      "line": "25g (0.9 oz) butter",
+      "expect": "butter, salted",
+      "reject": "stick",
+      "found": "Andy Cooks, marry me chicken — a weighed line skipped the portion check and found a second butter record"
+    },
+    {
+      "line": "¾ cup 177 ml chicken stock",
+      "expect": "chicken",
+      "reject": "beef",
+      "found": "Sweet y Salado, marry me chicken — '177 ml' left in the name (G32)"
+    },
+    {
+      "line": "1/2 cup dry white wine",
+      "expect": "wine, table, white",
+      "reject": "cooler",
+      "found": "That Dude Can Cook, marry me chicken"
+    },
+    {
+      "line": "2 tbsp white wine vinegar",
+      "expect": "vinegar",
+      "reject": "alcoholic",
+      "found": "Codex review of PR #10 — the 'white wine' pattern caught vinegar"
+    },
+    {
+      "line": "2 tsp Dijon mustard",
+      "expect": "mustard, prepared",
+      "reject": "greens",
+      "found": "That Dude Can Cook, marry me chicken — STAND-IN, USDA has no Dijon"
+    },
+    {
+      "line": "1/2 yellow onion diced",
+      "expect": "onions, raw",
+      "reject": "sauteed",
+      "found": "That Dude Can Cook, marry me chicken — no comma before the preparation (G35)"
     }
   ],
   "rejections": [

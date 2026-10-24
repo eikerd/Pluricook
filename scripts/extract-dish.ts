@@ -188,6 +188,7 @@ for (const target of targets.sort((a, b) => a.rank - b.rank)) {
       denied.push({
         url: target.url, site: name, denial: denialForExtractFailure(result.reason),
         detail: `page answered, no recipe for automation: ${result.reason}`, acquisition: site.acquisition,
+        ...(extractionRules.length > 0 ? { extractionRules } : {}),
       });
       rows.push({
         site: name, outcome: "failed", detail: result.reason satisfies ExtractFailure,

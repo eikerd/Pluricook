@@ -1,0 +1,51 @@
+{
+  "_comment": [
+    "Marry Me Chicken, That Dude Can Cook (Sonny Hurrell). The owner pasted the ingredient list",
+    "on 2026-10-24; the paste is kept verbatim in data/fixtures/marry-me-chicken-thatdudecancook.txt.",
+    "",
+    "Cells are the measures as given. Prep notes that have no place in a cell are kept here:",
+    "",
+    "  2 tbsp unsalted butter (save 1 tbsp for the end)",
+    "  1/2 yellow onion diced",
+    "  Squeeze of lemon",
+    "",
+    "No video was named, so there is no source URL and the import keeps this recipe PRIVATE."
+  ],
+
+  "dish": "marry-me-chicken",
+  "convention": "bare-numbers-are-grams",
+  "compiledBy": "owner",
+  "compiledAt": "2026-10-24",
+
+  "sources": [
+    { "key": "thatdudecancook", "siteName": "That Dude Can Cook", "author": "Sonny Hurrell",
+      "sourceUrl": null,
+      "sourceTitle": "Marry Me Chicken",
+      "note": "YouTube creator (@thatdudecancook). Which video is not on file." }
+  ],
+
+  "sections": [
+    {
+      "name": "marry me chicken",
+      "rows": [
+        { "ingredient": "Chicken Breasts",       "cells": { "thatdudecancook": "3-4" } },
+        { "ingredient": "Olive Oil",             "cells": { "thatdudecancook": "2 tbsp" } },
+        { "ingredient": "Unsalted Butter",       "cells": { "thatdudecancook": "2 tbsp" } },
+        { "ingredient": "Yellow Onion",          "cells": { "thatdudecancook": "1/2" } },
+        { "ingredient": "Garlic Cloves",         "cells": { "thatdudecancook": 5 } },
+        { "ingredient": "Tomato Paste",          "cells": { "thatdudecancook": "2 tbsp" } },
+        { "ingredient": "Sun-Dried Tomatoes",    "cells": { "thatdudecancook": "1/2 cup" } },
+        { "ingredient": "Dry White Wine",        "cells": { "thatdudecancook": "1/2 cup" } },
+        { "ingredient": "Chicken Stock",         "cells": { "thatdudecancook": "1 cup" } },
+        { "ingredient": "Heavy Cream",           "cells": { "thatdudecancook": "1/3 cup" } },
+        { "ingredient": "Dried Oregano",         "cells": { "thatdudecancook": "1 tsp" } },
+        { "ingredient": "Dried Chili Flakes",    "cells": { "thatdudecancook": "1/2 tsp" } },
+        { "ingredient": "Basil Leaves",          "cells": { "thatdudecancook": "12-14" } },
+        { "ingredient": "Dijon Mustard",         "cells": { "thatdudecancook": "2 tsp" } },
+        { "ingredient": "Parmesan Cheese",       "cells": { "thatdudecancook": "3/4 cup" } },
+        { "ingredient": "Lemon",                 "cells": { "thatdudecancook": "squeeze" } },
+        { "ingredient": "Salt and Pepper",       "cells": { "thatdudecancook": "to taste" } }
+      ]
+    }
+  ]
+}

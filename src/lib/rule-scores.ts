@@ -43,6 +43,7 @@ export const CODE_RULES = [
   "parse:unicode-fraction",
   "parse:inch-mark",
   "parse:slash-alternate",
+  "parse:bare-alternate",
   "line:leading-punctuation",
   "line:comma-after-food",
   "line:number-is-a-count",
@@ -51,7 +52,14 @@ export const CODE_RULES = [
   "line:count-noun-from-name",
   "line:stated-grams",
   "line:hundredth-gram",
+  "line:container-net-weight",
+  "line:piece-is-whole",
+  "line:poured-not-whipped",
+  "line:trailing-preparation",
+  "line:alias-before-comma",
+  "line:plural-portion",
   "extract:json-control-chars",
+  "extract:one-line-is-no-recipe",
 ] as const;
 
 /** Look-up kinds, each scored as a gate: how often it sent a page to a person, and how often rightly. */
@@ -225,13 +233,24 @@ export function gateCatches(dish: string, pages: Lookup[]): Catch[] {
 
 /** Extraction repairs, recorded on each recipe when it was extracted. */
 export function extractionCatches(recipe: ExtractedRecipe, verdicts: PersonVerdict[]): Catch[] {
-  const url = recipe.provenance.sourceUrl ?? recipe.id;
-  return (recipe.extractionRules ?? [])
+  return ruleCatches(recipe.extractionRules, recipe.provenance.sourceUrl ?? recipe.id, recipe.dish, recipe.provenance.capturedAt, verdicts);
+}
+
+/** Extraction rules that turned a page away, recorded on its look-up entry (G33). */
+export function deniedExtractionCatches(dish: string, pages: Lookup[], verdicts: PersonVerdict[]): Catch[] {
+  return pages.flatMap((p) => ruleCatches(p.extractionRules, p.url, dish, p.firstDeniedAt, verdicts));
+}
+
+function ruleCatches(
+  rules: Array<{ id: string; changed: boolean }> | undefined,
+  url: string, dish: string, capturedAt: string | null, verdicts: PersonVerdict[],
+): Catch[] {
+  return (rules ?? [])
     .filter((r) => r.changed)
     .map((r) => {
       const person = verdicts.find((v) => v.rule === r.id && v.subject === url);
       return {
-        rule: r.id, subject: url, dish: recipe.dish, capturedAt: recipe.provenance.capturedAt,
+        rule: r.id, subject: url, dish, capturedAt,
         verified: person?.verdict ?? null, by: person ? "person" : null,
       };
     });
@@ -245,6 +264,7 @@ export const EDGE_CASES_PATH = "data/rules/edge-cases.json";
 const FIXTURES: Array<{ path: string; dish: string; site: string; capturedAt: string }> = [
   { path: "data/fixtures/apple-fritters.txt", dish: "apple-fritters", site: "Kitchen in the shire", capturedAt: "2026-09-26" },
   { path: "data/fixtures/picadillo-zaragoza.txt", dish: "picadillo", site: "Jonathan Zaragoza", capturedAt: "2026-10-05" },
+  { path: "data/fixtures/marry-me-chicken-thatdudecancook.txt", dish: "marry-me-chicken", site: "That Dude Can Cook", capturedAt: "2026-10-24" },
 ];
 
 export function lineEvaluator(db: Database, aliases: AliasTable): (line: string) => Outcome {
@@ -326,6 +346,7 @@ export async function gatherRuleEvidence(db: Database): Promise<RuleEvidence> {
     const file = (await Bun.file(path).json()) as { dish: string; pages?: Lookup[]; resolved?: Lookup[] };
     // Resolved pages count too: a gate's verdicts must not vanish when a page later extracts.
     catches.push(...gateCatches(file.dish, [...(file.pages ?? []), ...(file.resolved ?? [])]));
+    catches.push(...deniedExtractionCatches(file.dish, file.pages ?? [], verdicts));
   }
 
   return { scores: scoreRules(await allRuleIds(aliases), catches), results, catches };

@@ -62,6 +62,13 @@ const SLASH_ALTERNATE = new RegExp(
   "i",
 );
 
+/**
+ * "¾ cup 177 ml chicken stock", "¼ cup 25 g Parmesan": a recipe card's metric
+ * conversion printed straight after the measure, with no slash or bracket.
+ * Metric only, so "1 cup 2 large eggs" can never be read as one. See G32.
+ */
+const BARE_ALTERNATE = /^(\d+(?:\.\d+)?)\s*(grams?|gm|g|kg|millilit(?:er|re)s?|ml)\b\.?\s+(.*)$/i;
+
 function parseQuantity(text: string): number {
   text = text.trim();
 
@@ -158,6 +165,12 @@ export function parseIngredientLine(line: string): ParsedIngredient {
   if (slash && rule("parse:slash-alternate")) {
     alternateQuantity = { quantity: parseQuantity(slash[1]!), unit: slash[2]!.toLowerCase() };
     name = slash[3]!.trim();
+  }
+
+  const bare = alternateQuantity || !unit ? null : BARE_ALTERNATE.exec(name);
+  if (bare && rule("parse:bare-alternate")) {
+    alternateQuantity = { quantity: Number(bare[1]), unit: bare[2]!.toLowerCase() };
+    name = bare[3]!.trim();
   }
 
   if (!name && unit) {

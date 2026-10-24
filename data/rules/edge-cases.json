@@ -181,13 +181,15 @@
       "recipeId": "fixture:apple-fritters",
       "line": "• 1large Egg, room temp, beaten",
       "caughtBy": [
+        "alias:egg",
+        "line:alias-before-comma",
         "parse:leading-bullet"
       ],
       "outcome": {
-        "grams": null,
-        "fdcId": 173429,
-        "food": "Egg substitute, powder",
-        "basis": "no-portion-match"
+        "grams": 50,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
       }
     },
     {
@@ -453,14 +455,15 @@
       "recipeId": "fixture:apple-fritters",
       "line": "• 3 tBsp (42g) Butter",
       "caughtBy": [
+        "alias:butter",
         "line:stated-grams",
         "parse:bracketed-alternate",
         "parse:leading-bullet"
       ],
       "outcome": {
         "grams": 42,
-        "fdcId": 790508,
-        "food": "Butter, stick, salted",
+        "fdcId": 173410,
+        "food": "Butter, salted",
         "basis": "direct-mass"
       }
     },
@@ -470,14 +473,16 @@
       "recipeId": "fixture:apple-fritters",
       "line": "• 3 tBsp (42g) Butter, softened",
       "caughtBy": [
+        "alias:butter",
+        "line:alias-before-comma",
         "line:stated-grams",
         "parse:bracketed-alternate",
         "parse:leading-bullet"
       ],
       "outcome": {
         "grams": 42,
-        "fdcId": 790508,
-        "food": "Butter, stick, salted",
+        "fdcId": 173410,
+        "food": "Butter, salted",
         "basis": "direct-mass"
       }
     },
@@ -487,13 +492,15 @@
       "recipeId": "fixture:apple-fritters",
       "line": "• ¾ cup (180g) Whole Milk, lukewarm",
       "caughtBy": [
+        "alias:whole milk",
+        "line:alias-before-comma",
         "line:stated-grams",
         "parse:bracketed-alternate",
         "parse:leading-bullet"
       ],
       "outcome": {
         "grams": 180,
-        "fdcId": 322892,
+        "fdcId": 746782,
         "food": "Milk, whole, 3.25% milkfat, with added vitamin D",
         "basis": "direct-mass"
       }
@@ -728,6 +735,21 @@
         "grams": 300,
         "fdcId": 168896,
         "food": "Wheat flour, white, bread, enriched",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Mine · Ethan Chlebowski",
+      "recipeId": "mine:detroit-pizza:ethan-chlebowski",
+      "line": "42 g butter",
+      "caughtBy": [
+        "alias:butter"
+      ],
+      "outcome": {
+        "grams": 42,
+        "fdcId": 173410,
+        "food": "Butter, salted",
         "basis": "direct-mass"
       }
     },
@@ -1288,6 +1310,21 @@
       "dish": "detroit-pizza",
       "site": "Ethan Chlebowski",
       "recipeId": "personal:detroit-pizza:ethan",
+      "line": "42 g butter",
+      "caughtBy": [
+        "alias:butter"
+      ],
+      "outcome": {
+        "grams": 42,
+        "fdcId": 173410,
+        "food": "Butter, salted",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "detroit-pizza",
+      "site": "Ethan Chlebowski",
+      "recipeId": "personal:detroit-pizza:ethan",
       "line": "5 g yeast",
       "caughtBy": [
         "alias:yeast"
@@ -1638,21 +1675,6 @@
         "fdcId": 169655,
         "food": "Sugars, granulated",
         "basis": "usda-portion-scaled"
-      }
-    },
-    {
-      "dish": "garlic-noodles",
-      "site": "Chasing Cravings",
-      "recipeId": "chasingcravings.com:garlic-noodles:2026-09-30",
-      "line": "1 tsp crushed red pepper flakes ((optional) )",
-      "caughtBy": [
-        "pattern:red pepper flakes"
-      ],
-      "outcome": {
-        "grams": 1.8,
-        "fdcId": 170932,
-        "food": "Spices, pepper, red or cayenne",
-        "basis": "usda-portion"
       }
     },
     {
@@ -2932,13 +2954,15 @@
       "recipeId": "thepioneerwoman.com:lentil-soup:2026-09-21",
       "line": "1 yellow onion, chopped",
       "caughtBy": [
+        "alias:yellow onion",
+        "line:alias-before-comma",
         "line:unknown-unit-is-name"
       ],
       "outcome": {
-        "grams": null,
-        "fdcId": 170004,
-        "food": "Onions, yellow, sauteed",
-        "basis": "no-portion-match"
+        "grams": 110,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
       }
     },
     {
@@ -3002,6 +3026,1370 @@
         "fdcId": 169230,
         "food": "Garlic, raw",
         "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "12 Tomatoes",
+      "recipeId": "12tomatoes.com:marry-me-chicken:2026-10-24",
+      "line": "1/2 cup heavy cream",
+      "caughtBy": [
+        "line:poured-not-whipped"
+      ],
+      "outcome": {
+        "grams": 119,
+        "fdcId": 170859,
+        "food": "Cream, fluid, heavy whipping",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "12 Tomatoes",
+      "recipeId": "12tomatoes.com:marry-me-chicken:2026-10-24",
+      "line": "1/2 cup parmesan cheese, grated",
+      "caughtBy": [
+        "pattern:parmesan"
+      ],
+      "outcome": {
+        "grams": 50,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "12 Tomatoes",
+      "recipeId": "12tomatoes.com:marry-me-chicken:2026-10-24",
+      "line": "1/2 teaspoon dried thyme",
+      "caughtBy": [
+        "pattern:dried thyme"
+      ],
+      "outcome": {
+        "grams": 0.5,
+        "fdcId": 170938,
+        "food": "Spices, thyme, dried",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "12 Tomatoes",
+      "recipeId": "12tomatoes.com:marry-me-chicken:2026-10-24",
+      "line": "1/2 teaspoon red pepper flakes",
+      "caughtBy": [
+        "pattern:red pepper flakes"
+      ],
+      "outcome": {
+        "grams": 0.9,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "12 Tomatoes",
+      "recipeId": "12tomatoes.com:marry-me-chicken:2026-10-24",
+      "line": "3/4 cup chicken broth",
+      "caughtBy": [
+        "alias:chicken broth"
+      ],
+      "outcome": {
+        "grams": 186.8,
+        "fdcId": 174536,
+        "food": "Soup, chicken broth, ready-to-serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "12 Tomatoes",
+      "recipeId": "12tomatoes.com:marry-me-chicken:2026-10-24",
+      "line": "4 boneless skinless chicken breasts",
+      "caughtBy": [
+        "line:piece-is-whole",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 1088,
+        "fdcId": 171077,
+        "food": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "12 Tomatoes",
+      "recipeId": "12tomatoes.com:marry-me-chicken:2026-10-24",
+      "line": "Fresh basil, for serving",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "12 Tomatoes",
+      "recipeId": "12tomatoes.com:marry-me-chicken:2026-10-24",
+      "line": "Kosher salt and freshly ground black pepper, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Andy Cooks",
+      "recipeId": "andy-cooks.com:marry-me-chicken:2026-10-24",
+      "line": "1 cup (250ml) chicken stock",
+      "caughtBy": [
+        "alias:chicken stock"
+      ],
+      "outcome": {
+        "grams": 249,
+        "fdcId": 174536,
+        "food": "Soup, chicken broth, ready-to-serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Andy Cooks",
+      "recipeId": "andy-cooks.com:marry-me-chicken:2026-10-24",
+      "line": "½ cup (125ml) cream",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 120,
+        "fdcId": 170857,
+        "food": "Cream, fluid, light (coffee cream or table cream)",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Andy Cooks",
+      "recipeId": "andy-cooks.com:marry-me-chicken:2026-10-24",
+      "line": "2 chicken breasts",
+      "caughtBy": [
+        "line:piece-is-whole",
+        "line:unknown-unit-is-name",
+        "pattern:chicken breast"
+      ],
+      "outcome": {
+        "grams": 544,
+        "fdcId": 171077,
+        "food": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Andy Cooks",
+      "recipeId": "andy-cooks.com:marry-me-chicken:2026-10-24",
+      "line": "2 tbsp plain flour",
+      "caughtBy": [
+        "pattern:plain flour"
+      ],
+      "outcome": {
+        "grams": 15.6,
+        "fdcId": 168894,
+        "food": "Wheat flour, white, all-purpose, enriched, bleached",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Andy Cooks",
+      "recipeId": "andy-cooks.com:marry-me-chicken:2026-10-24",
+      "line": "25g (0.9 oz) butter",
+      "caughtBy": [
+        "alias:butter"
+      ],
+      "outcome": {
+        "grams": 25,
+        "fdcId": 173410,
+        "food": "Butter, salted",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Andy Cooks",
+      "recipeId": "andy-cooks.com:marry-me-chicken:2026-10-24",
+      "line": "fresh basil, to garnish",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Andy Cooks",
+      "recipeId": "andy-cooks.com:marry-me-chicken:2026-10-24",
+      "line": "sea salt and white pepper, to season",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Andy Cooks",
+      "recipeId": "andy-cooks.com:marry-me-chicken:2026-10-24",
+      "line": "steamed rice, steamed broccolini to serve",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "1 red onion finely chopped",
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 197,
+        "fdcId": 790577,
+        "food": "Onions, red, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "½ - 1 tsp chilli flakes (to taste)",
+      "caughtBy": [
+        "parse:range-first-figure",
+        "parse:unicode-fraction",
+        "pattern:chilli flakes"
+      ],
+      "outcome": {
+        "grams": 0.9,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "125g sundried tomatoes in oil, drained and roughly chopped, 3 tbsp oil reserved",
+      "caughtBy": [
+        "pattern:tomatoes in oil"
+      ],
+      "outcome": {
+        "grams": 125,
+        "fdcId": 169384,
+        "food": "Tomatoes, sun-dried, packed in oil, drained",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "150ml double cream",
+      "caughtBy": [
+        "line:poured-not-whipped",
+        "pattern:double cream"
+      ],
+      "outcome": {
+        "grams": 150.9,
+        "fdcId": 170859,
+        "food": "Cream, fluid, heavy whipping",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "2-3 thyme or oregano sprigs leaves picked, or 1 tsp mixed dried herbs",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "no-food-match"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "250ml chicken stock",
+      "caughtBy": [
+        "alias:chicken stock"
+      ],
+      "outcome": {
+        "grams": 263.1,
+        "fdcId": 174536,
+        "food": "Soup, chicken broth, ready-to-serve",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "3 garlic cloves crushed or finely grated",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 9,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "30g plain flour",
+      "caughtBy": [
+        "pattern:plain flour"
+      ],
+      "outcome": {
+        "grams": 30,
+        "fdcId": 168894,
+        "food": "Wheat flour, white, all-purpose, enriched, bleached",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "35g parmesan grated",
+      "caughtBy": [
+        "pattern:parmesan"
+      ],
+      "outcome": {
+        "grams": 35,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "4 chicken breasts",
+      "caughtBy": [
+        "line:piece-is-whole",
+        "line:unknown-unit-is-name",
+        "pattern:chicken breast"
+      ],
+      "outcome": {
+        "grams": 1088,
+        "fdcId": 171077,
+        "food": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "8-10 basil leaves torn, to serve",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "no-food-match"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "BBC Good Food",
+      "recipeId": "bbcgoodfood.com:marry-me-chicken:2026-10-24",
+      "line": "lemon wedges to serve (optional)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Delish",
+      "recipeId": "delish.com:marry-me-chicken:2026-10-24",
+      "line": "1/2 c. heavy cream",
+      "caughtBy": [
+        "line:poured-not-whipped"
+      ],
+      "outcome": {
+        "grams": 119,
+        "fdcId": 170859,
+        "food": "Cream, fluid, heavy whipping",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Delish",
+      "recipeId": "delish.com:marry-me-chicken:2026-10-24",
+      "line": "2 garlic cloves, finely chopped",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Delish",
+      "recipeId": "delish.com:marry-me-chicken:2026-10-24",
+      "line": "3 tbsp. extra-virgin olive oil, divided",
+      "caughtBy": [
+        "pattern:olive oil"
+      ],
+      "outcome": {
+        "grams": 40.5,
+        "fdcId": 171413,
+        "food": "Oil, olive, salad or cooking",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Delish",
+      "recipeId": "delish.com:marry-me-chicken:2026-10-24",
+      "line": "4 boneless, skinless chicken breasts",
+      "caughtBy": [
+        "line:piece-is-whole",
+        "line:unknown-unit-is-name",
+        "pattern:chicken breast"
+      ],
+      "outcome": {
+        "grams": 1088,
+        "fdcId": 171077,
+        "food": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Delish",
+      "recipeId": "delish.com:marry-me-chicken:2026-10-24",
+      "line": "Freshly ground black pepper",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Delish",
+      "recipeId": "delish.com:marry-me-chicken:2026-10-24",
+      "line": "Kosher salt",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Delish",
+      "recipeId": "delish.com:marry-me-chicken:2026-10-24",
+      "line": "Torn fresh basil, for serving",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "1 cup chicken stock",
+      "caughtBy": [
+        "alias:chicken stock"
+      ],
+      "outcome": {
+        "grams": 249,
+        "fdcId": 174536,
+        "food": "Soup, chicken broth, ready-to-serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "1/2 cup dry white wine",
+      "caughtBy": [
+        "pattern:white wine"
+      ],
+      "outcome": {
+        "grams": 117.6,
+        "fdcId": 174837,
+        "food": "Alcoholic beverage, wine, table, white",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "1/2 tsp dried chili flakes",
+      "caughtBy": [
+        "pattern:chili flakes"
+      ],
+      "outcome": {
+        "grams": 0.9,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "1/2 yellow onion diced",
+      "caughtBy": [
+        "alias:yellow onion",
+        "line:alias-before-comma",
+        "line:trailing-preparation",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 55,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "1/3 cup heavy cream",
+      "caughtBy": [
+        "line:poured-not-whipped"
+      ],
+      "outcome": {
+        "grams": 79.3,
+        "fdcId": 170859,
+        "food": "Cream, fluid, heavy whipping",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "12-14 basil leaves",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:plural-portion",
+        "line:unknown-unit-is-name",
+        "parse:range-first-figure"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 172232,
+        "food": "Basil, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "2 tbsp unsalted butter (save 1 tbsp for the end)",
+      "caughtBy": [
+        "pattern:unsalted butter"
+      ],
+      "outcome": {
+        "grams": 28.4,
+        "fdcId": 173430,
+        "food": "Butter, without salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "2 tsp Dijon mustard",
+      "caughtBy": [
+        "pattern:dijon"
+      ],
+      "outcome": {
+        "grams": 10,
+        "fdcId": 172234,
+        "food": "Mustard, prepared, yellow",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "3-4 chicken breasts",
+      "caughtBy": [
+        "line:piece-is-whole",
+        "line:unknown-unit-is-name",
+        "parse:range-first-figure",
+        "pattern:chicken breast"
+      ],
+      "outcome": {
+        "grams": 816,
+        "fdcId": 171077,
+        "food": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "3/4 cup parmesan cheese",
+      "caughtBy": [
+        "pattern:parmesan"
+      ],
+      "outcome": {
+        "grams": 75,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "5 garlic cloves",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 15,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "Marry Me Chicken",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "Salt and pepper to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "fixture:marry-me-chicken",
+      "line": "Squeeze of lemon",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "unconvertible-unit"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "1 cup chicken stock",
+      "caughtBy": [
+        "alias:chicken stock"
+      ],
+      "outcome": {
+        "grams": 249,
+        "fdcId": 174536,
+        "food": "Soup, chicken broth, ready-to-serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "1/2 cup dry white wine",
+      "caughtBy": [
+        "pattern:white wine"
+      ],
+      "outcome": {
+        "grams": 117.6,
+        "fdcId": 174837,
+        "food": "Alcoholic beverage, wine, table, white",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "1/2 tsp dried chili flakes",
+      "caughtBy": [
+        "pattern:chili flakes"
+      ],
+      "outcome": {
+        "grams": 0.9,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "1/2 yellow onion",
+      "caughtBy": [
+        "alias:yellow onion",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 55,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "1/3 cup heavy cream",
+      "caughtBy": [
+        "line:poured-not-whipped"
+      ],
+      "outcome": {
+        "grams": 79.3,
+        "fdcId": 170859,
+        "food": "Cream, fluid, heavy whipping",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "12-14 basil leaves",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:plural-portion",
+        "line:unknown-unit-is-name",
+        "parse:range-first-figure"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 172232,
+        "food": "Basil, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "2 tbsp unsalted butter",
+      "caughtBy": [
+        "pattern:unsalted butter"
+      ],
+      "outcome": {
+        "grams": 28.4,
+        "fdcId": 173430,
+        "food": "Butter, without salt",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "2 tsp dijon mustard",
+      "caughtBy": [
+        "pattern:dijon"
+      ],
+      "outcome": {
+        "grams": 10,
+        "fdcId": 172234,
+        "food": "Mustard, prepared, yellow",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "3-4 chicken breasts",
+      "caughtBy": [
+        "line:piece-is-whole",
+        "line:unknown-unit-is-name",
+        "parse:range-first-figure",
+        "pattern:chicken breast"
+      ],
+      "outcome": {
+        "grams": 816,
+        "fdcId": 171077,
+        "food": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "3/4 cup parmesan cheese",
+      "caughtBy": [
+        "pattern:parmesan"
+      ],
+      "outcome": {
+        "grams": 75,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "5 garlic cloves",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 15,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "lemon, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "That Dude Can Cook",
+      "recipeId": "personal:marry-me-chicken:thatdudecancook",
+      "line": "salt and pepper, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Simply Organic",
+      "recipeId": "simplyorganic.com:marry-me-chicken:2026-10-24",
+      "line": "1/2 cup Parmesan cheese",
+      "caughtBy": [
+        "pattern:parmesan"
+      ],
+      "outcome": {
+        "grams": 50,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Simply Organic",
+      "recipeId": "simplyorganic.com:marry-me-chicken:2026-10-24",
+      "line": "1/2 teaspoon Simply Organic® Crushed Red Pepper",
+      "caughtBy": [
+        "pattern:crushed red pepper"
+      ],
+      "outcome": {
+        "grams": 0.9,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Simply Organic",
+      "recipeId": "simplyorganic.com:marry-me-chicken:2026-10-24",
+      "line": "2/3 cup heavy cream",
+      "caughtBy": [
+        "line:poured-not-whipped"
+      ],
+      "outcome": {
+        "grams": 158.7,
+        "fdcId": 170859,
+        "food": "Cream, fluid, heavy whipping",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Simply Organic",
+      "recipeId": "simplyorganic.com:marry-me-chicken:2026-10-24",
+      "line": "3/4 cup chicken broth",
+      "caughtBy": [
+        "alias:chicken broth"
+      ],
+      "outcome": {
+        "grams": 186.8,
+        "fdcId": 174536,
+        "food": "Soup, chicken broth, ready-to-serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Simply Organic",
+      "recipeId": "simplyorganic.com:marry-me-chicken:2026-10-24",
+      "line": "4 boneless, skinless chicken breasts",
+      "caughtBy": [
+        "line:piece-is-whole",
+        "line:unknown-unit-is-name",
+        "pattern:chicken breast"
+      ],
+      "outcome": {
+        "grams": 1088,
+        "fdcId": 171077,
+        "food": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Simply Organic",
+      "recipeId": "simplyorganic.com:marry-me-chicken:2026-10-24",
+      "line": "Fresh basil, for serving",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Simply Organic",
+      "recipeId": "simplyorganic.com:marry-me-chicken:2026-10-24",
+      "line": "Sea or Himalayan pink salt, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Simply Organic",
+      "recipeId": "simplyorganic.com:marry-me-chicken:2026-10-24",
+      "line": "Simply Organic® Black Pepper, to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Sweet y Salado",
+      "recipeId": "sweetysalado.com:marry-me-chicken:2026-10-24",
+      "line": "1 tsp chili flakes (Optional)",
+      "caughtBy": [
+        "pattern:chili flakes"
+      ],
+      "outcome": {
+        "grams": 1.8,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Sweet y Salado",
+      "recipeId": "sweetysalado.com:marry-me-chicken:2026-10-24",
+      "line": "½ tsp oregano",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 0.5,
+        "fdcId": 171328,
+        "food": "Spices, oregano, dried",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Sweet y Salado",
+      "recipeId": "sweetysalado.com:marry-me-chicken:2026-10-24",
+      "line": "½ tsp thyme",
+      "caughtBy": [
+        "alias:thyme",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 0.5,
+        "fdcId": 170938,
+        "food": "Spices, thyme, dried",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Sweet y Salado",
+      "recipeId": "sweetysalado.com:marry-me-chicken:2026-10-24",
+      "line": "¼ cup 25 g Parmesan cheese, grated",
+      "caughtBy": [
+        "pattern:parmesan"
+      ],
+      "outcome": {
+        "grams": 25,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Sweet y Salado",
+      "recipeId": "sweetysalado.com:marry-me-chicken:2026-10-24",
+      "line": "¾ cup 177 ml chicken stock",
+      "caughtBy": [
+        "alias:chicken stock",
+        "parse:bare-alternate",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 186.8,
+        "fdcId": 174536,
+        "food": "Soup, chicken broth, ready-to-serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Sweet y Salado",
+      "recipeId": "sweetysalado.com:marry-me-chicken:2026-10-24",
+      "line": "¾ cup 177 ml heavy cream",
+      "caughtBy": [
+        "line:poured-not-whipped",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 178.5,
+        "fdcId": 170859,
+        "food": "Cream, fluid, heavy whipping",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Sweet y Salado",
+      "recipeId": "sweetysalado.com:marry-me-chicken:2026-10-24",
+      "line": "4 boneless",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": 169196,
+        "food": "Pork, fresh, loin, blade (chops), boneless, separable lean only, boneless, cooked, broiled",
+        "basis": "no-portion-match"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Sweet y Salado",
+      "recipeId": "sweetysalado.com:marry-me-chicken:2026-10-24",
+      "line": "Pepper to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "Sweet y Salado",
+      "recipeId": "sweetysalado.com:marry-me-chicken:2026-10-24",
+      "line": "Salt to taste",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "1 (7-ounce) jar sun-dried tomatoes, drained and roughly chopped",
+      "caughtBy": [
+        "line:container-net-weight",
+        "line:hundredth-gram",
+        "line:stated-grams",
+        "parse:bracketed-alternate"
+      ],
+      "outcome": {
+        "grams": 198.45,
+        "fdcId": 168567,
+        "food": "Tomatoes, sun-dried",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "1 cup heavy cream",
+      "caughtBy": [
+        "line:poured-not-whipped"
+      ],
+      "outcome": {
+        "grams": 238,
+        "fdcId": 170859,
+        "food": "Cream, fluid, heavy whipping",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "½ cup chicken stock",
+      "caughtBy": [
+        "alias:chicken stock",
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 124.5,
+        "fdcId": 174536,
+        "food": "Soup, chicken broth, ready-to-serve",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "½ cup freshly grated Parmesan cheese",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 50,
+        "fdcId": 171247,
+        "food": "Cheese, parmesan, grated",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "½ teaspoon freshly cracked black pepper",
+      "caughtBy": [
+        "parse:unicode-fraction",
+        "pattern:black pepper"
+      ],
+      "outcome": {
+        "grams": 1.2,
+        "fdcId": 170931,
+        "food": "Spices, pepper, black",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "½ teaspoon red pepper flakes, (optional)",
+      "caughtBy": [
+        "parse:unicode-fraction",
+        "pattern:red pepper flakes"
+      ],
+      "outcome": {
+        "grams": 0.9,
+        "fdcId": 170932,
+        "food": "Spices, pepper, red or cayenne",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "¼ cup thinly sliced fresh basil leaves",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 6,
+        "fdcId": 172232,
+        "food": "Basil, fresh",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "1½ teaspoons kosher salt",
+      "caughtBy": [
+        "parse:unicode-fraction"
+      ],
+      "outcome": {
+        "grams": 9,
+        "fdcId": 173468,
+        "food": "Salt, table",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "2 tablespoons extra-virgin olive oil",
+      "caughtBy": [
+        "pattern:olive oil"
+      ],
+      "outcome": {
+        "grams": 27,
+        "fdcId": 171413,
+        "food": "Oil, olive, salad or cooking",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "3 garlic cloves, minced",
+      "caughtBy": [
+        "line:count-noun-from-name",
+        "line:unknown-unit-is-name"
+      ],
+      "outcome": {
+        "grams": 9,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "4 boneless, skinless, chicken breasts, about 2 pounds",
+      "caughtBy": [
+        "line:piece-is-whole",
+        "line:unknown-unit-is-name",
+        "pattern:chicken breast"
+      ],
+      "outcome": {
+        "grams": 1088,
+        "fdcId": 171077,
+        "food": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "marry-me-chicken",
+      "site": "The Modern Proper",
+      "recipeId": "themodernproper.com:marry-me-chicken:2026-10-24",
+      "line": "Cooked pasta or mashed potatoes, for serving (optional)",
+      "caughtBy": [],
+      "outcome": {
+        "grams": null,
+        "fdcId": null,
+        "food": null,
+        "basis": "rejected-by-alias"
       }
     },
     {
@@ -3070,12 +4458,15 @@
       "site": "Betty Crocker",
       "recipeId": "bettycrocker.com:meatloaf:2026-09-21",
       "line": "2 large eggs, beaten",
-      "caughtBy": [],
+      "caughtBy": [
+        "alias:eggs",
+        "line:alias-before-comma"
+      ],
       "outcome": {
-        "grams": null,
-        "fdcId": 169904,
-        "food": "Eggs, scrambled, frozen mixture",
-        "basis": "no-portion-match"
+        "grams": 100,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
       }
     },
     {
@@ -3114,12 +4505,45 @@
       "site": "Delish",
       "recipeId": "delish.com:meatloaf:2026-09-21",
       "line": "1 medium yellow onion, finely chopped",
-      "caughtBy": [],
+      "caughtBy": [
+        "alias:yellow onion",
+        "line:alias-before-comma"
+      ],
       "outcome": {
-        "grams": null,
-        "fdcId": 170004,
-        "food": "Onions, yellow, sauteed",
-        "basis": "no-portion-match"
+        "grams": 110,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "1 tbsp. Dijon mustard",
+      "caughtBy": [
+        "pattern:dijon"
+      ],
+      "outcome": {
+        "grams": 15.6,
+        "fdcId": 172234,
+        "food": "Mustard, prepared, yellow",
+        "basis": "usda-portion-scaled"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "Delish",
+      "recipeId": "delish.com:meatloaf:2026-09-21",
+      "line": "1 tsp. dried thyme",
+      "caughtBy": [
+        "pattern:dried thyme"
+      ],
+      "outcome": {
+        "grams": 1,
+        "fdcId": 170938,
+        "food": "Spices, thyme, dried",
+        "basis": "usda-portion"
       }
     },
     {
@@ -3678,6 +5102,21 @@
       "dish": "meatloaf",
       "site": "RecipeTin Eats",
       "recipeId": "recipetineats.com:meatloaf:2026-09-21",
+      "line": "1 tsp dried thyme",
+      "caughtBy": [
+        "pattern:dried thyme"
+      ],
+      "outcome": {
+        "grams": 1,
+        "fdcId": 170938,
+        "food": "Spices, thyme, dried",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "RecipeTin Eats",
+      "recipeId": "recipetineats.com:meatloaf:2026-09-21",
       "line": "1/2 cup tomato ketchup",
       "caughtBy": [],
       "outcome": {
@@ -4179,12 +5618,30 @@
       "site": "The Kitchn",
       "recipeId": "thekitchn.com:meatloaf:2026-09-21",
       "line": "1/2 cup ketchup, BBQ sauce, or other sauce to coat (optional)",
-      "caughtBy": [],
+      "caughtBy": [
+        "alias:ketchup",
+        "line:alias-before-comma"
+      ],
       "outcome": {
-        "grams": null,
-        "fdcId": 2709733,
-        "food": "Ketchup",
-        "basis": "no-portion-match"
+        "grams": 120,
+        "fdcId": 168556,
+        "food": "Catsup",
+        "basis": "usda-portion"
+      }
+    },
+    {
+      "dish": "meatloaf",
+      "site": "The Kitchn",
+      "recipeId": "thekitchn.com:meatloaf:2026-09-21",
+      "line": "1/2 teaspoon dried thyme",
+      "caughtBy": [
+        "pattern:dried thyme"
+      ],
+      "outcome": {
+        "grams": 0.5,
+        "fdcId": 170938,
+        "food": "Spices, thyme, dried",
+        "basis": "usda-portion"
       }
     },
     {
@@ -4192,12 +5649,15 @@
       "site": "The Kitchn",
       "recipeId": "thekitchn.com:meatloaf:2026-09-21",
       "line": "2 large eggs, beaten",
-      "caughtBy": [],
+      "caughtBy": [
+        "alias:eggs",
+        "line:alias-before-comma"
+      ],
       "outcome": {
-        "grams": null,
-        "fdcId": 169904,
-        "food": "Eggs, scrambled, frozen mixture",
-        "basis": "no-portion-match"
+        "grams": 100,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
       }
     },
     {
@@ -4266,14 +5726,16 @@
       "recipeId": "themodernproper.com:meatloaf:2026-09-21",
       "line": "½ yellow onion, grated",
       "caughtBy": [
+        "alias:yellow onion",
+        "line:alias-before-comma",
         "line:unknown-unit-is-name",
         "parse:unicode-fraction"
       ],
       "outcome": {
-        "grams": null,
-        "fdcId": 170004,
-        "food": "Onions, yellow, sauteed",
-        "basis": "no-portion-match"
+        "grams": 55,
+        "fdcId": 170000,
+        "food": "Onions, raw",
+        "basis": "usda-portion"
       }
     },
     {
@@ -4345,12 +5807,15 @@
       "site": "The Modern Proper",
       "recipeId": "themodernproper.com:meatloaf:2026-09-21",
       "line": "2 large eggs, beaten",
-      "caughtBy": [],
+      "caughtBy": [
+        "alias:eggs",
+        "line:alias-before-comma"
+      ],
       "outcome": {
-        "grams": null,
-        "fdcId": 169904,
-        "food": "Eggs, scrambled, frozen mixture",
-        "basis": "no-portion-match"
+        "grams": 100,
+        "fdcId": 171287,
+        "food": "Egg, whole, raw, fresh",
+        "basis": "usda-portion"
       }
     },
     {
@@ -4450,7 +5915,9 @@
       "site": "The Pioneer Woman",
       "recipeId": "thepioneerwoman.com:meatloaf:2026-09-21",
       "line": "4 whole eggs, beaten",
-      "caughtBy": [],
+      "caughtBy": [
+        "line:unknown-unit-is-name"
+      ],
       "outcome": {
         "grams": null,
         "fdcId": 169904,
@@ -4554,6 +6021,22 @@
         "grams": 20,
         "fdcId": 169396,
         "food": "Peppers, ancho, dried",
+        "basis": "direct-mass"
+      }
+    },
+    {
+      "dish": "picadillo",
+      "site": "Jonathan Zaragoza",
+      "recipeId": "fixture:picadillo",
+      "line": "20 g garlic, minced",
+      "caughtBy": [
+        "alias:garlic",
+        "line:alias-before-comma"
+      ],
+      "outcome": {
+        "grams": 20,
+        "fdcId": 169230,
+        "food": "Garlic, raw",
         "basis": "direct-mass"
       }
     },

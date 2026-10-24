@@ -100,6 +100,11 @@ export function parseCell(raw: string | number | null | undefined): Cell {
     return { kind: "count", quantity: text.replace(/\s*\/\s*/, "/"), size: null };
   }
 
+  // A range is a count too: "3-4" chicken breasts, "12-14" basil leaves.
+  if (/^\d+\s*[-–]\s*\d+$/.test(text)) {
+    return { kind: "count", quantity: text.replace(/\s*[-–]\s*/, "-"), size: null };
+  }
+
   // quantity + word: "1 Tb", "28 oz", "30ml", "1/4 tsp", "3 med"
   const measured = /^(\d+(?:\.\d+)?(?:\s+\d+\/\d+)?|\d+\/\d+)\s*([a-z][a-z .]*)$/i.exec(text);
   if (measured) {
