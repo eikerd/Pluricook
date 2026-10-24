@@ -198,6 +198,7 @@ withDb("marry me chicken, 2026-10-24", () => {
   test("G30: a recipe that says whipped still gets the whipped cup", () => {
     const aliases = pinned(HEAVY_CREAM, "heavy cream");
     expect(toGrams({ quantity: 1, unit: "cup", name: "heavy cream, whipped", db: db!, aliases }).grams).toBe(120);
+    expect(toGrams({ quantity: 236.588, unit: "ml", name: "heavy cream, whipped", db: db!, aliases }).grams).toBe(120);
   });
 });
 

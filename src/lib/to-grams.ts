@@ -423,7 +423,8 @@ export function toGrams(opts: ToGramsOptions): GramResult {
   if (thisMl !== undefined) {
     for (const [otherUnit, otherMl] of Object.entries(ML)) {
       const inUnit = portions.filter((p) => portionMatchesUnit(p, otherUnit));
-      const alt = (rule("line:poured-not-whipped") ? inUnit.find((p) => !isWhipped(p)) : undefined) ?? inUnit[0];
+      // Poured unless the line says whipped, as in the direct path above (G30).
+      const alt = (rule("line:poured-not-whipped") ? inUnit.find((p) => isWhipped(p) === saysWhipped) : undefined) ?? inUnit[0];
       if (!alt) continue;
       const per = alt.gram_weight / (alt.amount && alt.amount > 0 ? alt.amount : 1);
       return {
