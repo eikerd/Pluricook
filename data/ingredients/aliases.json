@@ -380,6 +380,10 @@
       "fdcId": 174837,
       "note": "Marry me chicken (That Dude Can Cook), 2026-10-24: Alcoholic beverage, wine, table, white (fl oz 29 g). '1/2 cup dry white wine' reached 'Wine cooler', with no grams."
     },
+    "wine vinegar": {
+      "fdcId": 172240,
+      "note": "Marry me chicken review, 2026-10-24: Vinegar, red wine (tbsp 14.9 g). Here so 'white wine vinegar' is not caught by the shorter 'white wine' pattern and filed as wine; patterns are checked longest-first. USDA has no white wine vinegar, so for it this is a STAND-IN: the same density as every USDA vinegar."
+    },
     "dijon": {
       "fdcId": 172234,
       "note": "Marry me chicken (That Dude Can Cook), 2026-10-24: Mustard, prepared, yellow (tsp 5 g). USDA has no Dijon; prepared yellow mustard is the nearest record and is marked STAND-IN here. '2 tsp Dijon mustard' reached 'Mustard greens, raw', the miss PR #5's note listed for bare mustard."

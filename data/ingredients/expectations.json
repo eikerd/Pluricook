@@ -330,6 +330,12 @@
       "found": "That Dude Can Cook, marry me chicken"
     },
     {
+      "line": "2 tbsp white wine vinegar",
+      "expect": "vinegar",
+      "reject": "alcoholic",
+      "found": "Codex review of PR #10 — the 'white wine' pattern caught vinegar"
+    },
+    {
       "line": "2 tsp Dijon mustard",
       "expect": "mustard, prepared",
       "reject": "greens",
